@@ -1593,67 +1593,61 @@ class ChessUI(MenuLayoutMixin):
         width = self.panel_w - 28
         gap = 7
         compact = self.win_w < 820
-        columns = 2 if self.panel_w < 300 else 3 if compact else 2
+        columns = 2
         button_width = (width - gap * (columns - 1)) // columns
         state = self.lesson.state
         if state == READING:
             specs = [
-                ("Make a move", self._lesson_start_question),
-                ("Flip board", self._toggle_flip),
-                ("Library", self._leave_lesson),
+                ("Start", self._lesson_start_question),
+                ("Lessons", self._leave_lesson),
                 ("Main menu", self._to_menu),
             ]
         elif state == QUESTION:
             specs = [
                 ("Hint", self._lesson_hint),
                 ("Show answer", self._lesson_reveal),
-                ("Try another idea", self._lesson_begin_exploration),
-                ("Flip board", self._toggle_flip),
-                ("Library", self._leave_lesson),
+                ("Lessons", self._leave_lesson),
                 ("Main menu", self._to_menu),
             ]
         elif state == FEEDBACK:
             if self.lesson.step_solved:
                 primary = ("Finish lesson" if self.lesson.step_index + 1
-                           == len(self.lesson.resolved_steps) else "Continue")
-                specs = [(primary, self._lesson_continue)]
+                           == len(self.lesson.resolved_steps) else "Next step")
+                specs = [(primary, self._lesson_continue),
+                         ("Try other move", self._lesson_begin_exploration)]
             else:
-                specs = [("Retry", self._lesson_retry),
+                specs = [("Try again", self._lesson_retry),
                          ("Show answer", self._lesson_reveal)]
             specs += [
-                ("Try another idea", self._lesson_begin_exploration),
-                ("Flip board", self._toggle_flip),
-                ("Library", self._leave_lesson),
+                ("Lessons", self._leave_lesson),
                 ("Main menu", self._to_menu),
             ]
         elif state == EXPLORING:
             specs = [
-                ("Return to lesson", self._lesson_return),
-                ("Flip board", self._toggle_flip),
-                ("Library", self._leave_lesson),
+                ("Back to lesson", self._lesson_return),
+                ("Lessons", self._leave_lesson),
                 ("Main menu", self._to_menu),
             ]
         else:
             source_id = self.lesson_entry.lesson.related_source_game_id
             specs = [
-                ("Restart lesson", self._lesson_restart),
+                ("Try again", self._lesson_restart),
                 ("Watch archival game" if source_id else "Replay practice",
                  self._watch_lesson_record),
-                ("Library", self._leave_lesson),
+                ("Lessons", self._leave_lesson),
                 ("Main menu", self._to_menu),
             ]
             if self._next_path_entry() is not None:
                 specs.insert(0, ("Next lesson", self._lesson_next))
         if compact or self.text_scale >= 1.4:
-            short = {"Make a move": "Move", "Flip board": "Flip",
-                     "Main menu": "Menu", "Show answer": "Answer",
-                     "Try another idea": "Explore",
-                     "Return to lesson": "Return",
-                     "Restart lesson": "Restart",
+            short = {"Main menu": "Menu", "Show answer": "Answer",
+                     "Try other move": "Other move",
+                     "Back to lesson": "Back to lesson",
                      "Watch archival game": "Watch game",
                      "Replay practice": "Replay",
                      "Finish lesson": "Finish"}
             short["Next lesson"] = "Next"
+            short["Next step"] = "Next step"
             specs = [(short.get(label, label), action)
                      for label, action in specs]
         rows = (len(specs) + columns - 1) // columns
@@ -1662,7 +1656,8 @@ class ChessUI(MenuLayoutMixin):
             column, row = index % columns, index // columns
             self._game_buttons.append(Button(
                 (ix + column * (button_width + gap), button_y + row * 36,
-                 button_width, 29), label, action, kind="step"))
+                 button_width, 29), label, action,
+                kind="cta" if index == 0 and state != QUESTION else "step"))
 
     def _build_promo_buttons(self, sq):
         self._promo_buttons = []
@@ -2292,16 +2287,16 @@ class ChessUI(MenuLayoutMixin):
                     self.replay.ply, total, mode)
         elif self.scene == "lesson":
             if self.lesson.state == COMPLETED:
-                text = "Lesson complete   ·   restart or choose Library"
+                text = "Lesson finished"
             elif self.lesson.state == EXPLORING:
-                text = "Exploring   ·   R returns to the lesson"
+                text = "Try a different move"
             elif self.lesson.state == QUESTION:
                 mover = "White" if self.board.side_to_move == WHITE else "Black"
-                text = "Your turn: move a {} piece".format(mover)
+                text = "{} to move".format(mover)
             elif self.lesson.state == FEEDBACK:
-                text = "Review the feedback, then continue"
+                text = "Move reviewed"
             else:
-                text = "Read the idea, then make a move"
+                text = "Read the question"
         elif self.status == "checkmate":
             winner = "White" if self.board.side_to_move == BLACK else "Black"
             text = f"Checkmate — {winner} wins   ·   R new game"

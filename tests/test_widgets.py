@@ -15,6 +15,7 @@ from chess_game import sound
 from chess_game.moves import legal_moves
 from chess_game.ui import ChessUI, WHITE_PRESETS, _fit_text, _wrap_text
 from chess_game.chess_thoughts import THOUGHTS
+from chess_game.study.coaching import coach_advice
 from chess_game.views.chess_thought_view import draw_chess_thought
 from chess_game.views import draw_focus_ring
 
@@ -321,6 +322,31 @@ def test_menu_and_library_render_at_every_text_size():
         ui._open_colors()
         ui._draw()
         assert all(screen.contains(button.rect) for button in ui._menu_buttons)
+    ui.progress_store.close()
+    pygame.quit()
+
+
+def test_lesson_question_and_feedback_have_clear_controls():
+    ui = ChessUI(":memory:")
+    ui._on_resize(1100, 760)
+    ui.start_lesson(ui.game_library.lesson_entry("bruno-scotch-make-room"),
+                    course_id="bruno-scotch-first-ideas")
+    ui._build_lesson_buttons()
+    assert [button.label for button in ui._game_buttons] == [
+        "Hint", "Show answer", "Lessons", "Main menu"]
+    ui._draw()
+    assert ui.study_view.lesson_content_rect.h < 150
+    assert ui.study_view.question_rect.bottom <= ui.study_view.lesson_content_rect.top
+
+    ui._lesson_hint()
+    assert coach_advice(ui.lesson, ui.lesson_message) != ui.lesson_message
+    ui._lesson_reveal()
+    ui._build_lesson_buttons()
+    assert [button.label for button in ui._game_buttons] == [
+        "Finish lesson", "Try other move", "Lessons", "Main menu"]
+    assert ui._game_buttons[0].kind == "cta"
+    ui._draw()
+    assert ui.study_view.lesson_content_rect.bottom <= ui._game_buttons[0].rect.top
     ui.progress_store.close()
     pygame.quit()
 

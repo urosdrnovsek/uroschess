@@ -93,6 +93,8 @@ def main():
             "bruno-scotch-make-room"),
             course_id="bruno-scotch-first-ideas")
         capture(ui, "bruno-lesson.png")
+        ui._on_resize(1100, 760)
+        capture(ui, "lesson-wide.png")
     finally:
         if ui.progress_store is not None:
             ui.progress_store.close()

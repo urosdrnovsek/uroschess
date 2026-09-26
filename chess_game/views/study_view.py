@@ -281,63 +281,41 @@ class StudyView:
         x = rect.x + 14
         width = rect.w - 28
         if thought:
-            self.thought_hit_rect = pygame.Rect(x, rect.y + 14, width, 260)
+            self.thought_hit_rect = pygame.Rect(x, rect.y + 14, width, 100)
             draw_chess_thought(
                 self.surface, self.thought_hit_rect, thought,
                 self.status_font, self.small_font, self.tag_font, p,
-                previous=thought_previous, progress=thought_progress)
+                compact=True, previous=thought_previous,
+                progress=thought_progress)
         else:
             self.thought_hit_rect = None
         step = lesson.current_step
         total = len(lesson.resolved_steps)
         title_lines = _wrap_text(
             self.status_font, lesson.lesson.title, width)[:2]
-        title_y = (self.thought_hit_rect.bottom + 16
+        title_y = (self.thought_hit_rect.bottom + 12
                    if thought else rect.y + 10)
         for line in title_lines:
             self.surface.blit(
                 self.status_font.render(line, True, p.text), (x, title_y))
             title_y += self.status_font.get_linesize()
-        state_labels = {
-            "READING": "LEARN",
-            "QUESTION": "YOUR TURN",
-            "FEEDBACK": "LET'S REVIEW",
-            "EXPLORING": "TRYING AN IDEA",
-            "COMPLETED": "FINISHED",
-        }
-        progress = "STEP {} OF {}  ·  {}".format(
-            lesson.step_index + 1, total,
-            state_labels.get(lesson.state, lesson.state))
-        if (step.practice_mode == "independent"
-                and lesson.state == "QUESTION"):
-            progress = "STEP {} OF {}  ·  TRY IT ALONE".format(
-                lesson.step_index + 1, total)
+        progress = "STEP {} OF {}".format(lesson.step_index + 1, total)
         progress_y = title_y + 1
         self.surface.blit(self.tag_font.render(progress, True, p.accent),
                           (x, progress_y))
 
         button_top = min((button.rect.y for button in buttons),
                          default=rect.bottom - 12)
-        content_top = progress_y + self.tag_font.get_linesize() + 8
+        content_top = progress_y + self.tag_font.get_linesize() + 5
         if lesson.lesson.content_kind == "historical":
-            provenance = ("FROM A GAME · UROSCHESS NOTES" if width >= 260
-                          else "FROM A GAME · UROSCHESS")
+            provenance = "FROM A RECORDED GAME"
         else:
-            provenance = ("PRACTICE · UROSCHESS" if width < 260 else
-                          "PRACTICE POSITION · UROSCHESS")
-            if coach_label and 260 <= width < 400:
-                provenance = "PRACTICE · {} · UROSCHESS".format(
-                    coach_label.upper())
+            provenance = "PRACTICE POSITION"
         provenance = _fit_text(self.tag_font, provenance, width)
         label = self.tag_font.render(provenance, True, p.text_dim)
         self.surface.blit(label, (x, content_top))
         self.provenance_rect = label.get_rect(topleft=(x, content_top))
-        content_top += self.tag_font.get_linesize() + 5
-        if coach_label and width >= 400:
-            label = "COACH: {}".format(coach_label.upper())
-            self.surface.blit(self.tag_font.render(label, True, p.accent),
-                              (x, content_top))
-            content_top += self.tag_font.get_linesize() + 5
+        content_top += self.tag_font.get_linesize() + 9
         if step.question and lesson.state in ("READING", "QUESTION", "FEEDBACK"):
             question_top = content_top
             for line in _wrap_text(self.status_font, lesson.active_prompt,
@@ -359,9 +337,7 @@ class StudyView:
                 x, question_top, width, content_top - question_top)
         else:
             self.question_rect = None
-        content_rect = pygame.Rect(
-            x, content_top, width, max(1, button_top - content_top - 8))
-        self.lesson_content_rect = content_rect
+        available_height = max(1, button_top - content_top - 8)
         content = []
 
         def add(text, font, color, gap=4):
@@ -370,48 +346,36 @@ class StudyView:
             for line in _wrap_text(font, text, width - 18):
                 content.append((line, font, color, gap))
 
-        add(lesson.lesson.objective, self.text_font, p.text, 7)
-        prompt_first = (step.question is not None and
-                        lesson.state in ("READING", "QUESTION") and
-                        not lesson.last_attempt)
-        if prompt_first:
-            if lesson.state == "READING":
-                add("Move a piece on the board when you are ready.",
-                    self.text_font, p.text, 5)
+        if lesson.state in ("READING", "QUESTION"):
+            if transient_message:
+                add("HINT", self.tag_font, p.accent, 5)
+                add(transient_message, self.text_font, p.text, 6)
             else:
-                mover = "White" if lesson.board.side_to_move == "w" else "Black"
-                add("Your turn: move a {} piece on the board.".format(mover),
-                    self.text_font, p.accent, 5)
-        add(step.explanation, self.text_font, p.text, 5)
-        add(step.detail, self.text_font, p.text, 9)
-
-        if lesson.state == "COMPLETED":
-            add("Lesson complete", self.status_font, p.good, 6)
-            add(lesson.lesson.takeaway, self.text_font, p.text, 6)
-        elif lesson.state == "EXPLORING":
-            add("Trying your idea", self.status_font, p.warn, 5)
-            add("These moves are just for exploring. Choose Return to lesson "
-                "to try the lesson move again.",
-                self.text_font, p.text, 7)
-            if lesson.last_attempt:
-                add(lesson.last_attempt.feedback, self.text_font, p.warn, 5)
-        elif step.question and not prompt_first:
+                add(step.explanation, self.text_font, p.text, 6)
+        elif lesson.state == "FEEDBACK":
             if lesson.last_attempt:
                 outcome = lesson.last_attempt.outcome
                 color = (p.good if outcome in ("preferred", "acceptable")
                          else p.warn if outcome in
                          ("revealed", "not_covered", "continue")
                          else p.bad)
-                prefix = ("Why this works: " if outcome in
-                          ("preferred", "acceptable") else "")
-                add(prefix + lesson.last_attempt.feedback,
-                    self.text_font, color, 6)
-        if transient_message:
-            add(transient_message, self.text_font, p.warn, 5)
+                add(lesson.last_attempt.feedback, self.text_font, color, 6)
+            if transient_message:
+                add(transient_message, self.text_font, p.warn, 5)
+        elif lesson.state == "EXPLORING":
+            add("Try any legal move. Use Back to lesson when you are ready.",
+                self.text_font, p.text, 6)
+        elif lesson.state == "COMPLETED":
+            add(lesson.lesson.takeaway, self.text_font, p.text, 6)
 
         line_heights = [font.get_linesize() + gap
                         for _line, font, _color, gap in content]
-        full_height = max(content_rect.h, sum(line_heights) + 16)
+        natural_height = sum(line_heights) + 16
+        content_rect = pygame.Rect(
+            x, content_top, width,
+            min(available_height, max(44, natural_height)))
+        self.lesson_content_rect = content_rect
+        full_height = max(content_rect.h, natural_height)
         body = pygame.Surface((content_rect.w, full_height), pygame.SRCALPHA)
         y = 8
         for (line, font, color, gap), height in zip(content, line_heights):
@@ -436,10 +400,13 @@ class StudyView:
 
         for index, button in enumerate(buttons):
             hot = button.rect.collidepoint(pointer)
-            fill = p.btn_hot if hot else p.btn
+            fill = (p.accent if button.kind == "cta" else
+                    p.btn_hot if hot else p.btn)
             _round_rect(self.surface, button.rect, (*fill, 255), 6)
             _outline(self.surface, button.rect, p.panel_line, 6)
-            label = self.small_font.render(button.label, True, p.text)
+            label = self.small_font.render(
+                button.label, True,
+                p.on_accent if button.kind == "cta" else p.text)
             self.surface.blit(label, label.get_rect(center=button.rect.center))
             if index == focused_button:
                 draw_focus_ring(self.surface, button.rect, p.accent, 6)

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "uroschess"
 version = "0.1.0"
-description = "A pygame chess teaching app with annotated games and a from-scratch engine"
+description = "A small offline chess game with short practice lessons"
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }
