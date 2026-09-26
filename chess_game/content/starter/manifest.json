@@ -1,0 +1,443 @@
+{
+  "schema_version": 1,
+  "pack_id": "starter",
+  "title": "Starter games",
+  "learning_path": [
+    "opening-essentials",
+    "italian-development",
+    "queens-gambit-plan",
+    "black-against-e4",
+    "black-against-d4",
+    "mate-or-stalemate",
+    "promote-the-pawn",
+    "queen-and-king-mate",
+    "rook-and-king-mate"
+  ],
+  "games": [
+    {
+      "game_id": "scotch-example-game",
+      "file": "scotch-example-game.pgn",
+      "title": "Scotch Game archival score",
+      "category": "source_game",
+      "level": "intermediate",
+      "themes": [
+        "Scotch Game",
+        "opening",
+        "world championship"
+      ],
+      "description": "An anonymized historical score for opening study.",
+      "source": {
+        "name": "Scotch Game archival score",
+        "license": "Historical move score with player identities omitted",
+        "attribution": "Recorded historical moves; player identities deliberately omitted"
+      }
+    },
+    {
+      "game_id": "catalan-example-game",
+      "file": "catalan-example-game.pgn",
+      "title": "Catalan Opening archival score",
+      "category": "source_game",
+      "level": "intermediate",
+      "themes": [
+        "Catalan",
+        "opening",
+        "world championship"
+      ],
+      "description": "An anonymized historical score for opening study.",
+      "source": {
+        "name": "Catalan Opening archival score",
+        "license": "Historical move score with player identities omitted",
+        "attribution": "Recorded historical moves; player identities deliberately omitted"
+      }
+    },
+    {
+      "game_id": "coordination-study",
+      "file": "coordination-study.pgn",
+      "title": "Tactical coordination study",
+      "category": "guided_game",
+      "level": "intermediate",
+      "themes": [
+        "development",
+        "initiative",
+        "coordination"
+      ],
+      "description": "Replay an anonymized historical game with concise notes about piece coordination.",
+      "source": {
+        "name": "Archival tactical score",
+        "license": "Historical move score; Uroschess notes are original",
+        "attribution": "Recorded historical moves; player identities deliberately omitted"
+      }
+    },
+    {
+      "game_id": "opening-essentials-line",
+      "file": "opening-essentials.pgn",
+      "title": "Opening essentials practice",
+      "category": "opening",
+      "level": "beginner",
+      "themes": [
+        "opening",
+        "centre",
+        "development",
+        "king-safety"
+      ],
+      "description": "A synthetic practice line for central control, development, and castling preparation.",
+      "source": {
+        "name": "Uroschess synthetic training line",
+        "license": "MIT",
+        "attribution": "Original synthetic position and move sequence; not a historical game"
+      }
+    },
+    {
+      "game_id": "italian-development-line",
+      "file": "italian-development.pgn",
+      "title": "Italian Game development",
+      "category": "opening",
+      "level": "beginner",
+      "themes": [
+        "opening",
+        "italian-game",
+        "development",
+        "central-break"
+      ],
+      "description": "A synthetic Italian Game line about active development, castling, and the d4 break.",
+      "source": {
+        "name": "Uroschess synthetic training line",
+        "license": "MIT",
+        "attribution": "Original synthetic position and move sequence; not a historical game"
+      }
+    },
+    {
+      "game_id": "queens-gambit-plan-line",
+      "file": "queens-gambit-plan.pgn",
+      "title": "Queen's Gambit plan",
+      "category": "opening",
+      "level": "beginner",
+      "themes": [
+        "opening",
+        "queens-gambit",
+        "centre",
+        "development"
+      ],
+      "description": "A synthetic Queen's Gambit line about challenging the centre and developing around pawn tension.",
+      "source": {
+        "name": "Uroschess synthetic training line",
+        "license": "MIT",
+        "attribution": "Original synthetic position and move sequence; not a historical game"
+      }
+    },
+    {
+      "game_id": "black-against-e4-line",
+      "file": "black-against-e4.pgn",
+      "title": "Black against 1.e4",
+      "category": "opening",
+      "level": "beginner",
+      "themes": [
+        "opening",
+        "black-repertoire",
+        "centre",
+        "development"
+      ],
+      "description": "A synthetic practice line for meeting 1.e4 with active central play.",
+      "source": {
+        "name": "Uroschess synthetic training line",
+        "license": "MIT",
+        "attribution": "Original synthetic position and move sequence; not a historical game"
+      }
+    },
+    {
+      "game_id": "black-against-d4-line",
+      "file": "black-against-d4.pgn",
+      "title": "Black against 1.d4",
+      "category": "opening",
+      "level": "beginner",
+      "themes": [
+        "opening",
+        "black-repertoire",
+        "centre",
+        "pawn-tension"
+      ],
+      "description": "A synthetic practice line for meeting 1.d4 with firm central control.",
+      "source": {
+        "name": "Uroschess synthetic training line",
+        "license": "MIT",
+        "attribution": "Original synthetic position and move sequence; not a historical game"
+      }
+    },
+    {
+      "game_id": "mate-or-stalemate-position",
+      "file": "mate-or-stalemate.pgn",
+      "title": "Checkmate versus stalemate",
+      "category": "endgame",
+      "level": "beginner",
+      "themes": [
+        "endgame",
+        "checkmate",
+        "stalemate"
+      ],
+      "description": "A synthetic queen-and-king finish that contrasts mate with stalemate.",
+      "source": {
+        "name": "Uroschess synthetic training position",
+        "license": "MIT",
+        "attribution": "Original synthetic endgame position; not a historical game"
+      }
+    },
+    {
+      "game_id": "promote-the-pawn-position",
+      "file": "promote-the-pawn.pgn",
+      "title": "Promote the passed pawn",
+      "category": "endgame",
+      "level": "beginner",
+      "themes": [
+        "endgame",
+        "passed-pawn",
+        "promotion"
+      ],
+      "description": "A synthetic two-move exercise about safe promotion and sufficient mating material.",
+      "source": {
+        "name": "Uroschess synthetic training position",
+        "license": "MIT",
+        "attribution": "Original synthetic endgame position and line; not a historical game"
+      }
+    },
+    {
+      "game_id": "queen-and-king-mate-position",
+      "file": "queen-and-king-mate.pgn",
+      "title": "Queen and king mate",
+      "category": "endgame",
+      "level": "beginner",
+      "themes": [
+        "endgame",
+        "queen-mate",
+        "king-activity"
+      ],
+      "description": "A synthetic exercise for coordinating the king and queen to mate on the edge.",
+      "source": {
+        "name": "Uroschess synthetic training position",
+        "license": "MIT",
+        "attribution": "Original synthetic endgame position and line; not a historical game"
+      }
+    },
+    {
+      "game_id": "rook-and-king-mate-position",
+      "file": "rook-and-king-mate.pgn",
+      "title": "Rook and king mate",
+      "category": "endgame",
+      "level": "beginner",
+      "themes": [
+        "endgame",
+        "rook-mate",
+        "king-activity"
+      ],
+      "description": "A synthetic exercise for coordinating the king and rook to mate on the edge.",
+      "source": {
+        "name": "Uroschess synthetic training position",
+        "license": "MIT",
+        "attribution": "Original synthetic endgame position and line; not a historical game"
+      }
+    },
+    {
+      "game_id": "square-of-the-pawn-position",
+      "file": "square-of-the-pawn.pgn",
+      "title": "The square of the pawn",
+      "category": "endgame",
+      "level": "beginner",
+      "themes": [
+        "endgame",
+        "square-of-the-pawn",
+        "king-activity"
+      ],
+      "description": "A synthetic pawn-race exercise for deciding whether a king can catch a passed pawn.",
+      "source": {
+        "name": "Uroschess synthetic training position",
+        "license": "MIT",
+        "attribution": "Original synthetic endgame position and line; not a historical game"
+      }
+    },
+    {
+      "game_id": "bruno-scotch-practice",
+      "file": "bruno-scotch-practice.pgn",
+      "title": "Scotch Game practice",
+      "category": "opening",
+      "level": "beginner",
+      "themes": [
+        "opening",
+        "centre",
+        "Scotch Game",
+        "development"
+      ],
+      "description": "A synthetic Scotch Game practice line for an original lesson.",
+      "source": {
+        "name": "Uroschess synthetic training line",
+        "license": "MIT",
+        "attribution": "Original Uroschess practice sequence; no historical player association"
+      }
+    },
+    {
+      "game_id": "bruno-scotch-transfer",
+      "file": "bruno-scotch-transfer.pgn",
+      "title": "Scotch four-knights practice",
+      "category": "opening",
+      "level": "beginner",
+      "themes": [
+        "opening",
+        "centre",
+        "independent practice"
+      ],
+      "description": "A distinct synthetic position for trying the central plan alone.",
+      "source": {
+        "name": "Uroschess synthetic training line",
+        "license": "MIT",
+        "attribution": "Original Uroschess practice sequence; no historical player association"
+      }
+    },
+    {
+      "game_id": "olive-catalan-practice",
+      "file": "olive-catalan-practice.pgn",
+      "title": "Catalan bishop practice",
+      "category": "opening",
+      "level": "beginner",
+      "themes": [
+        "opening",
+        "Catalan",
+        "bishop",
+        "king safety"
+      ],
+      "description": "A synthetic Catalan-style line for bishop development and castling.",
+      "source": {
+        "name": "Uroschess synthetic training line",
+        "license": "MIT",
+        "attribution": "Original Uroschess practice sequence; no historical player association"
+      }
+    },
+    {
+      "game_id": "olive-catalan-transfer",
+      "file": "olive-catalan-transfer.pgn",
+      "title": "Catalan bishop transfer practice",
+      "category": "opening",
+      "level": "beginner",
+      "themes": [
+        "opening",
+        "Catalan",
+        "bishop",
+        "independent practice"
+      ],
+      "description": "A distinct synthetic position for finding the bishop's diagonal alone.",
+      "source": {
+        "name": "Uroschess synthetic training line",
+        "license": "MIT",
+        "attribution": "Original Uroschess practice sequence; no historical player association"
+      }
+    },
+    {
+      "game_id": "opposition-and-king-activity-position",
+      "file": "opposition-and-king-activity.pgn",
+      "title": "Opposition and king activity",
+      "category": "endgame",
+      "level": "beginner",
+      "themes": [
+        "endgame",
+        "opposition",
+        "king-activity",
+        "passed-pawn"
+      ],
+      "description": "A synthetic king-and-pawn exercise about outflanking a blocking king.",
+      "source": {
+        "name": "Uroschess synthetic training position",
+        "license": "MIT",
+        "attribution": "Original synthetic endgame position and line; not a historical game"
+      }
+    }
+  ],
+  "lessons": [
+    {
+      "lesson_id": "coordination-before-material",
+      "game_id": "coordination-study",
+      "file": "coordination-before-material.json"
+    },
+    {
+      "lesson_id": "opening-essentials",
+      "game_id": "opening-essentials-line",
+      "file": "opening-essentials.json"
+    },
+    {
+      "lesson_id": "bruno-scotch-make-room",
+      "game_id": "bruno-scotch-practice",
+      "file": "bruno-scotch-make-room.json"
+    },
+    {
+      "lesson_id": "bruno-scotch-active-knight",
+      "game_id": "bruno-scotch-practice",
+      "file": "bruno-scotch-active-knight.json"
+    },
+    {
+      "lesson_id": "bruno-scotch-try-alone",
+      "game_id": "bruno-scotch-transfer",
+      "file": "bruno-scotch-try-alone.json"
+    },
+    {
+      "lesson_id": "olive-catalan-bishop",
+      "game_id": "olive-catalan-practice",
+      "file": "olive-catalan-bishop.json"
+    },
+    {
+      "lesson_id": "olive-catalan-king-safety",
+      "game_id": "olive-catalan-practice",
+      "file": "olive-catalan-king-safety.json"
+    },
+    {
+      "lesson_id": "olive-catalan-try-alone",
+      "game_id": "olive-catalan-transfer",
+      "file": "olive-catalan-try-alone.json"
+    },
+    {
+      "lesson_id": "italian-development",
+      "game_id": "italian-development-line",
+      "file": "italian-development.json"
+    },
+    {
+      "lesson_id": "queens-gambit-plan",
+      "game_id": "queens-gambit-plan-line",
+      "file": "queens-gambit-plan.json"
+    },
+    {
+      "lesson_id": "black-against-e4",
+      "game_id": "black-against-e4-line",
+      "file": "black-against-e4.json"
+    },
+    {
+      "lesson_id": "black-against-d4",
+      "game_id": "black-against-d4-line",
+      "file": "black-against-d4.json"
+    },
+    {
+      "lesson_id": "mate-or-stalemate",
+      "game_id": "mate-or-stalemate-position",
+      "file": "mate-or-stalemate.json"
+    },
+    {
+      "lesson_id": "promote-the-pawn",
+      "game_id": "promote-the-pawn-position",
+      "file": "promote-the-pawn.json"
+    },
+    {
+      "lesson_id": "queen-and-king-mate",
+      "game_id": "queen-and-king-mate-position",
+      "file": "queen-and-king-mate.json"
+    },
+    {
+      "lesson_id": "rook-and-king-mate",
+      "game_id": "rook-and-king-mate-position",
+      "file": "rook-and-king-mate.json"
+    },
+    {
+      "lesson_id": "square-of-the-pawn",
+      "game_id": "square-of-the-pawn-position",
+      "file": "square-of-the-pawn.json"
+    },
+    {
+      "lesson_id": "opposition-and-king-activity",
+      "game_id": "opposition-and-king-activity-position",
+      "file": "opposition-and-king-activity.json"
+    }
+  ]
+}

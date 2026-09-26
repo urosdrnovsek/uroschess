@@ -1,0 +1,33 @@
+# virtualenv
+.venv/
+
+# local planning / agent instructions
+Instructions/
+
+# local secrets and machine-specific configuration
+.env
+.env.*
+!.env.example
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# game / render output
+game.pgn
+scripts/*.bmp
+scripts/*.png
+*.bmp
+!chess_game/assets/portraits/*.bmp
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store

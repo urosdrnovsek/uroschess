@@ -1,0 +1,71 @@
+{
+  "schema_version": 3,
+  "lesson_id": "olive-catalan-bishop",
+  "content_revision": 2,
+  "title": "A long-view bishop",
+  "level": "beginner",
+  "estimated_minutes": 3,
+  "objective": "Develop a bishop onto a long diagonal.",
+  "prerequisites": [
+    "legal moves",
+    "opening basics"
+  ],
+  "concepts": [
+    "Catalan",
+    "bishop",
+    "development"
+  ],
+  "game_id": "olive-catalan-practice",
+  "coach_player_id": "olive-owl",
+  "content_kind": "synthetic",
+  "related_source_game_id": "catalan-example-game",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original synthetic lesson",
+    "license": "MIT",
+    "attribution": "Original teaching text and simplified Catalan practice line; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "bishop-long-diagonal",
+      "node_path": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g2g3",
+        "d7d5"
+      ],
+      "expected_fen": "rnbqkb1r/ppp2ppp/4pn2/3p4/2PP4/6P1/PP2PP1P/RNBQKBNR w KQkq d6 0 4",
+      "explanation": "White moved the g-pawn so the bishop has a path into the game.",
+      "detail": "From g2, the bishop can look across many squares on one diagonal.",
+      "coach_prompt": "Your g-pawn made a doorway for the bishop.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Where can the bishop go to use that long diagonal?",
+        "hints": [
+          "Look beside your king.",
+          "Move the bishop from f1 to g2."
+        ],
+        "tree": [
+          {
+            "uci": "f1g2",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Bg2 develops the bishop. It now looks across the board on a long diagonal."
+          },
+          {
+            "uci": "f1h3",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "Bh3 develops the bishop, but it misses the space behind your moved g-pawn. Try another home."
+          }
+        ],
+        "other_legal_move_text": "That move may help later. Return and find a home for the bishop."
+      }
+    }
+  ],
+  "takeaway": "Moving a pawn can open a useful path for a bishop."
+}

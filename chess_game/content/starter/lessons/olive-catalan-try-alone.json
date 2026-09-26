@@ -1,0 +1,70 @@
+{
+  "schema_version": 3,
+  "lesson_id": "olive-catalan-try-alone",
+  "content_revision": 2,
+  "title": "Try the bishop alone",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Prepare a long diagonal for your bishop in a different position.",
+  "prerequisites": [
+    "olive-catalan-king-safety"
+  ],
+  "concepts": [
+    "Catalan",
+    "bishop",
+    "independent practice"
+  ],
+  "game_id": "olive-catalan-transfer",
+  "coach_player_id": "olive-owl",
+  "content_kind": "synthetic",
+  "related_source_game_id": "catalan-example-game",
+  "commentary_source": {
+    "name": "Uroschess original independent practice",
+    "license": "MIT",
+    "attribution": "Original teaching text and distinct synthetic Catalan-style position"
+  },
+  "steps": [
+    {
+      "step_id": "bishop-new-position",
+      "practice_mode": "independent",
+      "node_path": [
+        "d2d4",
+        "d7d5",
+        "g1f3",
+        "g8f6",
+        "g2g3",
+        "e7e6"
+      ],
+      "expected_fen": "rnbqkb1r/ppp2ppp/4pn2/3p4/3P4/5NP1/PPP1PP1P/RNBQKB1R w KQkq - 0 4",
+      "explanation": "This board is different. Your bishop still needs a useful job.",
+      "detail": "Your knight on f3 blocks the long view for now. Moving it later can open the diagonal. Try without glowing piece hints.",
+      "coach_prompt": "Find a home for your bishop behind the moved g-pawn.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Where can your bishop prepare to use a long diagonal?",
+        "hints": [
+          "The g-pawn has already made a doorway.",
+          "Move the bishop from f1 to g2."
+        ],
+        "tree": [
+          {
+            "uci": "f1g2",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Bg2 puts the bishop behind your moved g-pawn. Your knight on f3 blocks its view now; moving the knight later can open the diagonal."
+          },
+          {
+            "uci": "f1h3",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "Bh3 develops the bishop, but it misses the space behind your moved g-pawn. Try another home."
+          }
+        ],
+        "other_legal_move_text": "That legal move may be useful. Return and choose a home for the bishop."
+      }
+    }
+  ],
+  "takeaway": "A bishop can prepare a long diagonal before the path is fully open."
+}

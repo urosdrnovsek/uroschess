@@ -1,0 +1,96 @@
+{
+  "schema_version": 3,
+  "lesson_id": "bruno-scotch-make-room",
+  "initial_help": true,
+  "content_revision": 2,
+  "title": "Make room in centre",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Challenge the centre and bring a knight to a useful square.",
+  "prerequisites": [
+    "legal moves",
+    "opening basics"
+  ],
+  "concepts": [
+    "opening",
+    "Scotch Game",
+    "centre",
+    "development"
+  ],
+  "game_id": "bruno-scotch-practice",
+  "coach_player_id": "bruno-bear",
+  "content_kind": "synthetic",
+  "related_source_game_id": "scotch-example-game",
+  "commentary_source": {
+    "name": "Uroschess original synthetic lesson",
+    "license": "MIT",
+    "attribution": "Original instructional text and practice line inspired by a Scotch Game idea"
+  },
+  "steps": [
+    {
+      "step_id": "challenge-and-recapture",
+      "node_path": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6"
+      ],
+      "expected_fen": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+      "explanation": "Both sides have a pawn in the middle. White can ask Black's pawn a question.",
+      "detail": "Move the d-pawn forward to challenge e5. If Black takes it, a knight can take back.",
+      "coach_prompt": "Make room for your pieces in the middle.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Which pawn can challenge Black's pawn in the middle?",
+        "hints": [
+          "Look at your d-pawn.",
+          "Try moving it two squares, to d4."
+        ],
+        "tree": [
+          {
+            "uci": "d2d4",
+            "role": "learner",
+            "outcome": "continue",
+            "feedback": "Your pawn challenges Black's e-pawn.",
+            "children": [
+              {
+                "uci": "e5d4",
+                "role": "opponent",
+                "outcome": "reply",
+                "feedback": "Black took your pawn. Look for a way to take it back.",
+                "next_prompt": "Black took your pawn. Which knight can take it back?",
+                "hints": [
+                  "Your knight on f3 can take the pawn on d4."
+                ],
+                "children": [
+                  {
+                    "uci": "f3d4",
+                    "role": "learner",
+                    "outcome": "preferred",
+                    "feedback": "Your knight takes back the pawn and reaches the centre."
+                  },
+                  {
+                    "uci": "d1d4",
+                    "role": "learner",
+                    "outcome": "wrong",
+                    "feedback": "Black's knight on c6 can take your queen right away. Find a safer piece to take the pawn."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "uci": "d2d3",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "d3 supports your pawn, but it does not challenge Black's pawn yet. Try moving farther."
+          }
+        ],
+        "other_legal_move_text": "That move may be useful too. Explore it, then return to try the central pawn idea."
+      }
+    }
+  ],
+  "takeaway": "A pawn challenge can open space. Bring a piece into the centre when you take back."
+}

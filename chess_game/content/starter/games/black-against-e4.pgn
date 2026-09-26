@@ -1,0 +1,10 @@
+[Event "Synthetic 1.e4 e5 exercise"]
+[Site "Uroschess"]
+[Date "????.??.??"]
+[Round "-"]
+[White "Practice line"]
+[Black "Learner"]
+[Result "*"]
+[Annotator "Uroschess"]
+
+1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. d3 Bc5 5. O-O d6 *

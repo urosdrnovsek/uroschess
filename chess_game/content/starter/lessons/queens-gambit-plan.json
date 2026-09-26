@@ -1,0 +1,77 @@
+{
+  "schema_version": 2,
+  "lesson_id": "queens-gambit-plan",
+  "initial_help": true,
+  "content_revision": 2,
+  "title": "Queen's Gambit: challenge the centre",
+  "level": "beginner",
+  "estimated_minutes": 6,
+  "objective": "Use c4 to challenge Black's d5 pawn, then develop around the tension.",
+  "prerequisites": ["opening essentials"],
+  "concepts": ["opening", "queens-gambit", "centre", "development"],
+  "game_id": "queens-gambit-plan-line",
+  "commentary_source": {
+    "name": "Uroschess original synthetic lesson",
+    "license": "MIT",
+    "attribution": "Original instructional text and synthetic Queen's Gambit line"
+  },
+  "steps": [
+    {
+      "step_id": "offer-the-c-pawn",
+      "node_path": [],
+      "expected_fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "explanation": "First White puts a pawn in the middle. Then White uses another pawn to challenge Black's pawn.",
+      "detail": "Black may take the c-pawn. White can bring out pieces and often win the pawn back.",
+      "arrows": [{"from": "c2", "to": "c4", "role": "idea"}],
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Build the Queen's Gambit with two pawn moves.",
+        "hints": ["Start with d4.", "After ...d5, challenge that pawn with c4."],
+        "tree": [
+          {
+            "uci": "d2d4",
+            "role": "learner",
+            "outcome": "continue",
+            "feedback": "d4 claims central space.",
+            "children": [
+              {
+                "uci": "d7d5",
+                "role": "opponent",
+                "outcome": "reply",
+                "feedback": "Black meets White in the centre.",
+                "children": [
+                  {"uci": "c2c4", "role": "learner", "outcome": "preferred", "feedback": "c4 creates the Queen's Gambit and puts pressure on d5."},
+                  {"uci": "g1f3", "role": "learner", "outcome": "acceptable", "feedback": "Nf3 develops naturally. c4 can still challenge d5 on a later move."}
+                ]
+              }
+            ]
+          }
+        ],
+        "other_legal_move_text": "That move may be sound, but this exercise practises the d4 and c4 pawn structure."
+      }
+    },
+    {
+      "step_id": "develop-behind-the-tension",
+      "node_path": ["d2d4", "d7d5", "c2c4", "e7e6"],
+      "expected_fen": "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/8/PP2PPPP/RNBQKBNR w KQkq - 0 3",
+      "explanation": "Black supports d5 with e6. White does not need to resolve the pawn tension immediately.",
+      "detail": "Developing a knight adds pressure and keeps several pawn choices available.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_moves",
+        "prompt": "Develop a knight while keeping pressure on the centre.",
+        "hints": ["Both knights have useful developing squares."],
+        "answers": [
+          {"uci": "b1c3", "outcome": "preferred", "feedback": "Nc3 develops and adds another attacker to d5."},
+          {"uci": "g1f3", "outcome": "acceptable", "feedback": "Nf3 is a natural developing move that supports the centre."},
+          {"uci": "c4d5", "outcome": "acceptable", "feedback": "cxd5 is playable, though it releases the tension earlier than necessary."}
+        ],
+        "other_legal_move_text": "That may be playable. This step asks for development or a reviewed central exchange."
+      }
+    }
+  ],
+  "takeaway": "The Queen's Gambit challenges d5 with c4. Develop pieces while the central tension gives you choices."
+}

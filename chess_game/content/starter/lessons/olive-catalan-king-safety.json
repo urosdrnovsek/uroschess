@@ -1,0 +1,73 @@
+{
+  "schema_version": 3,
+  "lesson_id": "olive-catalan-king-safety",
+  "content_revision": 2,
+  "title": "Keep your king safe",
+  "level": "beginner",
+  "estimated_minutes": 3,
+  "objective": "Use your developed pieces to get ready to castle.",
+  "prerequisites": [
+    "olive-catalan-bishop"
+  ],
+  "concepts": [
+    "Catalan",
+    "castling",
+    "king safety"
+  ],
+  "game_id": "olive-catalan-practice",
+  "coach_player_id": "olive-owl",
+  "content_kind": "synthetic",
+  "related_source_game_id": "catalan-example-game",
+  "commentary_source": {
+    "name": "Uroschess original synthetic lesson",
+    "license": "MIT",
+    "attribution": "Original teaching text and simplified Catalan practice line; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "castle-after-developing",
+      "node_path": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g2g3",
+        "d7d5",
+        "f1g2",
+        "f8e7",
+        "g1f3",
+        "e8g8"
+      ],
+      "expected_fen": "rnbq1rk1/ppp1bppp/4pn2/3p4/2PP4/5NP1/PP2PPBP/RNBQK2R w KQ - 4 6",
+      "explanation": "Your bishop and knight have moved. The path between your king and rook is clear.",
+      "detail": "Castling moves the king toward safety and brings the rook closer to the game.",
+      "coach_prompt": "Your pieces made room for the king. Check if castling is safe.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "What move can give your king a safer home now?",
+        "hints": [
+          "The squares between your king and rook are clear.",
+          "Castle your king to the right."
+        ],
+        "tree": [
+          {
+            "uci": "e1g1",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Castling puts the king behind pawns and brings the rook closer to the centre."
+          },
+          {
+            "uci": "b1c3",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "Nc3 develops another piece and helps the centre. Your king still needs a safer home in this lesson."
+          }
+        ],
+        "other_legal_move_text": "That move can be explored. Return and look for a way to improve king safety."
+      }
+    }
+  ],
+  "takeaway": "Develop pieces first; castle when the king can be safer."
+}

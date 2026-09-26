@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "lesson_id": "black-against-e4",
+  "content_revision": 2,
+  "title": "Black against 1.e4: answer in the centre",
+  "level": "beginner",
+  "estimated_minutes": 5,
+  "objective": "Meet 1.e4 with active central play and develop pieces toward useful squares.",
+  "prerequisites": ["opening essentials"],
+  "concepts": ["opening", "black-repertoire", "centre", "development"],
+  "game_id": "black-against-e4-line",
+  "commentary_source": {
+    "name": "Uroschess original synthetic lesson",
+    "license": "MIT",
+    "attribution": "Original instructional text and synthetic 1.e4 e5 line"
+  },
+  "steps": [
+    {
+      "step_id": "claim-the-centre",
+      "node_path": ["e2e4"],
+      "expected_fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
+      "explanation": "White has put a pawn in the middle. Black can put a pawn there too.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_moves",
+        "prompt": "White played e4. What should Black play?",
+        "hints": ["The lesson line answers with the e-pawn."],
+        "answers": [
+          {"uci": "e7e5", "outcome": "preferred", "feedback": "Good! ...e5 fights for the middle and opens a path for Black's bishop and queen."},
+          {"uci": "c7c5", "outcome": "acceptable", "feedback": "...c5 is the Sicilian Defence, another strong way to challenge White's centre."},
+          {"uci": "e7e6", "outcome": "acceptable", "feedback": "...e6 is the French Defence and prepares ...d5."},
+          {"uci": "f7f6", "outcome": "wrong", "feedback": "...f6 weakens Black's king and blocks the g8-knight's best square."}
+        ],
+        "other_legal_move_text": "That move may define another opening. This lesson checks active central replies."
+      }
+    },
+    {
+      "step_id": "develop-with-tempo",
+      "node_path": ["e2e4", "e7e5", "g1f3"],
+      "expected_fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+      "explanation": "White's knight attacks the pawn on e5. Black can bring out a piece and help the pawn.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_moves",
+        "prompt": "Develop a piece and protect e5.",
+        "hints": ["The b8-knight can reach c6."],
+        "answers": [
+          {"uci": "b8c6", "outcome": "preferred", "feedback": "...Nc6 develops, protects e5, and controls central squares."},
+          {"uci": "g8f6", "outcome": "acceptable", "feedback": "...Nf6 develops actively and counterattacks e4, though it leaves e5 tactically contested."},
+          {"uci": "d7d6", "outcome": "acceptable", "feedback": "...d6 supports e5, but it is less active than developing a knight."},
+          {"uci": "f7f6", "outcome": "wrong", "feedback": "...f6 defends e5 but weakens the king and takes the knight's natural square."}
+        ],
+        "other_legal_move_text": "That move is legal, but find a developing move that addresses the attack on e5."
+      }
+    }
+  ],
+  "takeaway": "Against 1.e4, fight for the centre and use threats as chances to develop useful pieces."
+}

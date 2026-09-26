@@ -1,0 +1,76 @@
+{
+  "schema_version": 3,
+  "lesson_id": "bruno-scotch-try-alone",
+  "content_revision": 2,
+  "title": "Try the plan alone",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Find a central pawn challenge in a new position.",
+  "prerequisites": [
+    "bruno-scotch-active-knight"
+  ],
+  "concepts": [
+    "Scotch Game",
+    "centre",
+    "independent practice"
+  ],
+  "game_id": "bruno-scotch-transfer",
+  "coach_player_id": "bruno-bear",
+  "content_kind": "synthetic",
+  "related_source_game_id": "scotch-example-game",
+  "commentary_source": {
+    "name": "Uroschess original independent practice",
+    "license": "MIT",
+    "attribution": "Original teaching text and distinct synthetic four-knights position"
+  },
+  "steps": [
+    {
+      "step_id": "four-knights-centre",
+      "practice_mode": "independent",
+      "node_path": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "b1c3",
+        "g8f6"
+      ],
+      "expected_fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 4 4",
+      "explanation": "Both sides brought out knights. Now choose a useful plan without glowing piece hints.",
+      "detail": "You can ask for a hint or an answer if you need one.",
+      "coach_prompt": "Look at the middle of the board and choose your move.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "What pawn move can challenge Black's centre?",
+        "hints": [
+          "A middle pawn can move forward.",
+          "Move your d-pawn two squares."
+        ],
+        "tree": [
+          {
+            "uci": "d2d4",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "d4 challenges Black's e-pawn and opens lines for your pieces."
+          },
+          {
+            "uci": "f1c4",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "Bc4 develops the bishop well, but this lesson asks you to challenge Black's centre with a pawn. Try again."
+          },
+          {
+            "uci": "d2d3",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "d3 supports your centre, but it does not challenge Black's e-pawn yet. Try another pawn move."
+          }
+        ],
+        "other_legal_move_text": "That legal move might have a place in a game. Return and look for a central pawn challenge."
+      }
+    }
+  ],
+  "takeaway": "When your pieces are ready, a pawn move can challenge the centre."
+}

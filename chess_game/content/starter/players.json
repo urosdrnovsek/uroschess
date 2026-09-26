@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "players": [
+    {
+      "player_id": "bruno-bear",
+      "name": "Bruno the Bear",
+      "short_name": "Bruno",
+      "portrait": "bruno.bmp",
+      "intro": "Explore a Scotch Game idea with Bruno.",
+      "portrait_attribution": "Original animal illustration for Uroschess"
+    },
+    {
+      "player_id": "olive-owl",
+      "name": "Olive the Owl",
+      "short_name": "Olive",
+      "portrait": "olive.bmp",
+      "intro": "Explore a Catalan bishop idea with Olive.",
+      "portrait_attribution": "Original animal illustration for Uroschess"
+    }
+  ]
+}

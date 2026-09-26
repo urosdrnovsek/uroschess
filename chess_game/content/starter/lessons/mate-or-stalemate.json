@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "lesson_id": "mate-or-stalemate",
+  "content_revision": 2,
+  "title": "Finish without stalemate",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Tell checkmate from stalemate before making the final queen move.",
+  "prerequisites": ["check", "checkmate", "queen movement"],
+  "concepts": ["endgame", "checkmate", "stalemate"],
+  "game_id": "mate-or-stalemate-position",
+  "commentary_source": {
+    "name": "Uroschess original synthetic lesson",
+    "license": "MIT",
+    "attribution": "Original instructional text and synthetic endgame position"
+  },
+  "steps": [
+    {
+      "step_id": "give-checkmate",
+      "node_path": [],
+      "expected_fen": "k7/8/2K5/1Q6/8/8/8/8 w - - 0 1",
+      "explanation": "Black's king is all alone. White must give check and leave the king no way out.",
+      "detail": "If Black has no legal move but is not in check, the game is stalemate and ends in a draw.",
+      "arrows": [{"from": "b5", "to": "b7", "role": "move"}],
+      "highlights": [
+        {"square": "a8", "role": "warning"},
+        {"square": "b7", "role": "target"}
+      ],
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_moves",
+        "prompt": "White to move. Give checkmate, not stalemate.",
+        "hints": [
+          "The queen must check the king on a8.",
+          "Move the queen from b5 to b7. White's king protects it."
+        ],
+        "answers": [
+          {
+            "uci": "b5b7",
+            "outcome": "preferred",
+            "feedback": "Qb7# is checkmate. The queen checks on a8, and White's king protects the queen."
+          },
+          {
+            "uci": "b5b6",
+            "outcome": "wrong",
+            "feedback": "Qb6 is stalemate. Black has no legal move, but the king is not in check, so the game is a draw."
+          }
+        ],
+        "other_legal_move_text": "That move does not finish the exercise. Explore the position, then return and look for a checking queen move."
+      }
+    }
+  ],
+  "takeaway": "For checkmate, the king must be in check and have nowhere to go."
+}

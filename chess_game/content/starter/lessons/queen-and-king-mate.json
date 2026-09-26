@@ -1,0 +1,59 @@
+{
+  "schema_version": 2,
+  "lesson_id": "queen-and-king-mate",
+  "content_revision": 2,
+  "title": "Queen mate: bring the king close",
+  "level": "beginner",
+  "estimated_minutes": 5,
+  "objective": "Use the king to support a final queen check on the edge.",
+  "prerequisites": ["checkmate versus stalemate", "queen movement"],
+  "concepts": ["endgame", "queen-mate", "king-activity"],
+  "game_id": "queen-and-king-mate-position",
+  "commentary_source": {
+    "name": "Uroschess original synthetic lesson",
+    "license": "MIT",
+    "attribution": "Original instructional text and synthetic queen-mate position"
+  },
+  "steps": [
+    {
+      "step_id": "support-the-final-check",
+      "node_path": [],
+      "expected_fen": "k7/8/2K5/8/3Q4/8/8/8 w - - 0 1",
+      "explanation": "The queen has trapped Black's king on the edge. Bring White's king closer before giving the final check.",
+      "detail": "Your king can guard the squares beside Black's king. Bring it close before the last check.",
+      "arrows": [
+        {"from": "c6", "to": "b6", "role": "move"},
+        {"from": "d4", "to": "d8", "role": "idea"}
+      ],
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Bring the king closer, then deliver checkmate.",
+        "hints": ["Move the king from c6 to b6.", "After ...Kb8, check on the back rank."],
+        "tree": [
+          {
+            "uci": "c6b6",
+            "role": "learner",
+            "outcome": "continue",
+            "feedback": "Kb6 brings the king close enough to support the mating net.",
+            "children": [
+              {
+                "uci": "a8b8",
+                "role": "opponent",
+                "outcome": "reply",
+                "feedback": "Black has only Kb8. Now finish with a queen check.",
+                "children": [
+                  {"uci": "d4d8", "role": "learner", "outcome": "preferred", "feedback": "Qd8# is checkmate. The queen checks across the back rank while the king covers a7 and b7."},
+                  {"uci": "d4h8", "role": "learner", "outcome": "acceptable", "feedback": "Qh8# is checkmate too. The queen controls the back rank from the other side."}
+                ]
+              }
+            ]
+          }
+        ],
+        "other_legal_move_text": "That move may still win, but this exercise practises bringing the king close before the final check."
+      }
+    }
+  ],
+  "takeaway": "Use your queen to make a small box for the other king. Bring your king close. Then give the last check."
+}

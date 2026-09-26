@@ -1,0 +1,290 @@
+{
+  "schema_version": 1,
+  "lesson_id": "coordination-before-material",
+  "content_revision": 2,
+  "title": "Make your pieces work together",
+  "level": "intermediate",
+  "estimated_minutes": 8,
+  "objective": "Help your pieces work as a team. A busy team can beat a bigger one.",
+  "prerequisites": [
+    "legal moves",
+    "check and checkmate",
+    "rough piece values"
+  ],
+  "concepts": [
+    "development",
+    "initiative",
+    "coordination",
+    "calculation"
+  ],
+  "game_id": "coordination-study",
+  "content_kind": "historical",
+  "commentary_source": {
+    "name": "Uroschess original guided lesson",
+    "license": "MIT",
+    "attribution": "Original instructional text based on an anonymized historical game"
+  },
+  "steps": [
+    {
+      "step_id": "finish-the-fianchetto",
+      "node_path": [
+        "g1f3",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3"
+      ],
+      "expected_fen": "rnbqkb1r/pppppp1p/5np1/8/2P5/2N2N2/PP1PPPPP/R1BQKB1R b KQkq - 1 3",
+      "explanation": "Black moved a pawn to open the door for a bishop. The bishop is ready to join the team.",
+      "detail": "Before you attack, bring out your pieces. Ask: Will this move help a piece? Will it keep my king safe?",
+      "arrows": [
+        {
+          "from": "f8",
+          "to": "g7",
+          "role": "move"
+        }
+      ],
+      "highlights": [
+        {
+          "square": "g7",
+          "role": "target"
+        }
+      ],
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_moves",
+        "prompt": "Black to move. Where should the bishop go?",
+        "hints": [
+          "Look at the bishop that is still on its starting square.",
+          "The pawn on g6 moved out of the bishop's way."
+        ],
+        "answers": [
+          {
+            "uci": "f8g7",
+            "outcome": "preferred",
+            "feedback": "Nice! Bg7 lets the bishop see across the board. Black is also one step closer to keeping the king safe."
+          },
+          {
+            "uci": "d7d5",
+            "outcome": "acceptable",
+            "feedback": "Good move too! ...d5 fights for the middle. In this game, Black brought out the bishop first with ...Bg7."
+          },
+          {
+            "uci": "f8h6",
+            "outcome": "wrong",
+            "feedback": "Bh6 brings the bishop out, but it is not very active there. Try to find a square where it can see across the board."
+          }
+        ],
+        "other_legal_move_text": "That move is allowed, but it is not one of the answers checked for this lesson. You can try the new position, then come back and move the bishop."
+      }
+    },
+    {
+      "step_id": "the-queen-offer",
+      "node_path": [
+        "g1f3",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "d2d4",
+        "e8g8",
+        "c1f4",
+        "d7d5",
+        "d1b3",
+        "d5c4",
+        "b3c4",
+        "c7c6",
+        "e2e4",
+        "b8d7",
+        "a1d1",
+        "d7b6",
+        "c4c5",
+        "c8g4",
+        "f4g5",
+        "b6a4",
+        "c5a3",
+        "a4c3",
+        "b2c3",
+        "f6e4",
+        "g5e7",
+        "d8b6",
+        "f1c4",
+        "e4c3",
+        "e7c5",
+        "f8e8",
+        "e1f1"
+      ],
+      "expected_fen": "r3r1k1/pp3pbp/1qp3p1/2B5/2BP2b1/Q1n2N2/P4PPP/3R1K1R b - - 3 17",
+      "explanation": "White is chasing Black's queen. But Black's pieces are chasing White's king! Does the queen really have to run?",
+      "detail": "Look for checks and strong threats. Look for a bishop move that leaves the queen open to capture. The other pieces keep the attack going.",
+      "arrows": [
+        {
+          "from": "g4",
+          "to": "e6",
+          "role": "move"
+        }
+      ],
+      "highlights": [
+        {
+          "square": "f1",
+          "role": "warning"
+        },
+        {
+          "square": "e6",
+          "role": "target"
+        }
+      ],
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_moves",
+        "prompt": "Black to move. Can you find the surprising bishop move that offers the queen?",
+        "hints": [
+          "Do not move the queen yet. Look for a bishop move.",
+          "Move the bishop from g4 to e6. This lets Black keep attacking with checks."
+        ],
+        "answers": [
+          {
+            "uci": "g4e6",
+            "outcome": "preferred",
+            "feedback": "Wow! Be6 lets White take the queen. If White does, ...Bxc4+ begins a string of checks. The queen takes a break, but Black's other pieces do not!"
+          }
+        ],
+        "other_legal_move_text": "That move is allowed, but it leaves the combination shown in this lesson. Try the position if you like, then come back and look for the bishop move that offers the queen."
+      }
+    },
+    {
+      "step_id": "two-mating-moves",
+      "node_path": [
+        "g1f3",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "d2d4",
+        "e8g8",
+        "c1f4",
+        "d7d5",
+        "d1b3",
+        "d5c4",
+        "b3c4",
+        "c7c6",
+        "e2e4",
+        "b8d7",
+        "a1d1",
+        "d7b6",
+        "c4c5",
+        "c8g4",
+        "f4g5",
+        "b6a4",
+        "c5a3",
+        "a4c3",
+        "b2c3",
+        "f6e4",
+        "g5e7",
+        "d8b6",
+        "f1c4",
+        "e4c3",
+        "e7c5",
+        "f8e8",
+        "e1f1",
+        "g4e6",
+        "c5b6",
+        "e6c4",
+        "f1g1",
+        "c3e2",
+        "g1f1",
+        "e2d4",
+        "f1g1",
+        "d4e2",
+        "g1f1",
+        "e2c3",
+        "f1g1",
+        "a7b6",
+        "a3b4",
+        "a8a4",
+        "b4b6",
+        "c3d1",
+        "h2h3",
+        "a4a2",
+        "g1h2",
+        "d1f2",
+        "h1e1",
+        "e8e1",
+        "b6d8",
+        "g7f8",
+        "f3e1",
+        "c4d5",
+        "e1f3",
+        "f2e4",
+        "d8b8",
+        "b7b5",
+        "h3h4",
+        "h7h5",
+        "f3e5",
+        "g8g7",
+        "h2g1",
+        "f8c5",
+        "g1f1",
+        "e4g3",
+        "f1e1",
+        "c5b4",
+        "e1d1",
+        "d5b3",
+        "d1c1",
+        "g3e2",
+        "c1b1",
+        "e2c3",
+        "b1c1"
+      ],
+      "expected_fen": "1Q6/5pk1/2p3p1/1p2N2p/1b5P/1bn5/r5P1/2K5 b - - 15 41",
+      "explanation": "White's king is stuck on c1. Black's pieces guard every way out. Can you find a check that ends the game?",
+      "detail": "There are two ways to win in one move. The game used a rook, but a bishop works too.",
+      "arrows": [
+        {
+          "from": "a2",
+          "to": "c2",
+          "role": "move"
+        },
+        {
+          "from": "b4",
+          "to": "a3",
+          "role": "idea"
+        }
+      ],
+      "highlights": [
+        {
+          "square": "c1",
+          "role": "warning"
+        }
+      ],
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_moves",
+        "prompt": "Black to move. Find a checkmate in one.",
+        "hints": [
+          "The king cannot leave the c-file corner. Look at checks by the rook and dark-squared bishop.",
+          "Both ...Rc2# and ...Ba3# work."
+        ],
+        "answers": [
+          {
+            "uci": "a2c2",
+            "outcome": "preferred",
+            "feedback": "Rc2# is the game move. The rook gives check, and White's king has nowhere to go. Checkmate!"
+          },
+          {
+            "uci": "b4a3",
+            "outcome": "acceptable",
+            "feedback": "Ba3# is checkmate too. Great spotting! Chess sometimes has more than one good answer."
+          }
+        ],
+        "other_legal_move_text": "That move is allowed, but it is not checkmate. Try the position if you like, then come back and look at every check."
+      }
+    }
+  ],
+  "takeaway": "Bring your pieces out and help them work together. When a king is in danger, look for checks and captures."
+}

@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "courses": [
+    {
+      "course_id": "bruno-scotch-first-ideas",
+      "player_id": "bruno-bear",
+      "title": "Open the centre",
+      "opening_name": "Scotch Game",
+      "description": "A short practice lesson about challenging the centre and bringing out a knight.",
+      "level": "beginner",
+      "prerequisite_lesson_ids": [
+        "opening-essentials"
+      ],
+      "published": true,
+      "source_game_id": "scotch-example-game",
+      "lesson_ids": [
+        "bruno-scotch-make-room",
+        "bruno-scotch-active-knight",
+        "bruno-scotch-try-alone"
+      ],
+      "association_source": {
+        "name": "Scotch Game",
+        "url": "https://en.wikipedia.org/wiki/Scotch_Game",
+        "license": "Reference link only",
+        "attribution": "Background on the opening; Uroschess practice positions and advice are original"
+      },
+      "source_game": {
+        "name": "Scotch Game archival score",
+        "url": "",
+        "license": "Historical move score with player identities omitted",
+        "attribution": "Historical game shown for opening study; no player endorsement or coaching claimed"
+      }
+    },
+    {
+      "course_id": "olive-catalan-first-ideas",
+      "player_id": "olive-owl",
+      "title": "Give your bishop a job",
+      "card_title": "Bishop with a job",
+      "opening_name": "Catalan ideas",
+      "description": "Put a bishop on a long diagonal and make room to castle.",
+      "level": "beginner",
+      "prerequisite_lesson_ids": [
+        "opening-essentials"
+      ],
+      "published": true,
+      "source_game_id": "catalan-example-game",
+      "lesson_ids": [
+        "olive-catalan-bishop",
+        "olive-catalan-king-safety",
+        "olive-catalan-try-alone"
+      ],
+      "association_source": {
+        "name": "Catalan Opening",
+        "url": "https://en.wikipedia.org/wiki/Catalan_Opening",
+        "license": "Reference link only",
+        "attribution": "Background on the opening; Uroschess practice positions and advice are original"
+      },
+      "source_game": {
+        "name": "Catalan Opening archival score",
+        "url": "",
+        "license": "Historical move score with player identities omitted",
+        "attribution": "Historical game shown for opening study; no player endorsement or coaching claimed"
+      }
+    }
+  ]
+}

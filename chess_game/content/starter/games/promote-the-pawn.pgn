@@ -1,0 +1,12 @@
+[Event "Synthetic endgame exercise"]
+[Site "Uroschess"]
+[Date "????.??.??"]
+[Round "-"]
+[White "Learner"]
+[Black "Practice position"]
+[Result "*"]
+[SetUp "1"]
+[FEN "8/8/2K1P3/8/8/8/7k/8 w - - 0 1"]
+[Annotator "Uroschess"]
+
+1. e7 Kg3 2. e8=Q *

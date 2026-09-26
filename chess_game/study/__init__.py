@@ -1,0 +1,87 @@
+"""Domain models and controllers for game study and teaching."""
+
+from .chess_adapter import ChessAdapter, MoveResolutionError
+from .content import (
+    ContentLoadError,
+    GameLibrary,
+    LibraryEntry,
+    OpeningCourse,
+    PlayerProfile,
+    load_game_library,
+    parse_lesson_data,
+)
+from .lessons import (
+    COMPLETED,
+    EXPLORING,
+    FEEDBACK,
+    QUESTION,
+    READING,
+    AttemptResult,
+    LessonController,
+    LessonStateError,
+    LessonValidationError,
+    resolve_lesson,
+)
+from .models import (
+    BoardArrow,
+    GameRecord,
+    Lesson,
+    LessonQuestion,
+    LessonStep,
+    MoveAnswer,
+    MoveNode,
+    ReviewedMove,
+    SourceInfo,
+    SquareHighlight,
+)
+from .pgn_service import PgnParseError, load_pgn_file, parse_pgn_games
+from .progress import (
+    ProgressRecord,
+    StepProgressRecord,
+    ProgressStore,
+    ProgressStoreError,
+    default_progress_path,
+)
+from .replay import ReplayController, ReplayNavigationError
+
+__all__ = [
+    "ChessAdapter",
+    "COMPLETED",
+    "ContentLoadError",
+    "EXPLORING",
+    "FEEDBACK",
+    "GameRecord",
+    "GameLibrary",
+    "Lesson",
+    "LessonController",
+    "LessonQuestion",
+    "LessonStep",
+    "LessonStateError",
+    "LessonValidationError",
+    "LibraryEntry",
+    "OpeningCourse",
+    "PlayerProfile",
+    "MoveAnswer",
+    "MoveNode",
+    "ReviewedMove",
+    "MoveResolutionError",
+    "PgnParseError",
+    "ProgressRecord",
+    "StepProgressRecord",
+    "ProgressStore",
+    "ProgressStoreError",
+    "QUESTION",
+    "READING",
+    "ReplayController",
+    "ReplayNavigationError",
+    "SourceInfo",
+    "SquareHighlight",
+    "BoardArrow",
+    "AttemptResult",
+    "default_progress_path",
+    "load_game_library",
+    "parse_lesson_data",
+    "load_pgn_file",
+    "parse_pgn_games",
+    "resolve_lesson",
+]

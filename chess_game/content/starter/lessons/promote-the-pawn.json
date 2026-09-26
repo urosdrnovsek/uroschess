@@ -1,0 +1,102 @@
+{
+  "schema_version": 2,
+  "lesson_id": "promote-the-pawn",
+  "content_revision": 2,
+  "title": "Promote with enough power",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Move your pawn to the far edge. Choose a piece that can help you win.",
+  "prerequisites": ["pawn movement", "promotion"],
+  "concepts": ["endgame", "passed-pawn", "promotion", "material"],
+  "game_id": "promote-the-pawn-position",
+  "commentary_source": {
+    "name": "Uroschess original synthetic lesson",
+    "license": "MIT",
+    "attribution": "Original instructional text and synthetic endgame position"
+  },
+  "steps": [
+    {
+      "step_id": "push-and-promote",
+      "node_path": [],
+      "expected_fen": "8/8/2K1P3/8/8/8/7k/8 w - - 0 1",
+      "explanation": "The white king protects the pawn, and Black's king is too far away. Push the pawn, then choose the promotion piece carefully.",
+      "detail": "A queen is usually the simplest choice. A rook can also force checkmate. A lone bishop or knight cannot checkmate a bare king.",
+      "arrows": [{"from": "e6", "to": "e8", "role": "idea"}],
+      "highlights": [{"square": "e8", "role": "target"}],
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Push the pawn. At the far edge, choose a piece that can help you win.",
+        "hints": [
+          "Move the pawn from e6 to e7.",
+          "On e8, choose a queen or rook."
+        ],
+        "tree": [
+          {
+            "uci": "e6e7",
+            "role": "learner",
+            "outcome": "continue",
+            "feedback": "Good. The pawn is one step from promotion.",
+            "children": [
+              {
+                "uci": "h2g3",
+                "role": "opponent",
+                "outcome": "reply",
+                "feedback": "Black's king moves, but it cannot catch the pawn.",
+                "children": [
+                  {
+                    "uci": "e7e8q",
+                    "role": "learner",
+                    "outcome": "preferred",
+                    "feedback": "e8=Q gives White a queen. White now has enough material to force checkmate."
+                  },
+                  {
+                    "uci": "e7e8r",
+                    "role": "learner",
+                    "outcome": "acceptable",
+                    "feedback": "e8=R works too. A king and rook can force checkmate."
+                  },
+                  {
+                    "uci": "e7e8b",
+                    "role": "learner",
+                    "outcome": "wrong",
+                    "feedback": "A lone bishop cannot force checkmate against a bare king. Choose more power."
+                  },
+                  {
+                    "uci": "e7e8n",
+                    "role": "learner",
+                    "outcome": "wrong",
+                    "feedback": "A lone knight cannot force checkmate against a bare king. Choose more power."
+                  }
+                ]
+              },
+              {
+                "uci": "h2g2",
+                "role": "opponent",
+                "outcome": "reply",
+                "feedback": "Black tries another square, but promotion is still safe.",
+                "children": [
+                  {
+                    "uci": "e7e8q",
+                    "role": "learner",
+                    "outcome": "preferred",
+                    "feedback": "e8=Q keeps a decisive material advantage."
+                  },
+                  {
+                    "uci": "e7e8r",
+                    "role": "learner",
+                    "outcome": "acceptable",
+                    "feedback": "e8=R also leaves enough material to force mate."
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "other_legal_move_text": "That move may be legal, but the safe passed pawn is ready to advance now."
+      }
+    }
+  ],
+  "takeaway": "When your pawn is safe, push it to the far edge. A queen is the easiest choice. A rook can win too."
+}

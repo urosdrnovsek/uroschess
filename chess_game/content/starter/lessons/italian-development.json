@@ -1,0 +1,79 @@
+{
+  "schema_version": 2,
+  "lesson_id": "italian-development",
+  "initial_help": true,
+  "content_revision": 2,
+  "title": "Italian Game: develop, castle, break",
+  "level": "beginner",
+  "estimated_minutes": 7,
+  "objective": "Bring out your pieces, keep your king safe, then push the d-pawn.",
+  "prerequisites": ["opening essentials", "castling"],
+  "concepts": ["opening", "italian-game", "development", "central-break"],
+  "game_id": "italian-development-line",
+  "commentary_source": {
+    "name": "Uroschess original synthetic lesson",
+    "license": "MIT",
+    "attribution": "Original instructional text and synthetic Italian Game line"
+  },
+  "steps": [
+    {
+      "step_id": "choose-active-bishop-square",
+      "node_path": ["e2e4", "e7e5", "g1f3", "b8c6"],
+      "expected_fen": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+      "explanation": "Both sides have a pawn in the centre and a knight developed. White can bring out the king bishop next.",
+      "detail": "Bc4 creates the Italian Game. The bishop becomes active and White gets closer to castling.",
+      "arrows": [{"from": "f1", "to": "c4", "role": "move"}],
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_moves",
+        "prompt": "Develop the bishop to an active square.",
+        "hints": ["Look at the bishop on f1."],
+        "answers": [
+          {"uci": "f1c4", "outcome": "preferred", "feedback": "Bc4 enters the Italian Game, develops actively, and prepares castling."},
+          {"uci": "f1b5", "outcome": "acceptable", "feedback": "Bb5 is excellent too. It enters the Spanish Game and still develops with purpose."},
+          {"uci": "f1e2", "outcome": "acceptable", "feedback": "Be2 is quieter, but it develops and clears the castling path."},
+          {"uci": "f3g1", "outcome": "wrong", "feedback": "Ng1 moves a developed piece backward. Bring a new piece into the game instead."}
+        ],
+        "other_legal_move_text": "That move may be playable, but this exercise asks for useful bishop development."
+      }
+    },
+    {
+      "step_id": "prepare-the-central-break",
+      "node_path": ["e2e4", "e7e5", "g1f3", "b8c6", "f1c4", "g8f6", "d2d3", "f8c5", "e1g1", "e8g8", "c2c3", "d7d6"],
+      "expected_fen": "r1bq1rk1/ppp2ppp/2np1n2/2b1p3/2B1P3/2PP1N2/PP3PPP/RNBQ1RK1 w - - 0 7",
+      "explanation": "White has brought out pieces and made the king safe. The pawn on c3 helps the d-pawn move forward.",
+      "detail": "Push the d-pawn to d4 to attack Black's e5 pawn. If Black takes it, White can take back.",
+      "arrows": [{"from": "d3", "to": "d4", "role": "move"}],
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Play the d4 break, then recapture in the centre.",
+        "hints": ["Push the pawn from d3 to d4.", "After ...exd4, use the c-pawn or knight to recapture."],
+        "tree": [
+          {
+            "uci": "d3d4",
+            "role": "learner",
+            "outcome": "continue",
+            "feedback": "Good. d4 challenges Black's centre.",
+            "children": [
+              {
+                "uci": "e5d4",
+                "role": "opponent",
+                "outcome": "reply",
+                "feedback": "Black exchanges in the centre. Recapture the pawn.",
+                "children": [
+                  {"uci": "c3d4", "role": "learner", "outcome": "preferred", "feedback": "cxd4 restores White's central pawn and opens the c-file."},
+                  {"uci": "f3d4", "role": "learner", "outcome": "acceptable", "feedback": "Nxd4 also recaptures and places the knight in the centre."}
+                ]
+              }
+            ]
+          }
+        ],
+        "other_legal_move_text": "That move leaves the planned d4 break. Explore it, then return to practise the central break."
+      }
+    }
+  ],
+  "takeaway": "In the Italian Game, develop and castle first; then prepare d4 to challenge the centre."
+}

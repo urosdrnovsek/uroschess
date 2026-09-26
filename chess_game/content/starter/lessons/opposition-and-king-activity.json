@@ -1,0 +1,75 @@
+{
+  "schema_version": 2,
+  "lesson_id": "opposition-and-king-activity",
+  "content_revision": 2,
+  "title": "Step around the blocking king",
+  "level": "beginner",
+  "estimated_minutes": 5,
+  "objective": "Move your king around Black's king to help your pawn.",
+  "prerequisites": ["king movement", "passed pawns"],
+  "concepts": ["endgame", "opposition", "king-activity", "passed-pawn"],
+  "game_id": "opposition-and-king-activity-position",
+  "commentary_source": {
+    "name": "Uroschess original synthetic lesson",
+    "license": "MIT",
+    "attribution": "Original instructional text and synthetic king-and-pawn position"
+  },
+  "steps": [
+    {
+      "step_id": "outflank-then-push",
+      "node_path": [],
+      "expected_fen": "8/4k3/8/4K3/4P3/8/8/8 w - - 0 1",
+      "explanation": "Black's king blocks the pawn. White's king should step around it before pushing.",
+      "detail": "Move your king to d5 or f5 to go around Black's king. Then your pawn can move forward with help from your king.",
+      "arrows": [
+        {"from": "e5", "to": "d5", "role": "move"},
+        {"from": "e4", "to": "e5", "role": "idea"}
+      ],
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Step around Black's king, then advance the pawn.",
+        "hints": ["Move the king sideways to d5 or f5.", "After Black follows, push e5."],
+        "tree": [
+          {
+            "uci": "e5d5",
+            "role": "learner",
+            "outcome": "continue",
+            "feedback": "Kd5 outflanks the blocking king on the queenside.",
+            "children": [
+              {
+                "uci": "e7d7",
+                "role": "opponent",
+                "outcome": "reply",
+                "feedback": "Black follows. Now the pawn has room to advance.",
+                "children": [
+                  {"uci": "e4e5", "role": "learner", "outcome": "preferred", "feedback": "e5 advances with the king actively supporting it."}
+                ]
+              }
+            ]
+          },
+          {
+            "uci": "e5f5",
+            "role": "learner",
+            "outcome": "continue",
+            "feedback": "Kf5 outflanks on the kingside.",
+            "children": [
+              {
+                "uci": "e7f7",
+                "role": "opponent",
+                "outcome": "reply",
+                "feedback": "Black follows to f7. Advance the pawn.",
+                "children": [
+                  {"uci": "e4e5", "role": "learner", "outcome": "acceptable", "feedback": "e5 keeps the pawn protected and gains space."}
+                ]
+              }
+            ]
+          }
+        ],
+        "other_legal_move_text": "That move may change the technique. This exercise practises outflanking before the pawn push."
+      }
+    }
+  ],
+  "takeaway": "In king-and-pawn endings, use the king first. Outflank the defender, then advance the protected pawn."
+}

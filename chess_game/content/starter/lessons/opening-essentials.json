@@ -1,0 +1,175 @@
+{
+  "schema_version": 2,
+  "lesson_id": "opening-essentials",
+  "initial_help": true,
+  "content_revision": 2,
+  "title": "Start with a useful plan",
+  "level": "beginner",
+  "estimated_minutes": 6,
+  "objective": "Move toward the middle and bring out your pieces.",
+  "prerequisites": ["legal moves"],
+  "concepts": ["opening", "centre", "development", "king-safety"],
+  "game_id": "opening-essentials-line",
+  "commentary_source": {
+    "name": "Uroschess original synthetic lesson",
+    "license": "MIT",
+    "attribution": "Original instructional text and synthetic training lines"
+  },
+  "steps": [
+    {
+      "step_id": "centre-then-develop",
+      "node_path": [],
+      "expected_fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "explanation": "At the start, aim for the middle of the board. Bring a new piece into the game too.",
+      "detail": "First move a pawn in the middle. After Black moves, bring out a piece or fight for the middle again.",
+      "highlights": [
+        {"square": "d4", "role": "target"},
+        {"square": "e4", "role": "target"}
+      ],
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Play two useful opening moves for White.",
+        "hints": [
+          "Start with the d-pawn or e-pawn.",
+          "After Black replies, develop a knight or bishop toward the centre."
+        ],
+        "tree": [
+          {
+            "uci": "e2e4",
+            "role": "learner",
+            "outcome": "continue",
+            "feedback": "Good. The e-pawn takes space in the centre.",
+            "children": [
+              {
+                "uci": "e7e5",
+                "role": "opponent",
+                "outcome": "reply",
+                "feedback": "Black also claims the centre. Now develop.",
+                "children": [
+                  {
+                    "uci": "g1f3",
+                    "role": "learner",
+                    "outcome": "preferred",
+                    "feedback": "Nf3 develops a piece, attacks e5, and helps White get ready to castle."
+                  },
+                  {
+                    "uci": "f1c4",
+                    "role": "learner",
+                    "outcome": "acceptable",
+                    "feedback": "Bc4 develops the bishop toward an active diagonal and clears the way to castle."
+                  },
+                  {
+                    "uci": "f2f3",
+                    "role": "learner",
+                    "outcome": "wrong",
+                    "feedback": "f3 does not develop a piece and it weakens squares near White's king."
+                  }
+                ]
+              },
+              {
+                "uci": "c7c5",
+                "role": "opponent",
+                "outcome": "reply",
+                "feedback": "Black challenges the centre from the side.",
+                "children": [
+                  {
+                    "uci": "g1f3",
+                    "role": "learner",
+                    "outcome": "preferred",
+                    "feedback": "Nf3 develops naturally and supports White's central control."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "uci": "d2d4",
+            "role": "learner",
+            "outcome": "continue",
+            "feedback": "Good. The d-pawn claims central space.",
+            "children": [
+              {
+                "uci": "d7d5",
+                "role": "opponent",
+                "outcome": "reply",
+                "feedback": "Black meets White in the centre.",
+                "children": [
+                  {
+                    "uci": "g1f3",
+                    "role": "learner",
+                    "outcome": "preferred",
+                    "feedback": "Nf3 develops a piece toward the centre and prepares quick castling."
+                  },
+                  {
+                    "uci": "c2c4",
+                    "role": "learner",
+                    "outcome": "acceptable",
+                    "feedback": "c4 is the Queen's Gambit. It challenges Black's central pawn immediately."
+                  },
+                  {
+                    "uci": "a2a3",
+                    "role": "learner",
+                    "outcome": "wrong",
+                    "feedback": "a3 is usually too slow here. Develop a piece or fight for the centre."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "uci": "a2a3",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "a3 is legal, but it does not help control the centre or develop a piece."
+          }
+        ],
+        "other_legal_move_text": "That move may lead to a playable opening, but this exercise checks central pawn moves followed by useful development."
+      }
+    },
+    {
+      "step_id": "develop-the-bishop",
+      "practice_mode": "independent",
+      "node_path": ["e2e4", "e7e5", "g1f3", "b8c6"],
+      "expected_fen": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+      "explanation": "White has a pawn in the middle and a knight in play. Now bring out a bishop. This helps White get ready to castle.",
+      "detail": "The bishop has several good squares. This lesson looks for c4, but b5 and e2 are good too.",
+      "arrows": [
+        {"from": "f1", "to": "c4", "role": "move"},
+        {"from": "e1", "to": "g1", "role": "idea"}
+      ],
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_moves",
+        "prompt": "Move White's bishop from f1 to a useful square.",
+        "hints": ["The bishop starts on f1."],
+        "answers": [
+          {
+            "uci": "f1c4",
+            "outcome": "preferred",
+            "feedback": "Bc4 develops actively and prepares castling. This reaches the Italian Game."
+          },
+          {
+            "uci": "f1b5",
+            "outcome": "acceptable",
+            "feedback": "Bb5 is an excellent developing move. This reaches the Spanish Game."
+          },
+          {
+            "uci": "f1e2",
+            "outcome": "acceptable",
+            "feedback": "Be2 is quieter, but it develops the bishop and clears the way to castle."
+          },
+          {
+            "uci": "f3g1",
+            "outcome": "wrong",
+            "feedback": "Moving the knight back loses time. Bring out a piece that has not moved yet."
+          }
+        ],
+        "other_legal_move_text": "That move is legal, but this step asks you to develop the bishop from f1."
+      }
+    }
+  ],
+  "takeaway": "Use central pawns, develop new pieces, and prepare to castle. Do not spend early moves without a clear purpose."
+}

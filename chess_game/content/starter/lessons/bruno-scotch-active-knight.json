@@ -1,0 +1,69 @@
+{
+  "schema_version": 3,
+  "lesson_id": "bruno-scotch-active-knight",
+  "content_revision": 2,
+  "title": "Active knight",
+  "level": "beginner",
+  "estimated_minutes": 3,
+  "objective": "Take back a pawn while bringing a knight to an active square.",
+  "prerequisites": [
+    "bruno-scotch-make-room"
+  ],
+  "concepts": [
+    "Scotch Game",
+    "recapture",
+    "development"
+  ],
+  "game_id": "bruno-scotch-practice",
+  "coach_player_id": "bruno-bear",
+  "content_kind": "synthetic",
+  "related_source_game_id": "scotch-example-game",
+  "commentary_source": {
+    "name": "Uroschess original synthetic lesson",
+    "license": "MIT",
+    "attribution": "Original teaching text and practice position; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "knight-recapture",
+      "node_path": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "d2d4",
+        "e5d4"
+      ],
+      "expected_fen": "r1bqkbnr/pppp1ppp/2n5/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4",
+      "explanation": "Black took White's d-pawn. Taking back can also improve a piece.",
+      "detail": "A knight in the centre can reach more squares than a knight at home.",
+      "coach_prompt": "Find a recapture that helps a piece grow stronger.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Which piece can take the pawn on d4 and reach the centre?",
+        "hints": [
+          "Look at your knight on f3.",
+          "That knight can jump to d4."
+        ],
+        "tree": [
+          {
+            "uci": "f3d4",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Your knight takes the pawn and stands in the centre, where it has more choices."
+          },
+          {
+            "uci": "d1d4",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "Black's knight on c6 can take your queen right away. Find a safer piece to take the pawn."
+          }
+        ],
+        "other_legal_move_text": "That move may be useful, but the pawn on d4 is still there. Explore it, then try a recapture."
+      }
+    }
+  ],
+  "takeaway": "Taking back can do two jobs: win a pawn and develop a piece."
+}

@@ -1,0 +1,73 @@
+{
+  "schema_version": 2,
+  "lesson_id": "square-of-the-pawn",
+  "content_revision": 2,
+  "title": "Catch the pawn with the square rule",
+  "level": "beginner",
+  "estimated_minutes": 5,
+  "objective": "See if your king can catch a running pawn.",
+  "prerequisites": ["king movement", "promotion"],
+  "concepts": ["endgame", "square-of-the-pawn", "king-activity"],
+  "game_id": "square-of-the-pawn-position",
+  "commentary_source": {
+    "name": "Uroschess original synthetic lesson",
+    "license": "MIT",
+    "attribution": "Original instructional text and synthetic pawn-race position"
+  },
+  "steps": [
+    {
+      "step_id": "enter-the-square",
+      "node_path": [],
+      "expected_fen": "8/8/8/4k3/P7/8/8/7K b - - 0 1",
+      "explanation": "Can the king catch the pawn before it becomes a queen? Imagine a square from the pawn to the far edge. If the king can step into it, it can often catch the pawn.",
+      "detail": "The a-pawn needs four steps to reach the far edge. Move Black's king toward it, not away from it.",
+      "arrows": [{"from": "e5", "to": "c6", "role": "idea"}],
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move toward the pawn twice while it advances.",
+        "hints": ["Start with ...Kd6 or ...Kd5.", "Keep moving diagonally toward the a-file."],
+        "tree": [
+          {
+            "uci": "e5d6",
+            "role": "learner",
+            "outcome": "continue",
+            "feedback": "...Kd6 enters the pawn's square by the shortest route.",
+            "children": [
+              {
+                "uci": "a4a5",
+                "role": "opponent",
+                "outcome": "reply",
+                "feedback": "The pawn advances. Keep approaching diagonally.",
+                "children": [
+                  {"uci": "d6c6", "role": "learner", "outcome": "preferred", "feedback": "...Kc6 stays inside the square and will meet the pawn on the a-file."}
+                ]
+              }
+            ]
+          },
+          {
+            "uci": "e5d5",
+            "role": "learner",
+            "outcome": "continue",
+            "feedback": "...Kd5 also stays inside the pawn's square.",
+            "children": [
+              {
+                "uci": "a4a5",
+                "role": "opponent",
+                "outcome": "reply",
+                "feedback": "The pawn advances. Continue toward it.",
+                "children": [
+                  {"uci": "d5c6", "role": "learner", "outcome": "acceptable", "feedback": "...Kc6 takes the diagonal route and catches the pawn in time."}
+                ]
+              }
+            ]
+          },
+          {"uci": "e5f5", "role": "learner", "outcome": "wrong", "feedback": "...Kf5 moves away from the pawn's square and loses the race."}
+        ],
+        "other_legal_move_text": "That move is legal, but check whether it keeps the king inside the pawn's square."
+      }
+    }
+  ],
+  "takeaway": "Count the pawn's moves to promotion and imagine the same-sized square. Enter it by the shortest diagonal route."
+}

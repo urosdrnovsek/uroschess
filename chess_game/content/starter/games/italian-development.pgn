@@ -1,0 +1,11 @@
+[Event "Synthetic Italian Game exercise"]
+[Site "Uroschess"]
+[Date "????.??.??"]
+[Round "-"]
+[White "Learner"]
+[Black "Practice line"]
+[Result "*"]
+[Annotator "Uroschess"]
+
+1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. d3 Bc5 5. O-O O-O 6. c3 d6
+7. d4 exd4 8. cxd4 *

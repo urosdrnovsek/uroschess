@@ -1,0 +1,58 @@
+{
+  "schema_version": 2,
+  "lesson_id": "rook-and-king-mate",
+  "content_revision": 2,
+  "title": "Rook mate: close the box",
+  "level": "beginner",
+  "estimated_minutes": 5,
+  "objective": "Use the king to support a rook mate along the edge.",
+  "prerequisites": ["checkmate versus stalemate", "rook movement"],
+  "concepts": ["endgame", "rook-mate", "king-activity"],
+  "game_id": "rook-and-king-mate-position",
+  "commentary_source": {
+    "name": "Uroschess original synthetic lesson",
+    "license": "MIT",
+    "attribution": "Original instructional text and synthetic rook-mate position"
+  },
+  "steps": [
+    {
+      "step_id": "king-up-rook-across",
+      "node_path": [],
+      "expected_fen": "k7/8/2K5/8/3R4/8/8/8 w - - 0 1",
+      "explanation": "The rook keeps Black's king near the edge. Bring White's king closer to help the rook.",
+      "detail": "The rook needs help. Your king can guard the squares where Black's king might run.",
+      "arrows": [
+        {"from": "c6", "to": "b6", "role": "move"},
+        {"from": "d4", "to": "d8", "role": "idea"}
+      ],
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move the king into place, then finish with the rook.",
+        "hints": ["Play Kb6.", "After ...Kb8, put the rook on d8."],
+        "tree": [
+          {
+            "uci": "c6b6",
+            "role": "learner",
+            "outcome": "continue",
+            "feedback": "Kb6 covers a7 and b7 and supports the final mating pattern.",
+            "children": [
+              {
+                "uci": "a8b8",
+                "role": "opponent",
+                "outcome": "reply",
+                "feedback": "Black moves to b8. Give a rook check along the back rank.",
+                "children": [
+                  {"uci": "d4d8", "role": "learner", "outcome": "preferred", "feedback": "Rd8# is checkmate. The rook checks while White's king covers both escape squares."}
+                ]
+              }
+            ]
+          }
+        ],
+        "other_legal_move_text": "That may keep winning, but this exercise practises the king-and-rook mating pattern."
+      }
+    }
+  ],
+  "takeaway": "Use the rook to make a box, bring the king close, and give the final rook check from a safe distance."
+}

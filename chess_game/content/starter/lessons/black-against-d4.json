@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "lesson_id": "black-against-d4",
+  "content_revision": 2,
+  "title": "Black against 1.d4: build a firm centre",
+  "level": "beginner",
+  "estimated_minutes": 5,
+  "objective": "Meet 1.d4 with central control and choose a sound response to c4.",
+  "prerequisites": ["opening essentials"],
+  "concepts": ["opening", "black-repertoire", "centre", "pawn-tension"],
+  "game_id": "black-against-d4-line",
+  "commentary_source": {
+    "name": "Uroschess original synthetic lesson",
+    "license": "MIT",
+    "attribution": "Original instructional text and synthetic 1.d4 d5 line"
+  },
+  "steps": [
+    {
+      "step_id": "match-central-control",
+      "node_path": ["d2d4"],
+      "expected_fen": "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1",
+      "explanation": "White's pawn helps control the middle. Black can place a pawn in the middle too.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_moves",
+        "prompt": "White played d4. What should Black play?",
+        "hints": ["The lesson line uses the d-pawn."],
+        "answers": [
+          {"uci": "d7d5", "outcome": "preferred", "feedback": "Good! ...d5 gives Black space in the middle."},
+          {"uci": "g8f6", "outcome": "acceptable", "feedback": "...Nf6 develops and controls e4, keeping several Indian defences available."},
+          {"uci": "e7e6", "outcome": "acceptable", "feedback": "...e6 prepares ...d5 and keeps the position solid."},
+          {"uci": "a7a6", "outcome": "wrong", "feedback": "...a6 is too slow here. Contest the centre or develop first."}
+        ],
+        "other_legal_move_text": "That may lead to another opening. This exercise checks central control and development."
+      }
+    },
+    {
+      "step_id": "support-or-accept-the-gambit",
+      "node_path": ["d2d4", "d7d5", "c2c4"],
+      "expected_fen": "rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR b KQkq c3 0 2",
+      "explanation": "White's c-pawn attacks the pawn on d5. Black has more than one good way to answer.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_moves",
+        "prompt": "Choose a sound response to the Queen's Gambit.",
+        "hints": ["Supporting d5 with e6 is the classical choice."],
+        "answers": [
+          {"uci": "e7e6", "outcome": "preferred", "feedback": "...e6 supports d5 and prepares development: the Queen's Gambit Declined."},
+          {"uci": "c7c6", "outcome": "acceptable", "feedback": "...c6 supports d5 in the Slav Defence and keeps the light bishop open."},
+          {"uci": "d5c4", "outcome": "acceptable", "feedback": "...dxc4 accepts the gambit. Black should develop rather than try to hold the pawn at any cost."},
+          {"uci": "a7a6", "outcome": "wrong", "feedback": "...a6 does not answer the pressure on d5. Address the centre first."}
+        ],
+        "other_legal_move_text": "That move may be playable, but this step checks three standard responses to c4."
+      }
+    }
+  ],
+  "takeaway": "Against 1.d4, contest the centre. After c4, support d5, build a Slav structure, or accept with a plan to develop."
+}

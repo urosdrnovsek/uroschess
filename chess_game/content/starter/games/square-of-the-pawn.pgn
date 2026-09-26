@@ -1,0 +1,12 @@
+[Event "Synthetic pawn-square exercise"]
+[Site "Uroschess"]
+[Date "????.??.??"]
+[Round "-"]
+[White "Practice position"]
+[Black "Learner"]
+[Result "*"]
+[SetUp "1"]
+[FEN "8/8/8/4k3/P7/8/8/7K b - - 0 1"]
+[Annotator "Uroschess"]
+
+1... Kd6 2. a5 Kc6 *

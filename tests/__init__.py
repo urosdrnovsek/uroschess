@@ -1,0 +1,1 @@
+"""Uroschess test suite."""
