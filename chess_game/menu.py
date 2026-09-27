@@ -4,14 +4,8 @@ import pygame
 
 from .views.widgets import Button
 from .pieces import WHITE, BLACK
+from .difficulty import DIFFICULTIES
 
-
-DIFFICULTIES = [
-    ("Easy", 0.25, 2),
-    ("Normal", 1.0, 64),
-    ("Hard", 2.5, 64),
-    ("Max", 6.0, 64),
-]
 
 BOARD_STYLE_NAMES = ["Theme", "Wood", "Marble", "Emerald", "Ocean"]
 
@@ -51,6 +45,8 @@ class MenuLayoutMixin:
             self._build_course_about()
         elif self.menu_view == "challenge":
             self._build_challenge_menu()
+        elif self.menu_view == "challenge_color":
+            self._build_challenge_color_menu()
         elif self.menu_view in ("learn", "play", "ai_play"):
             self._build_menu_section()
         else:
@@ -161,23 +157,26 @@ class MenuLayoutMixin:
         card = pygame.Rect((self.win_w - width) // 2, top, width, 490)
         self._menu_card = card
         x, w = card.x + 20, card.w - 40
-        self._menu_heads.append(("CHARACTER CHALLENGE", x, top + 13))
+        heading = ("UROSCHESS MASTER · CHARACTER CHALLENGE"
+                   if self.challenge_store.award() else "CHARACTER CHALLENGE")
+        self._menu_heads.append((heading, x, top + 13))
         states = stage_states(self.challenge_store.victories())
         saved = self.challenge_store.active()
         for index, opponent in enumerate(ROSTER):
             state = states[index]
             detail = {
-                "locked": "Locked · beat the previous character twice",
-                "white_required": "Win with White to earn the first badge",
-                "black_required": "White won · now win with Black",
-                "complete": "White ✓  Black ✓ · stage complete",
+                "locked": "Beat {} with both colours".format(
+                    ROSTER[index - 1].name) if index else "Locked",
+                "white_required": "Win with White",
+                "black_required": "White won · play Black",
+                "complete": "White ✓  Black ✓ · complete",
             }[state]
             label = "{} · {}".format(opponent.name, opponent.strength)
-            action = (lambda c=WHITE if state == "white_required" else BLACK:
-                      self._start_challenge(c)) if index == 0 and state in (
-                          "white_required", "black_required", "complete") and not saved else None
+            action = (lambda ident=opponent.ident:
+                      self._choose_challenge_opponent(ident)) if (
+                          state != "locked" and not saved) else None
             self._menu_buttons.append(Button(
-                (x, top + 39 + index * 79, w, 70), label,
+                (x, top + 39 + index * 90, w, 90), label,
                 action or (lambda: None), kind="challenge", detail=detail,
                 value=opponent.portrait))
         if saved:
@@ -187,18 +186,34 @@ class MenuLayoutMixin:
             self._menu_buttons.append(Button(
                 (x + (w + 8) // 2, card.bottom + 6, (w - 8) // 2, 36),
                 "Discard", self._discard_challenge, kind="step"))
-        elif states[0] in ("black_required", "complete"):
-            self._menu_buttons.append(Button(
-                (x, card.bottom + 6, (w - 8) // 2, 36), "Replay White",
-                lambda: self._start_challenge(WHITE), kind="step"))
-            if states[0] == "complete":
-                self._menu_buttons.append(Button(
-                    (x + (w + 8) // 2, card.bottom + 6, (w - 8) // 2, 36),
-                    "Replay Black", lambda: self._start_challenge(BLACK),
-                    kind="step"))
         self._menu_buttons.append(Button(
             (x, card.bottom + 48, w, 36), "‹  Back to Play",
             lambda: self._open_menu_section("play"), kind="cta"))
+
+    def _build_challenge_color_menu(self):
+        from .challenge import OPPONENTS, ROSTER, stage_states
+        opponent = OPPONENTS[self.challenge_choice_id]
+        state = stage_states(self.challenge_store.victories())[
+            ROSTER.index(opponent)]
+        width = min(472, self.win_w - 24)
+        top = max(95, min(190, self.win_h - 420))
+        card = pygame.Rect((self.win_w - width) // 2, top, width, 260)
+        self._menu_card = card
+        x, w = card.x + 24, card.w - 48
+        self._menu_heads.append((opponent.name.upper() + " · " +
+                                 opponent.strength.upper(), x, top + 16))
+        self._menu_buttons.append(Button(
+            (x, top + 53, w, 48), "Play as White",
+            lambda ident=opponent.ident: self._start_challenge(WHITE, ident),
+            kind="cta"))
+        if state in ("black_required", "complete"):
+            self._menu_buttons.append(Button(
+                (x, top + 113, w, 48), "Play as Black",
+                lambda ident=opponent.ident: self._start_challenge(BLACK, ident),
+                kind="step"))
+        self._menu_buttons.append(Button(
+            (x, card.bottom + 8, w, 38), "‹  All characters",
+            self._open_challenge_menu, kind="step"))
 
     def _build_opening_hub(self):
         width = min(660, self.win_w - 24)

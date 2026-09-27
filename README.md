@@ -36,7 +36,10 @@ Omarchy colours when available and otherwise uses a built-in dark theme.
 
 - **Play:** choose White or Black against the computer, play locally with a
   friend, or let the computer play both sides. The difficulty setting changes
-  how long the computer thinks.
+  how long the computer thinks. **Character Challenge** is a separate offline
+  journey through Chicky, Pippa, Bruno, Olivia, and Monty. Beat each character
+  with White and then Black to unlock the next; ten wins earn the Uroschess
+  Master title. An unfinished match can be resumed later.
 - **Learn:** try short move exercises about openings, tactics, and endgames.
   Each question has a hint and an answer you can reveal. You can retry and
   return later; progress is saved on this computer.
@@ -44,7 +47,7 @@ Omarchy colours when available and otherwise uses a built-in dark theme.
   scores are shown without player identities; the lesson practice positions
   are separate from those scores.
 
-Bruno the Bear and Olive the Owl are fictional coaches with original chess
+Bruno the Bear and Olivia the Owl are fictional coaches with original chess
 tips. Their portraits and advice were created for Uroschess.
 
 | Main menu | Opening lessons |
@@ -66,11 +69,14 @@ stack vertically.
 - **Tab** moves keyboard focus between visible buttons; **Enter** activates one.
 - In a replay, use the on-screen controls or Left and Right to step through
   moves. Space starts or pauses autoplay.
-- In a game, **R** starts over and **U** takes back a move. **S** saves a PGN;
-  **L** loads `game.pgn` from the working directory.
+- In an ordinary game, **R** starts over and **U** takes back a move. **S** saves
+  a PGN; **L** loads `game.pgn` from the working directory. Challenge matches
+  have fixed opponents and no takeback or PGN import. **Save & return** keeps
+  the current match; **Resign** asks for a second click before ending it.
 
 The window is resizable. **Appearance** offers board styles, piece colours,
-text sizes, and a sound switch. Settings and lesson progress are kept locally.
+text sizes, and a sound switch. Settings, lesson progress, and challenge badges
+are kept locally.
 
 ## Development
 

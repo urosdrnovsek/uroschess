@@ -11,10 +11,10 @@
     },
     {
       "player_id": "olive-owl",
-      "name": "Olive the Owl",
-      "short_name": "Olive",
+      "name": "Olivia the Owl",
+      "short_name": "Olivia",
       "portrait": "olive.bmp",
-      "intro": "Explore a Catalan bishop idea with Olive.",
+      "intro": "Explore a Catalan bishop idea with Olivia.",
       "portrait_attribution": "Original animal illustration for Uroschess"
     }
   ]

@@ -9,7 +9,7 @@ from pathlib import Path
 import sqlite3
 
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 
 # Digests of earlier published identifiers. Keep the former identities out of
 # shipped source while allowing existing local progress to follow renamed lessons.
@@ -89,6 +89,7 @@ class ProgressStore:
                 self.path.parent.mkdir(parents=True, exist_ok=True)
             self.connection = sqlite3.connect(str(self.path))
             self.connection.row_factory = sqlite3.Row
+            self.connection.execute("PRAGMA foreign_keys = ON")
             self._migrate()
             self._migrate_renamed_ids()
         except (OSError, sqlite3.Error) as error:
@@ -168,6 +169,9 @@ class ProgressStore:
             if version == 5:
                 version = 6
                 self.connection.execute("UPDATE schema_info SET version = 6")
+            if version == 6:
+                version = 7
+                self.connection.execute("UPDATE schema_info SET version = 7")
             if version != SCHEMA_VERSION:
                 raise ProgressStoreError(
                     "progress schema version {} is not supported; data was left "
@@ -226,6 +230,18 @@ class ProgressStore:
                     match_id TEXT NOT NULL REFERENCES challenge_matches(match_id),
                     earned_at TEXT NOT NULL,
                     PRIMARY KEY (opponent_id, human_color)
+                )""")
+            self.connection.execute(
+                """CREATE TABLE IF NOT EXISTS challenge_policies (
+                    match_id TEXT PRIMARY KEY REFERENCES challenge_matches(match_id),
+                    parameters_json TEXT NOT NULL
+                )""")
+            self.connection.execute(
+                """CREATE TABLE IF NOT EXISTS challenge_awards (
+                    award_id TEXT PRIMARY KEY,
+                    earned_at TEXT NOT NULL,
+                    match_id TEXT NOT NULL REFERENCES challenge_matches(match_id),
+                    celebration_seen_at TEXT
                 )""")
 
     def _migrate_renamed_ids(self):

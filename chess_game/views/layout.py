@@ -16,7 +16,7 @@ def layout_board(ui):
         ui.panel_h = ui.win_h - 2 * P
         inner_w = ui.win_w - 2 * P - (ui.panel_w + GAP if ui.show_panel else 0)
         thought_h = 92
-        controls_h = 0 if ui.show_panel else 92
+        controls_h = 0 if ui.show_panel else 130
         available = ui.win_h - 2 * P - thought_h - SH - SGAP - controls_h - 18
         sq = max(20, min(inner_w, available) // 8)
         ui.SQ = sq

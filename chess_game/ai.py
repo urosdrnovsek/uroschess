@@ -131,16 +131,27 @@ class _Timeout(Exception):
     pass
 
 
+class SearchCancelled(Exception):
+    """A search was invalidated by navigation or a new match."""
+
+
 class Engine:
     """One search. Holds the transposition table and killer tables for a run."""
 
-    def __init__(self, time_limit=2.0, max_depth=64):
+    def __init__(self, time_limit=2.0, max_depth=64, cancel_event=None):
         self.time_limit = time_limit
         self.max_depth = max_depth
         self.tt = {}                     # zobrist -> (depth, flag, value, move)
         self.killers = [[None, None] for _ in range(max_depth + 1)]
         self.nodes = 0
         self.deadline = None
+        self.cancel_event = cancel_event
+
+    def _checkpoint(self):
+        if self.cancel_event is not None and self.cancel_event.is_set():
+            raise SearchCancelled
+        if time.monotonic() > self.deadline:
+            raise _Timeout
 
     # -- helpers -------------------------------------------------------------
     def _draw(self, board):
@@ -170,8 +181,8 @@ class Engine:
     # -- quiescence -------------------------------------------------------
     def _qsearch(self, board, alpha, beta):
         self.nodes += 1
-        if self.nodes % 2048 == 0 and time.monotonic() > self.deadline:
-            raise _Timeout
+        if self.nodes % 256 == 0:
+            self._checkpoint()
 
         stand = evaluate(board) if board.side_to_move == WHITE else -evaluate(board)
         if stand >= beta:
@@ -198,8 +209,8 @@ class Engine:
     # -- main search -----------------------------------------------------
     def _search(self, board, depth, alpha, beta, ply):
         self.nodes += 1
-        if self.nodes % 2048 == 0 and time.monotonic() > self.deadline:
-            raise _Timeout
+        if self.nodes % 256 == 0:
+            self._checkpoint()
 
         if ply > 0 and self._draw(board):
             return 0
@@ -266,6 +277,7 @@ class Engine:
     # -- driver --------------------------------------------------------
     def search(self, board, on_progress=None):
         self.deadline = time.monotonic() + self.time_limit
+        self._checkpoint()
         root_moves = legal_moves(board)
         if not root_moves:
             return None, 0, []
@@ -274,6 +286,7 @@ class Engine:
         pv = [best_move]
 
         for depth in range(1, self.max_depth + 1):
+            self._checkpoint()
             try:
                 score, move, line = self._root(board, depth)
             except _Timeout:
@@ -355,8 +368,10 @@ def best_move(board, depth=None, time_limit=2.0, on_progress=None):
     return move
 
 
-def analyse(board, time_limit=2.0, max_depth=64, on_progress=None):
+def analyse(board, time_limit=2.0, max_depth=64, on_progress=None,
+            cancel_event=None):
     """Like best_move but returns (move, score, pv, nodes)."""
-    eng = Engine(time_limit=time_limit, max_depth=max_depth)
+    eng = Engine(time_limit=time_limit, max_depth=max_depth,
+                 cancel_event=cancel_event)
     move, score, pv = eng.search(board, on_progress=on_progress)
     return move, score, pv, eng.nodes

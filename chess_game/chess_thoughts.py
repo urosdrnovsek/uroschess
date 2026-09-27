@@ -28,7 +28,7 @@ _COACHES = (
         "If a piece is trapped, make it an escape route.",
         "After the game, find one move to learn from.",
     )),
-    ("Olive the Owl", "Olive", "olive.bmp", (
+    ("Olivia the Owl", "Olivia", "olive.bmp", (
         "Look along the whole diagonal before moving.",
         "Find the squares your opponent cannot defend.",
         "A bishop likes a long, open view.",
