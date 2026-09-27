@@ -28,7 +28,8 @@ import pygame
 from . import ai, sound, theme
 from .board import Board
 from .chess_thoughts import ChessThought, random_thought
-from .challenge import ChallengeStore, OPPONENTS, ROSTER, stage_states
+from .challenge import ChallengeStore, OPPONENTS, ROSTER
+from .character_stories import STORIES
 from .challenge_commentary import VOICES
 from .moves import legal_moves, in_check, game_status
 from . import notation
@@ -465,6 +466,8 @@ class ChessUI(MenuLayoutMixin):
         self.challenge_store = None
         self.challenge = None
         self.challenge_choice_id = "chicky"
+        self.challenge_page = 0
+        self.character_index = 0
         self.challenge_generation = 0
         self.challenge_cancel_event = None
         self._course_summary_cache = {}
@@ -563,6 +566,12 @@ class ChessUI(MenuLayoutMixin):
         self._thought_changed_at = time.monotonic()
         if play_sound:
             sound.play("click")
+        self._dirty = True
+
+    def _change_character(self, delta):
+        self.character_index = (self.character_index + delta) % len(ROSTER)
+        self._reset_button_focus()
+        self._menu_buttons = []
         self._dirty = True
 
     def _thought_progress(self):
@@ -669,7 +678,18 @@ class ChessUI(MenuLayoutMixin):
         if self.challenge_store is None:
             self._flash("Challenge progress is unavailable")
             return
+        if self.challenge is not None:
+            self.challenge_page = ROSTER.index(self.challenge.opponent) // 4
         self._open_menu_section("challenge")
+
+    def _change_challenge_page(self, delta):
+        page = max(0, min((len(ROSTER) - 1) // 4,
+                          self.challenge_page + delta))
+        if page != self.challenge_page:
+            self.challenge_page = page
+            self._reset_button_focus()
+            self._menu_buttons = []
+            self._dirty = True
 
     def _choose_challenge_opponent(self, opponent_id):
         self.challenge_choice_id = opponent_id
@@ -986,10 +1006,13 @@ class ChessUI(MenuLayoutMixin):
             result = self.lesson.explore_uci(uci)
         else:
             return False
-        self.lesson_message = ""
+        self.lesson_message = (result.feedback
+                               if result.outcome == "not_covered" else "")
         if result.outcome != "illegal":
             self._show_latest_lesson_message()
-        self._sync_lesson_position(result.move)
+        last_move = (None if result.outcome in ("wrong", "not_covered")
+                     else result.move)
+        self._sync_lesson_position(last_move)
         self._save_lesson_progress()
         return result.outcome != "illegal"
 
@@ -1115,6 +1138,10 @@ class ChessUI(MenuLayoutMixin):
                 except Exception as error:
                     result_queue.put((None, None, str(error), token))
             else:
+                random_move = session.choose_random_search_move()
+                if random_move is not None:
+                    result_queue.put((random_move, 0, None, token))
+                    return
                 cancel = threading.Event()
                 self.challenge_cancel_event = cancel
                 snap = session.board.clone()
@@ -1725,7 +1752,7 @@ class ChessUI(MenuLayoutMixin):
                            else "Resign", self._resign_challenge),
                           ("Save & return", self._open_challenge_from_game)]
             else:
-                states = stage_states(self.challenge_store.victories())
+                states = self.challenge_store.stages()
                 opponent = self.challenge.opponent
                 index = ROSTER.index(opponent)
                 won = (self.status == "checkmate" and
@@ -1869,7 +1896,7 @@ class ChessUI(MenuLayoutMixin):
             source_id = self.lesson_entry.lesson.related_source_game_id
             specs = [
                 ("Try again", self._lesson_restart),
-                ("Watch archival game" if source_id else "Replay practice",
+                ("Watch a game" if source_id else "Replay practice",
                  self._watch_lesson_record),
                 ("Lessons", self._leave_lesson),
                 ("Main menu", self._to_menu),
@@ -1880,7 +1907,7 @@ class ChessUI(MenuLayoutMixin):
             short = {"Main menu": "Menu", "Show answer": "Answer",
                      "Try other move": "Other move",
                      "Back to lesson": "Back to lesson",
-                     "Watch archival game": "Watch game",
+                     "Watch a game": "Watch game",
                      "Replay practice": "Replay",
                      "Finish lesson": "Finish"}
             short["Next lesson"] = "Next"
@@ -2131,6 +2158,9 @@ class ChessUI(MenuLayoutMixin):
                 b, b.rect.collidepoint(mx, my), rad,
                 focused=index == self._button_focus)
 
+        if self.menu_view == "characters":
+            self._draw_character_profile()
+
         if self.menu_view == "course_about" and self.game_library:
             course = self.game_library.course(self.active_course_id)
             if course:
@@ -2179,7 +2209,7 @@ class ChessUI(MenuLayoutMixin):
             draw_chess_thought(
                 self.screen, self._feature_rect, thought,
                 self.status_font, self.text_font, self.tag_font, self.pal,
-                compact=True,
+                compact=True, large=True,
                 previous=None if player or self.menu_view == "challenge_color"
                 else self._thought_previous,
                 progress=thought_progress)
@@ -2199,21 +2229,52 @@ class ChessUI(MenuLayoutMixin):
                                      (card.x + 28, y))
                     y += 16
 
-        if colors_view:
-            hint = "choose board, pieces, text, and sound   ·   Esc  back"
-        elif library_view:
-            hint = ("choose a game   ·   Esc  back"
-                    if self.library_filter == "replay"
-                    else "choose a lesson   ·   Esc  back")
-        else:
-            hint = "choose Learn or Play   ·   keyboard and mouse supported"
-        if self.win_h >= 730:
-            hs = self.small_font.render(hint, True, p.text_dim)
-            self.screen.blit(hs, hs.get_rect(center=(cx, self.win_h - 22)))
         if colors_view and self.preferences_error:
             warning = self.small_font.render(
                 "Preferences could not be loaded or saved.", True, p.bad)
             self.screen.blit(warning, (card.centerx + 26, card.bottom - 22))
+
+    def _draw_character_profile(self):
+        card = self._menu_card
+        opponent = ROSTER[self.character_index]
+        profile = STORIES[opponent.ident]
+        portrait_size = min(190, card.h // 3, card.w - 80)
+        if card.w < 400 and card.h < 540:
+            portrait_size = min(portrait_size, 120)
+        portrait_x = card.centerx - portrait_size // 2
+        portrait_y = card.top + 40
+        self.screen.blit(_portrait(opponent.portrait, portrait_size,
+                                   self.pal.field, self.pal.text),
+                         (portrait_x, portrait_y))
+
+        name_y = portrait_y + portrait_size + 7
+        name = _fit_text(self.status_font, opponent.name, card.w - 32)
+        rendered = self.status_font.render(name, True, self.pal.text)
+        self.screen.blit(rendered, rendered.get_rect(centerx=card.centerx,
+                                                     y=name_y))
+        favourite_y = name_y + self.status_font.get_linesize() + 5
+        favourite = "Favourite: " + profile.favourite_piece
+        favourite_font = (self.text_font if self.text_font.size(favourite)[0]
+                          <= card.w - 32 else self.small_font)
+        rendered = favourite_font.render(favourite, True, self.pal.accent)
+        self.screen.blit(rendered, rendered.get_rect(centerx=card.centerx,
+                                                     y=favourite_y))
+
+        story_y = favourite_y + self.text_font.get_linesize() + 17
+        label = self.tag_font.render("THE STORY", True, self.pal.accent)
+        self.screen.blit(label, (card.x + 24, story_y))
+        story_y += self.tag_font.get_linesize() + 8
+        story_bottom = card.bottom - 55
+        story_width = card.w - 48
+        font = self.text_font
+        lines = _wrap_text(font, profile.story, story_width)
+        if len(lines) * font.get_linesize() > story_bottom - story_y:
+            font = self.small_font
+            lines = _wrap_text(font, profile.story, story_width)
+        for line in lines:
+            self.screen.blit(font.render(line, True, self.pal.text),
+                             (card.x + 24, story_y))
+            story_y += font.get_linesize()
 
     def _draw_menu_button(self, b, hot, rad, focused=False):
         p = self.pal
@@ -2716,6 +2777,12 @@ class ChessUI(MenuLayoutMixin):
                     if self.scene == "menu" and self.menu_view == "library":
                         self._change_library_page(-event.y)
                         need_draw = True
+                    elif self.scene == "menu" and self.menu_view == "characters":
+                        self._change_character(-event.y)
+                        need_draw = True
+                    elif self.scene == "menu" and self.menu_view == "challenge":
+                        self._change_challenge_page(-event.y)
+                        need_draw = True
                     elif self.scene == "menu" and self.menu_view == "opening_hub":
                         self._change_course_page(-event.y)
                         need_draw = True
@@ -2773,7 +2840,9 @@ class ChessUI(MenuLayoutMixin):
 
     def _on_key(self, key, modifiers=0):
         if key == pygame.K_n:
-            if self.challenge is None:
+            if self.scene == "menu" and self.menu_view == "characters":
+                self._change_character(1)
+            elif self.challenge is None:
                 self._change_chess_thought()
             return True
         if key == pygame.K_TAB:
@@ -2802,6 +2871,7 @@ class ChessUI(MenuLayoutMixin):
                     self._leave_lesson()
                 return True
             if self.menu_view in ("colors", "library", "learn", "play", "challenge",
+                                  "characters",
                                   "challenge_color",
                                   "ai_play", "opening_hub", "course",
                                   "course_about"):
@@ -2811,6 +2881,8 @@ class ChessUI(MenuLayoutMixin):
                     self._open_menu_section("play")
                 elif self.menu_view == "challenge":
                     self._open_menu_section("play")
+                elif self.menu_view == "characters":
+                    self._open_menu_section("main")
                 elif self.menu_view == "challenge_color":
                     self._open_challenge_menu()
                 elif self.menu_view == "course":
@@ -2830,6 +2902,18 @@ class ChessUI(MenuLayoutMixin):
                 self._change_library_page(-1)
             elif key == pygame.K_PAGEDOWN:
                 self._change_library_page(1)
+            return True
+        if self.scene == "menu" and self.menu_view == "characters":
+            if key in (pygame.K_LEFT, pygame.K_PAGEUP):
+                self._change_character(-1)
+            elif key in (pygame.K_RIGHT, pygame.K_PAGEDOWN):
+                self._change_character(1)
+            return True
+        if self.scene == "menu" and self.menu_view == "challenge":
+            if key == pygame.K_PAGEUP:
+                self._change_challenge_page(-1)
+            elif key == pygame.K_PAGEDOWN:
+                self._change_challenge_page(1)
             return True
         if self.scene == "menu" and self.menu_view == "opening_hub":
             if key == pygame.K_PAGEUP:

@@ -22,7 +22,7 @@ def draw_player_card(surface, rect, player, course, palette, title_font,
     pygame.draw.rect(surface, fill, rect, border_radius=8)
     pygame.draw.rect(surface, palette.panel_line, rect, width=1,
                      border_radius=8)
-    portrait_size = min(68 if rect.w < 330 else 78, rect.h - 20)
+    portrait_size = min(78 if rect.w < 330 else 92, rect.h - 18)
     portrait_x = rect.x + 12
     portrait_y = rect.y + (rect.h - portrait_size) // 2
     surface.blit(_portrait(player.portrait, portrait_size,

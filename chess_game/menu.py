@@ -26,9 +26,12 @@ TEXT_SIZES = [
 class MenuLayoutMixin:
     """Build menu controls while the UI owns their actions and state."""
 
+    def _simple_menu_top(self):
+        return max(95, min(218, self.win_h - 436))
+
     def _study_menu_top(self):
         """Leave room for the card and its navigation at shorter heights."""
-        return max(20, min(145, self.win_h - 500))
+        return max(20, min(164, self.win_h - 500))
 
     def _build_menu_buttons(self):
         self._menu_buttons = []
@@ -47,14 +50,21 @@ class MenuLayoutMixin:
             self._build_challenge_menu()
         elif self.menu_view == "challenge_color":
             self._build_challenge_color_menu()
+        elif self.menu_view == "characters":
+            self._build_character_menu()
         elif self.menu_view in ("learn", "play", "ai_play"):
             self._build_menu_section()
         else:
             self._build_menu_main()
+        if self.menu_view == "characters":
+            self._feature_rect = pygame.Rect(0, 0, 0, 0)
+            return
         card = self._menu_card
-        gap = (40 if self.menu_view == "main" and card.top >= 175
-               else 28 if card.top >= 136 else 16)
-        portrait_height = min(100, card.top - 8 - gap)
+        gap = 16
+        portrait_height = 140
+        if card.top < portrait_height + gap + 8:
+            self._feature_rect = pygame.Rect(0, 0, 0, 0)
+            return
         portrait_width = min(472, card.w)
         self._feature_rect = pygame.Rect(
             card.centerx - portrait_width // 2,
@@ -64,27 +74,49 @@ class MenuLayoutMixin:
     def _build_menu_main(self):
         card_width = min(472, self.win_w - 24)
         left = (self.win_w - card_width) // 2
-        top = max(95, min(225, self.win_h - 410))
-        card = pygame.Rect(left, top, card_width, 294)
+        top = self._simple_menu_top()
+        card = pygame.Rect(left, top, card_width, 286)
         self._menu_card = card
         x, w = card.x + 24, card.w - 48
         cx = card.centerx
-        self._menu_heads.append(("CHOOSE AN ACTIVITY", x, card.y + 17))
         for index, (label, action) in enumerate((
                 ("Learn", lambda: self._open_menu_section("learn")),
                 ("Play", lambda: self._open_menu_section("play")),
-                ("Watch games", lambda: self._open_library("replay")))):
+                ("Watch games", lambda: self._open_library("replay")),
+                ("Meet the characters", lambda: self._open_menu_section(
+                    "characters")))):
             self._menu_buttons.append(Button(
-                (x, card.y + 44 + index * 59, w, 49), label, action,
+                (x, card.y + 18 + index * 64, w, 54), label, action,
                 kind="cta" if index == 0 else "step"))
         self._menu_buttons.append(
             Button((cx - min(200, w // 2), card.bottom + 8,
-                    min(400, w), 38), "Appearance",
+                    min(400, w), 42), "Appearance",
                    self._open_colors, kind="cta"))
         self._menu_buttons.append(
             Button((cx - min(200, w // 2), card.bottom + 50,
                     min(400, w), 36), "Exit",
                    self._exit, kind="exit"))
+
+    def _build_character_menu(self):
+        from .challenge import ROSTER
+        width = min(640, self.win_w - 24)
+        height = min(580, self.win_h - 95)
+        top = max(12, (self.win_h - height - 50) // 2)
+        card = pygame.Rect((self.win_w - width) // 2, top, width, height)
+        self._menu_card = card
+        x, inner = card.x + 20, card.w - 40
+        self._menu_heads.append((
+            "MEET THE CHARACTERS · {} / {}".format(
+                self.character_index + 1, len(ROSTER)), x, top + 14))
+        half = (inner - 8) // 2
+        self._menu_buttons.extend((
+            Button((x, card.bottom - 47, half, 36), "‹ Previous",
+                   lambda: self._change_character(-1), kind="step"),
+            Button((x + half + 8, card.bottom - 47, inner - half - 8, 36),
+                   "Next ›", lambda: self._change_character(1), kind="step"),
+            Button((x, card.bottom + 8, inner, 38), "‹ Back to menu",
+                   lambda: self._open_menu_section("main"), kind="cta"),
+        ))
 
     def _open_menu_section(self, section):
         self._reset_button_focus()
@@ -94,7 +126,7 @@ class MenuLayoutMixin:
 
     def _build_menu_section(self):
         width = min(472, self.win_w - 24)
-        top = max(95, min(190, self.win_h - 490))
+        top = self._simple_menu_top()
         card = pygame.Rect((self.win_w - width) // 2, top, width, 390)
         self._menu_card = card
         x, w = card.x + 24, card.w - 48
@@ -151,18 +183,22 @@ class MenuLayoutMixin:
             kind="cta"))
 
     def _build_challenge_menu(self):
-        from .challenge import ROSTER, stage_states
+        from .challenge import ROSTER
         width = min(500, self.win_w - 24)
-        top = max(18, min(85, self.win_h - 590))
+        top = max(18, min(164, self.win_h - 574))
         card = pygame.Rect((self.win_w - width) // 2, top, width, 490)
         self._menu_card = card
         x, w = card.x + 20, card.w - 40
         heading = ("UROSCHESS MASTER · CHARACTER CHALLENGE"
                    if self.challenge_store.award() else "CHARACTER CHALLENGE")
         self._menu_heads.append((heading, x, top + 13))
-        states = stage_states(self.challenge_store.victories())
+        states = self.challenge_store.stages()
         saved = self.challenge_store.active()
-        for index, opponent in enumerate(ROSTER):
+        page_count = (len(ROSTER) + 3) // 4
+        self.challenge_page = max(0, min(self.challenge_page, page_count - 1))
+        first = self.challenge_page * 4
+        for row, opponent in enumerate(ROSTER[first:first + 4]):
+            index = first + row
             state = states[index]
             detail = {
                 "locked": "Beat {} with both colours".format(
@@ -176,9 +212,19 @@ class MenuLayoutMixin:
                       self._choose_challenge_opponent(ident)) if (
                           state != "locked" and not saved) else None
             self._menu_buttons.append(Button(
-                (x, top + 39 + index * 90, w, 90), label,
+                (x, top + 39 + row * 90, w, 90), label,
                 action or (lambda: None), kind="challenge", detail=detail,
                 value=opponent.portrait))
+        half = (w - 8) // 2
+        if self.challenge_page > 0:
+            self._menu_buttons.append(Button(
+                (x, top + 410, half, 36), "‹ Previous characters",
+                lambda: self._change_challenge_page(-1), kind="step"))
+        if self.challenge_page < page_count - 1:
+            self._menu_buttons.append(Button(
+                (x + half + 8, top + 410, w - half - 8, 36),
+                "Next characters ›", lambda: self._change_challenge_page(1),
+                kind="step"))
         if saved:
             self._menu_buttons.append(Button(
                 (x, card.bottom + 6, (w - 8) // 2, 36), "Resume",
@@ -191,12 +237,11 @@ class MenuLayoutMixin:
             lambda: self._open_menu_section("play"), kind="cta"))
 
     def _build_challenge_color_menu(self):
-        from .challenge import OPPONENTS, ROSTER, stage_states
+        from .challenge import OPPONENTS, ROSTER
         opponent = OPPONENTS[self.challenge_choice_id]
-        state = stage_states(self.challenge_store.victories())[
-            ROSTER.index(opponent)]
+        state = self.challenge_store.stages()[ROSTER.index(opponent)]
         width = min(472, self.win_w - 24)
-        top = max(95, min(190, self.win_h - 420))
+        top = self._simple_menu_top()
         card = pygame.Rect((self.win_w - width) // 2, top, width, 260)
         self._menu_card = card
         x, w = card.x + 24, card.w - 48
@@ -353,7 +398,7 @@ class MenuLayoutMixin:
             Button((x, top + 297, inner, 36), "Read opening source",
                    lambda: self._open_source_link(course.association_source.url),
                    kind="step"),
-            Button((x, top + 343, inner, 36), "Watch archival game",
+            Button((x, top + 343, inner, 36), "Watch a game",
                    self._watch_course_source, kind="cta", value="source_game"),
             Button((x, card.bottom + 8, inner, 38), "‹  Back to course",
                    lambda: self._open_menu_section("course"), kind="cta"),
@@ -508,7 +553,7 @@ class MenuLayoutMixin:
                 (x, card.bottom + 8, inner, 38), "‹  Back",
                 self._close_colors, kind="cta"))
             return
-        top = max(140, self.win_h // 2 - 230)
+        top = max(20, min(164, self.win_h - 542))
         card = pygame.Rect(cx - 322, top, 644, 478)
         self._menu_card = card
         lx = card.x + 28

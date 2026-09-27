@@ -8,7 +8,10 @@ from chess_game.chess_thoughts import THOUGHTS, random_thought
 
 def test_each_fictional_coach_has_original_tips_and_a_portrait():
     counts = Counter(thought.portrait for thought in THOUGHTS)
-    assert counts == {"bruno.bmp": 12, "olive.bmp": 12}
+    assert counts == {"bruno.bmp": 22, "olive.bmp": 22,
+                      "pomeranian.bmp": 15, "chicky.bmp": 20,
+                      "monty.bmp": 22, "tina.bmp": 15, "tom.bmp": 15}
+    assert len(THOUGHTS) == len({thought.quote for thought in THOUGHTS})
     for thought in THOUGHTS:
         assert thought.source == ""
         assert len(thought.quote) <= 56

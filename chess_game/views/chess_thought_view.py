@@ -52,7 +52,7 @@ def _lines(font, text, width):
 
 def draw_chess_thought(surface, rect, thought, title_font, text_font,
                        small_font, palette, compact=False, previous=None,
-                       progress=1.0):
+                       progress=1.0, large=False):
     """Draw a theme-coloured portrait card, optionally crossfading from another."""
     rect = pygame.Rect(rect)
     if previous is not None and progress < 1.0:
@@ -61,9 +61,9 @@ def draw_chess_thought(surface, rect, thought, title_font, text_font,
         new_card = pygame.Surface(rect.size, pygame.SRCALPHA)
         local = pygame.Rect((0, 0), rect.size)
         draw_chess_thought(old_card, local, previous, title_font, text_font,
-                           small_font, palette, compact)
+                           small_font, palette, compact, large=large)
         draw_chess_thought(new_card, local, thought, title_font, text_font,
-                           small_font, palette, compact)
+                           small_font, palette, compact, large=large)
         old_card.set_alpha(round(255 * (1 - eased)))
         new_card.set_alpha(round(255 * eased))
         clip = surface.get_clip()
@@ -78,7 +78,7 @@ def draw_chess_thought(surface, rect, thought, title_font, text_font,
     pygame.draw.rect(surface, paper, rect, border_radius=10)
     pygame.draw.rect(surface, edge, rect, width=1, border_radius=10)
     if compact:
-        portrait_size = min(65, rect.h - 30)
+        portrait_size = min(110 if large else 82, rect.h - 30)
         portrait_x = rect.x + 17
         portrait_y = rect.y + 5
         surface.blit(_portrait(thought.portrait, portrait_size, paper, ink),
@@ -87,24 +87,26 @@ def draw_chess_thought(surface, rect, thought, title_font, text_font,
         surface.blit(name, name.get_rect(
             centerx=portrait_x + portrait_size // 2,
             y=portrait_y + portrait_size))
-        quote_x = rect.x + 105
+        quote_x = portrait_x + portrait_size + 23
         quote_width = max(40, rect.right - quote_x - 9)
         y = rect.y + 15
         quote = thought.quote
-        lines = _lines(text_font, quote, quote_width)
         available = rect.bottom - 3 - y
-        if len(lines) * text_font.get_linesize() > available:
-            text_font = small_font
-            lines = _lines(text_font, quote, quote_width)
-        for line in lines:
-            if y + text_font.get_linesize() > rect.bottom - 3:
+        fonts = ((title_font, text_font, small_font) if large
+                 else (text_font, small_font))
+        for quote_font in fonts:
+            lines = _lines(quote_font, quote, quote_width)
+            if len(lines) * quote_font.get_linesize() <= available:
                 break
-            surface.blit(text_font.render(line, True, ink), (quote_x, y))
-            y += text_font.get_linesize()
+        for line in lines:
+            if y + quote_font.get_linesize() > rect.bottom - 3:
+                break
+            surface.blit(quote_font.render(line, True, ink), (quote_x, y))
+            y += quote_font.get_linesize()
         return
 
     portrait_size = min(
-        160, rect.w - 24,
+        190, rect.w - 24,
         max(72, rect.h - (110 if rect.w >= 300 else 140)))
     portrait_x = rect.centerx - portrait_size // 2
     portrait_y = rect.y + 12

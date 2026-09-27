@@ -95,6 +95,11 @@ def main():
         capture(ui, "bruno-lesson.png")
         ui._on_resize(1100, 760)
         capture(ui, "lesson-wide.png")
+        ui._to_menu()
+        ui._open_menu_section("characters")
+        ui.character_index = 2
+        ui._on_resize(980, 760)
+        capture(ui, "meet-characters.png")
     finally:
         if ui.progress_store is not None:
             ui.progress_store.close()

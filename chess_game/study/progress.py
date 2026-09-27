@@ -9,7 +9,7 @@ from pathlib import Path
 import sqlite3
 
 
-SCHEMA_VERSION = 7
+SCHEMA_VERSION = 8
 
 # Digests of earlier published identifiers. Keep the former identities out of
 # shipped source while allowing existing local progress to follow renamed lessons.
@@ -172,6 +172,26 @@ class ProgressStore:
             if version == 6:
                 version = 7
                 self.connection.execute("UPDATE schema_info SET version = 7")
+            if version == 7:
+                self.connection.execute(
+                    "CREATE TABLE IF NOT EXISTS challenge_legacy_access "
+                    "(opponent_id TEXT PRIMARY KEY)")
+                tables = {row[0] for row in self.connection.execute(
+                    "SELECT name FROM sqlite_master WHERE type = 'table'")}
+                if "challenge_victories" in tables:
+                    victories = {(row[0], row[1]) for row in self.connection.execute(
+                        "SELECT opponent_id, human_color FROM challenge_victories")}
+                    for predecessor, successor in (
+                            ("chicky", "pippa-pomeranian"),
+                            ("pippa-pomeranian", "bruno-bear"),
+                            ("bruno-bear", "olive-owl"),
+                            ("olive-owl", "monty-cat")):
+                        if {(predecessor, "w"), (predecessor, "b")} <= victories:
+                            self.connection.execute(
+                                "INSERT OR IGNORE INTO challenge_legacy_access VALUES (?)",
+                                (successor,))
+                version = 8
+                self.connection.execute("UPDATE schema_info SET version = 8")
             if version != SCHEMA_VERSION:
                 raise ProgressStoreError(
                     "progress schema version {} is not supported; data was left "
@@ -223,6 +243,9 @@ class ProgressStore:
                     result TEXT,
                     updated_at TEXT NOT NULL
                 )""")
+            self.connection.execute(
+                "CREATE TABLE IF NOT EXISTS challenge_legacy_access "
+                "(opponent_id TEXT PRIMARY KEY)")
             self.connection.execute(
                 """CREATE TABLE IF NOT EXISTS challenge_victories (
                     opponent_id TEXT NOT NULL,

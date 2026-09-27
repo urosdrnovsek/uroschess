@@ -37,9 +37,9 @@ Omarchy colours when available and otherwise uses a built-in dark theme.
 - **Play:** choose White or Black against the computer, play locally with a
   friend, or let the computer play both sides. The difficulty setting changes
   how long the computer thinks. **Character Challenge** is a separate offline
-  journey through Chicky, Pippa, Bruno, Olivia, and Monty. Beat each character
-  with White and then Black to unlock the next; ten wins earn the Uroschess
-  Master title. An unfinished match can be resumed later.
+  journey through Chicky, Pippa, Tina, Tom, Bruno, Olivia, and Monty. Beat each
+  character with White and then Black to unlock the next; fourteen wins earn
+  the Uroschess Master title. An unfinished match can be resumed later.
 - **Learn:** try short move exercises about openings, tactics, and endgames.
   Each question has a hint and an answer you can reveal. You can retry and
   return later; progress is saved on this computer.
@@ -50,9 +50,16 @@ Omarchy colours when available and otherwise uses a built-in dark theme.
 Bruno the Bear and Olivia the Owl are fictional coaches with original chess
 tips. Their portraits and advice were created for Uroschess.
 
+Choose **Meet the characters** on the main menu to browse all seven animals,
+read their short stories, and see their favourite chess pieces. Click the
+larger portrait on the main menu, or press **N**, to see another character's
+quote.
+
 | Main menu | Opening lessons |
 | --- | --- |
-| ![Menu with Learn, Play, and Watch games](docs/menu.png) | ![Opening courses with the two animal coaches](docs/openings.png) |
+| ![Menu with Learn, Play, Watch games, and Meet the characters](docs/menu.png) | ![Opening courses with the two animal coaches](docs/openings.png) |
+
+![Tina's story in Meet the characters](docs/meet-characters.png)
 
 In a lesson, read the question beside or below the board and make a move.
 **Hint** gives a clue; **Show answer** reveals a move. After a move, the panel

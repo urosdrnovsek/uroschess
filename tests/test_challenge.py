@@ -11,6 +11,8 @@ import pytest
 from chess_game.board import Board
 from chess_game import ai
 from chess_game.challenge import ChallengeStore, ROSTER, stage_states
+from chess_game.challenge_commentary import VOICES
+from chess_game.chess_thoughts import THOUGHTS
 from chess_game.difficulty import DIFFICULTIES
 from chess_game.moves import legal_moves
 from chess_game.notation import from_fen
@@ -30,7 +32,43 @@ def test_stage_order_is_derived_from_victories():
         assert stage_states(victories)[index] == "black_required"
         victories.add((opponent.ident, BLACK))
         assert stage_states(victories)[index] == "complete"
-    assert stage_states(victories) == ("complete",) * 5
+    assert stage_states(victories) == ("complete",) * len(ROSTER)
+
+
+def test_each_character_has_distinct_short_match_and_general_lines():
+    for opponent in ROSTER:
+        voice = VOICES[opponent.ident]
+        general = {thought.quote for thought in THOUGHTS
+                   if thought.short_name == opponent.name}
+        assert len(general) >= 10
+        assert len(voice.after_move) == len(set(voice.after_move)) == 10
+        assert not general.intersection(voice.after_move)
+        assert all(0 < len(line) <= 56 for line in (
+            voice.greeting, *voice.after_move, voice.character_wins,
+            voice.character_loses, voice.draw))
+
+
+def test_new_stages_gate_bruno_but_legacy_access_survives_upgrade(tmp_path):
+    path = tmp_path / "progress.sqlite3"
+    with ProgressStore(path) as progress:
+        store = ChallengeStore(progress)
+        chicky = store.start(WHITE)
+        store.discard(chicky.match_id)
+        with progress.connection:
+            progress.connection.executemany(
+                "INSERT INTO challenge_victories VALUES (?, ?, ?, 'now')",
+                ((opponent, color, chicky.match_id)
+                 for opponent in ("chicky", "pippa-pomeranian")
+                 for color in (WHITE, BLACK)))
+            progress.connection.execute("DROP TABLE challenge_legacy_access")
+            progress.connection.execute("UPDATE schema_info SET version = 7")
+    with ProgressStore(path) as upgraded:
+        store = ChallengeStore(upgraded)
+        states = store.stages()
+        assert states[2:5] == ("white_required", "locked", "white_required")
+        assert store.start(WHITE, "bruno-bear").opponent.name == "Bruno"
+        assert upgraded.connection.execute(
+            "SELECT version FROM schema_info").fetchone()[0] == SCHEMA_VERSION
 
 
 def test_chicky_resume_preserves_history_comment_and_policy(tmp_path):
@@ -133,8 +171,19 @@ def test_search_roster_unlocks_and_master_award_once(tmp_path):
                 ((WHITE, chicky.match_id), (BLACK, chicky.match_id)))
         for opponent in ROSTER[1:]:
             white = store.start(WHITE, opponent.ident)
-            assert white.opponent.policy_parameters["seconds"] == DIFFICULTIES[
-                opponent.preset][1]
+            assert white.opponent.policy_parameters["seconds"] == (
+                2.0 if opponent.ident == "olive-owl" else
+                DIFFICULTIES[opponent.preset][1])
+            assert white.opponent.policy_parameters["depth"] == (
+                1 if opponent.ident == "pippa-pomeranian" else
+                1 if opponent.ident == "tina-turtle" else
+                1 if opponent.ident == "tom-rabbit" else
+                2 if opponent.ident == "bruno-bear" else
+                32 if opponent.ident == "olive-owl" else
+                DIFFICULTIES[opponent.preset][2])
+            if opponent.ident in ("tina-turtle", "tom-rabbit"):
+                assert white.opponent.policy_parameters["random_move_chance"] == (
+                    0.3 if opponent.ident == "tina-turtle" else 0.1)
             _play_authored_mate(white, (
                 "e2e4", "f7f6", "d2d4", "g7g5", "d1h5"))
             assert (opponent.ident, WHITE) in store.victories()
@@ -142,7 +191,7 @@ def test_search_roster_unlocks_and_master_award_once(tmp_path):
             _play_authored_mate(black, (
                 "f2f3", "e7e5", "g2g4", "d8h4"))
             assert (opponent.ident, BLACK) in store.victories()
-        assert stage_states(store.victories()) == ("complete",) * 5
+        assert stage_states(store.victories()) == ("complete",) * len(ROSTER)
         award = store.award()
         assert award["match_id"] == black.match_id
         assert award["celebration_seen_at"] is None
@@ -173,6 +222,29 @@ def test_search_session_resumes_with_frozen_policy(tmp_path):
                 (session.match_id,))
         with pytest.raises(ValueError, match="older opponent policy"):
             store.resume()
+
+
+def test_pippa_random_moves_are_seeded_and_legal(tmp_path):
+    with ProgressStore(tmp_path / "progress.sqlite3") as progress:
+        store = ChallengeStore(progress)
+        chicky = store.start(WHITE)
+        store.discard(chicky.match_id)
+        with progress.connection:
+            progress.connection.executemany(
+                "INSERT INTO challenge_victories VALUES ('chicky', ?, ?, 'now')",
+                ((WHITE, chicky.match_id), (BLACK, chicky.match_id)))
+        session = store.start(WHITE, "pippa-pomeranian")
+        session.accept(move(session.board, "e2e4"), WHITE)
+        assert session.opponent.policy_parameters["random_move_chance"] == 0.5
+        random_turns = 0
+        for seed in range(200):
+            session.move_seed = seed
+            chosen = session.choose_random_search_move()
+            assert chosen == session.choose_random_search_move()
+            if chosen is not None:
+                assert chosen in legal_moves(session.board)
+                random_turns += 1
+        assert 75 <= random_turns <= 125
 
 
 def test_resignation_finishes_without_a_badge(tmp_path):
@@ -210,16 +282,17 @@ def test_schema_six_chicky_save_survives_upgrade(tmp_path):
 
 
 def test_pippa_finds_mate_and_monty_uses_max_preset():
+    pippa = ROSTER[1].policy_parameters
     board = Board()
     for uci in ("f2f3", "e7e5", "g2g4"):
         board.make_move(move(board, uci))
     chosen, _score, _pv, _nodes = ai.analyse(
-        board, time_limit=DIFFICULTIES[0][1], max_depth=DIFFICULTIES[0][2])
+        board, time_limit=pippa["seconds"], max_depth=pippa["depth"])
     assert str(chosen) == "d8h4"
     hanging_queen = from_fen("4k3/8/8/8/8/8/4q3/4R2K w - - 0 1")
     chosen, _score, _pv, _nodes = ai.analyse(
-        hanging_queen, time_limit=DIFFICULTIES[0][1],
-        max_depth=DIFFICULTIES[0][2])
+        hanging_queen, time_limit=pippa["seconds"],
+        max_depth=pippa["depth"])
     assert str(chosen) == "e1e2"
     assert ROSTER[-1].policy_parameters == {
         "kind": "search", "preset": "Max", "seconds": 6.0,
@@ -240,6 +313,9 @@ def test_navigation_cancels_search_and_preserves_match(tmp_path, monkeypatch):
         raise ai.SearchCancelled
 
     monkeypatch.setattr(ai, "analyse", searching)
+    monkeypatch.setattr(
+        "chess_game.challenge.ChallengeSession.choose_random_search_move",
+        lambda self: None)
     ui = ChessUI(tmp_path / "progress.sqlite3")
     try:
         chicky = ui.challenge_store.start(WHITE)
@@ -261,6 +337,41 @@ def test_navigation_cancels_search_and_preserves_match(tmp_path, monkeypatch):
     finally:
         ui.progress_store.close()
         import pygame
+        pygame.quit()
+
+
+def test_seven_character_roster_is_reachable_at_small_sizes(tmp_path):
+    from chess_game.ui import ChessUI
+    import pygame
+
+    ui = ChessUI(tmp_path / "progress.sqlite3")
+    try:
+        ui._open_challenge_menu()
+        for width, height in ((360, 700), (600, 600), (980, 760)):
+            ui._on_resize(width, height)
+            for scale in (1.0, 1.2, 1.4):
+                ui._set_text_scale(scale)
+                for page in (0, 1):
+                    ui.challenge_page = page
+                    ui._menu_buttons = []
+                    ui._draw()
+                    cards = [button for button in ui._menu_buttons
+                             if button.kind == "challenge"]
+                    assert len(cards) == (4 if page == 0 else 3)
+                    assert all(ui.screen.get_rect().contains(button.rect)
+                               for button in ui._menu_buttons)
+                    if page == 0:
+                        assert [card.label.split(" · ")[0] for card in cards] == [
+                            "Chicky", "Pippa", "Tina", "Tom"]
+                    else:
+                        assert [card.label.split(" · ")[0] for card in cards] == [
+                            "Bruno", "Olivia", "Monty"]
+        ui._on_key(pygame.K_PAGEUP)
+        assert ui.challenge_page == 0
+        ui._on_key(pygame.K_PAGEDOWN)
+        assert ui.challenge_page == 1
+    finally:
+        ui.progress_store.close()
         pygame.quit()
 
 

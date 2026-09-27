@@ -15,6 +15,8 @@ from chess_game import sound
 from chess_game.moves import legal_moves
 from chess_game.ui import ChessUI, WHITE_PRESETS, _fit_text, _wrap_text
 from chess_game.chess_thoughts import THOUGHTS
+from chess_game.challenge import ROSTER
+from chess_game.character_stories import STORIES
 from chess_game.study.coaching import coach_advice
 from chess_game.views.chess_thought_view import draw_chess_thought
 from chess_game.views import draw_focus_ring
@@ -94,6 +96,7 @@ def test_home_routes_to_categorized_lesson_libraries():
     ui._build_menu_buttons()
     labels = [button.label for button in ui._menu_buttons]
     assert labels[:3] == ["Learn", "Play", "Watch games"]
+    assert "Meet the characters" in labels
     next(button for button in ui._menu_buttons
          if button.label == "Learn").action()
     ui._build_menu_buttons()
@@ -153,6 +156,47 @@ def test_home_routes_to_categorized_lesson_libraries():
     assert "Finish without stalemate" not in opening_labels
     ui.progress_store.close()
     pygame.quit()
+
+
+def test_character_gallery_has_stories_pieces_and_keyboard_navigation():
+    favourites = ("Pawn", "Horse (knight)", "Pawn", "Rook",
+                  "Queen", "Bishop", "King")
+    assert set(STORIES) == {opponent.ident for opponent in ROSTER}
+    assert tuple(STORIES[opponent.ident].favourite_piece
+                 for opponent in ROSTER) == favourites
+    assert all(80 <= len(STORIES[opponent.ident].story) <= 180
+               for opponent in ROSTER)
+
+    ui = ChessUI(":memory:")
+    try:
+        ui._open_menu_section("characters")
+        for width, height in ((360, 600), (360, 700), (600, 600), (980, 760)):
+            ui._on_resize(width, height)
+            for scale in (1.0, 1.2, 1.4):
+                ui._set_text_scale(scale)
+                for index in range(len(ROSTER)):
+                    ui.character_index = index
+                    ui._menu_buttons = []
+                    ui._draw()
+                    assert all(ui.screen.get_rect().contains(button.rect)
+                               for button in ui._menu_buttons)
+                    assert ui._feature_rect.h == 0
+        ui.character_index = 0
+        ui._on_key(pygame.K_RIGHT)
+        assert ui.character_index == 1
+        ui._on_key(pygame.K_LEFT)
+        assert ui.character_index == 0
+        ui._on_key(pygame.K_PAGEUP)
+        assert ui.character_index == len(ROSTER) - 1
+        ui._on_key(pygame.K_ESCAPE)
+        assert ui.menu_view == "main"
+        ui._draw()
+        portrait = ui.chess_thought.portrait
+        ui._on_mouse_down(ui._portrait_hit_rect.center)
+        assert ui.chess_thought.portrait != portrait
+    finally:
+        ui.progress_store.close()
+        pygame.quit()
 
 
 def test_course_source_replay_returns_to_about_and_browse_restores(tmp_path):
@@ -402,9 +446,12 @@ def test_portrait_click_changes_player_and_completes_animation():
 def test_portrait_is_present_on_every_menu_and_play_layout():
     ui = ChessUI(":memory:")
     ui._draw()
-    assert ui._menu_card.top == 225
-    assert ui._feature_rect.top >= 85
-    assert ui._menu_card.top - ui._feature_rect.bottom >= 40
+    assert ui._menu_card.top == 218
+    assert ui._feature_rect.h == 140
+    assert ui._feature_rect.top >= 0
+    assert ui._menu_card.top - ui._feature_rect.bottom == 16
+    assert not any(text in ("CHOOSE AN ACTIVITY", "Portrait / N: next quote")
+                   for text, *_ in ui._menu_heads)
     for size in ((700, 700), (650, 650), (600, 600)):
         ui._on_resize(*size)
         ui._build_menu_buttons()
@@ -413,9 +460,19 @@ def test_portrait_is_present_on_every_menu_and_play_layout():
     ui._on_resize(980, 760)
     ui._build_menu_buttons()
 
+    ui.active_course_id = ui.game_library.courses[0].course_id
+    for view in ("learn", "play", "ai_play", "opening_hub", "course",
+                 "course_about", "challenge", "challenge_color"):
+        ui.menu_view = view
+        ui._build_menu_buttons()
+        assert ui._feature_rect.h == 140
+        assert ui._feature_rect.top >= 0
+        assert ui._feature_rect.bottom < ui._menu_card.top
+
     for open_view in (lambda: ui._open_library("opening"), ui._open_colors):
         open_view()
         ui._draw()
+        assert ui._feature_rect.h == 140
         assert ui._portrait_hit_rect == ui._feature_rect
         assert ui._feature_rect.bottom < ui._menu_card.top
         first = ui.chess_thought

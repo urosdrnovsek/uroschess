@@ -158,8 +158,12 @@ def test_packaged_starter_collection_categories_and_endgame_claims():
     assert game_status(mate.board) == "checkmate"
     stalemate = LessonController(mate_entry.game, mate_entry.lesson)
     stalemate.begin_question()
+    original_fen = stalemate.adapter.fen(stalemate.board)
     stalemate.attempt_uci("b5b6")
-    assert game_status(stalemate.board) == "stalemate"
+    assert stalemate.adapter.fen(stalemate.board) == original_fen
+    hypothetical_board = stalemate.board.clone()
+    stalemate.adapter.apply_uci(hypothetical_board, "b5b6")
+    assert game_status(hypothetical_board) == "stalemate"
 
     for lesson_id in ("queen-and-king-mate", "rook-and-king-mate"):
         entry = next(entry for entry in library.lesson_entries
@@ -225,10 +229,12 @@ def test_player_courses_acknowledge_good_moves_that_miss_the_question():
         entry = library.lesson_entry(lesson_id)
         lesson = LessonController(entry.game, entry.lesson)
         lesson.begin_question()
+        question_fen = lesson.adapter.fen(lesson.board)
         result = lesson.attempt_uci(move)
         assert result.outcome == "wrong"
         assert not lesson.step_solved
-        assert "develop" in result.feedback
+        assert result.feedback == "Hmm, that is not what I had in mind. Try another move."
+        assert lesson.adapter.fen(lesson.board) == question_fen
 
 
 def test_revised_player_feedback_matches_the_board():
@@ -236,8 +242,11 @@ def test_revised_player_feedback_matches_the_board():
     scotch = library.lesson_entry("bruno-scotch-active-knight")
     lesson = LessonController(scotch.game, scotch.lesson)
     lesson.begin_question()
+    question_fen = lesson.adapter.fen(lesson.board)
     assert lesson.attempt_uci("d1d4").outcome == "wrong"
-    board = lesson.board
+    assert lesson.adapter.fen(lesson.board) == question_fen
+    board = lesson.board.clone()
+    lesson.adapter.apply_uci(board, "d1d4")
     lesson.adapter.apply_uci(board, "c6d4")
     assert board.piece_at((4, 3)) == "bn"
     assert not any(piece == "wq" for row in board.grid for piece in row)
@@ -309,8 +318,12 @@ def test_packaged_opening_and_promotion_multi_move_exercises():
         promotion_entry.game, promotion_entry.lesson)
     underpromotion.begin_question()
     underpromotion.attempt_uci("e6e7")
+    question_fen = underpromotion.adapter.fen(underpromotion.board)
     assert underpromotion.attempt_uci("e7e8b").outcome == "wrong"
-    assert game_status(underpromotion.board) == "draw-material"
+    assert underpromotion.adapter.fen(underpromotion.board) == question_fen
+    hypothetical_board = underpromotion.board.clone()
+    underpromotion.adapter.apply_uci(hypothetical_board, "e7e8b")
+    assert game_status(hypothetical_board) == "draw-material"
 
 
 def test_square_rule_line_really_catches_the_pawn():
@@ -455,11 +468,8 @@ def test_multi_move_tree_applies_reply_and_completes_only_at_terminal_move():
 
     uncovered = lesson.attempt_uci("c7c5", view_state={"scroll": 24})
     assert uncovered.outcome == "not_covered"
-    assert "okay to try" in uncovered.feedback
-    assert "Return to lesson to try again" in uncovered.feedback
-    assert lesson.state == EXPLORING
-    restored = lesson.return_from_exploration()
-    assert restored == {"scroll": 24}
+    assert uncovered.feedback == "Hmm, that is not what I had in mind. Try another move."
+    assert lesson.state == QUESTION
     assert lesson.adapter.fen(lesson.board) == after_reply
 
     final = lesson.attempt_uci("e8g8")
@@ -483,6 +493,11 @@ def test_multi_move_retry_and_reveal_reset_to_a_checked_line():
 
     continued = LessonController(entry.game, lesson_data)
     continued.begin_question()
+    continued.attempt_uci("f8g7")
+    after_reply = continued.adapter.fen(continued.board)
+    assert continued.attempt_uci("b8c6").outcome == "wrong"
+    assert continued.adapter.fen(continued.board) == after_reply
+    continued.retry()
     continued.attempt_uci("f8g7")
     revealed_remainder = continued.reveal()
     assert str(revealed_remainder.move) == "e8g8"
@@ -515,18 +530,20 @@ def test_question_outcomes_retry_hint_and_reveal():
     assert lesson.assisted and lesson.reveals == 1
 
 
-def test_uncovered_exploration_returns_to_exact_question_state():
+def test_uncovered_move_resets_board_and_explicit_exploration_restores_state():
     entry = _entry()
     lesson = LessonController(entry.game, entry.lesson)
     lesson.begin_question()
     expected_fen = lesson.adapter.fen(lesson.board)
     result = lesson.attempt_uci("b8c6")
     assert result.outcome == "not_covered"
+    assert lesson.state == QUESTION
+    assert lesson.adapter.fen(lesson.board) == expected_fen
+    lesson.begin_exploration(view_state={"scroll": 24})
     assert lesson.state == EXPLORING
-    assert lesson.adapter.fen(lesson.board) != expected_fen
     lesson.explore_uci("d2d4")
     restored_view = lesson.return_from_exploration()
-    assert restored_view is None
+    assert restored_view == {"scroll": 24}
     assert lesson.state == QUESTION
     assert lesson.adapter.fen(lesson.board) == expected_fen
     assert lesson.replay.ply == 5
@@ -603,10 +620,8 @@ def test_lesson_ui_plays_a_question_and_keeps_panel_on_narrow_windows():
         uncovered = next(move for move in ui.lesson.adapter.legal_moves(ui.board)
                          if str(move) == "b6b5")
         assert ui._apply_lesson_move(uncovered)
-        assert ui.lesson.state == EXPLORING
-        ui._lesson_return()
         assert ui.lesson.state == QUESTION
-        assert ui.lesson_scroll == 48
+        assert ui.lesson_message == "Hmm, that is not what I had in mind. Try another move."
         assert ui.lesson.adapter.fen(ui.board) == source_fen
         ui._lesson_hint()
         ui._lesson_reveal()

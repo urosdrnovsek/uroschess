@@ -278,20 +278,12 @@ class LessonController:
                    else question.answers)
         answer = next((item for item in choices if item.uci == uci), None)
         if answer is None:
-            snapshot = _ExplorationSnapshot(
-                QUESTION, question_board, self._last_attempt,
-                self._step_solved, self._assisted, view_state,
-                tuple(self._tree_choices), self._active_prompt,
-                self._active_hints)
-            self._exploration_snapshot = snapshot
-            self._display_board = attempt_board
-            self.state = EXPLORING
             result = AttemptResult(
                 "not_covered",
-                "That move is okay to try. This lesson is looking for a different "
-                "idea. Choose Return to lesson to try again.",
+                "Hmm, that is not what I had in mind. Try another move.",
                 uci, learner_move)
             self._last_attempt = result
+            self._display_board = question_board
             return result
 
         if question.evaluator == "reviewed_tree" and answer.outcome == "continue":
@@ -314,8 +306,13 @@ class LessonController:
             self._last_attempt = result
             return result
 
-        result = AttemptResult(answer.outcome, answer.feedback, uci, learner_move)
-        self._display_board = attempt_board
+        feedback = ("Hmm, that is not what I had in mind. Try another move."
+                    if answer.outcome == "wrong" else answer.feedback)
+        result = AttemptResult(answer.outcome, feedback, uci, learner_move)
+        # Incorrect attempts are feedback only: leave the lesson position
+        # visible so the learner can choose again from the same board.
+        self._display_board = (question_board if answer.outcome == "wrong"
+                               else attempt_board)
         self._last_attempt = result
         self.state = FEEDBACK
         if answer.outcome in ("preferred", "acceptable"):
