@@ -10,6 +10,7 @@ os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 
 from chess_game.study import LessonController, ProgressStore, load_game_library
 from chess_game.study import progress as progress_module
+from chess_game.study.progress import SCHEMA_VERSION
 
 
 def test_renamed_lessons_preserve_saved_progress_and_browse_route(tmp_path, monkeypatch):
@@ -179,7 +180,7 @@ def test_schema_one_is_migrated_without_losing_progress(tmp_path):
         assert record.completed and record.attempts == 4
         version = store.connection.execute(
             "SELECT version FROM schema_info").fetchone()[0]
-        assert version == 5
+        assert version == SCHEMA_VERSION
 
 
 def test_settings_round_trip_and_schema_two_migration(tmp_path):
@@ -211,7 +212,7 @@ def test_settings_round_trip_and_schema_two_migration(tmp_path):
         }
         version = store.connection.execute(
             "SELECT version FROM schema_info").fetchone()[0]
-        assert version == 5
+        assert version == SCHEMA_VERSION
 
 
 def test_schema_three_migration_keeps_old_completion_unknown(tmp_path):
@@ -238,7 +239,7 @@ def test_schema_three_migration_keeps_old_completion_unknown(tmp_path):
         assert store.load("old-lesson", 1).completed
         assert store.load_step_progress("old-lesson", 1) == {}
         assert store.connection.execute(
-            "SELECT version FROM schema_info").fetchone()[0] == 5
+            "SELECT version FROM schema_info").fetchone()[0] == SCHEMA_VERSION
 
 
 def test_assistance_survives_resume_and_fresh_revisit(tmp_path):
@@ -329,7 +330,7 @@ def test_schema_four_migration_conservatively_restores_help(tmp_path):
         assert not store.load("completed", 1).active_assisted
         assert store.load("completed", 1).successes == 1
         assert store.connection.execute(
-            "SELECT version FROM schema_info").fetchone()[0] == 5
+            "SELECT version FROM schema_info").fetchone()[0] == SCHEMA_VERSION
 
 
 def test_transfer_step_can_be_revisited_without_hint(tmp_path):

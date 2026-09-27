@@ -9,7 +9,7 @@ from pathlib import Path
 import sqlite3
 
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 
 # Digests of earlier published identifiers. Keep the former identities out of
 # shipped source while allowing existing local progress to follow renamed lessons.
@@ -165,6 +165,9 @@ class ProgressStore:
                        WHERE completed = 0 AND (hints_used > 0 OR reveals > 0)""")
                 version = 5
                 self.connection.execute("UPDATE schema_info SET version = 5")
+            if version == 5:
+                version = 6
+                self.connection.execute("UPDATE schema_info SET version = 6")
             if version != SCHEMA_VERSION:
                 raise ProgressStoreError(
                     "progress schema version {} is not supported; data was left "
@@ -199,6 +202,30 @@ class ProgressStore:
                     outcome TEXT NOT NULL,
                     updated_at TEXT NOT NULL,
                     PRIMARY KEY (lesson_id, content_revision, step_id)
+                )""")
+            self.connection.execute(
+                """CREATE TABLE IF NOT EXISTS challenge_matches (
+                    match_id TEXT PRIMARY KEY,
+                    opponent_id TEXT NOT NULL,
+                    human_color TEXT NOT NULL CHECK (human_color IN ('w', 'b')),
+                    policy_revision INTEGER NOT NULL,
+                    state TEXT NOT NULL CHECK (state IN
+                        ('active', 'finished', 'abandoned')),
+                    moves_json TEXT NOT NULL,
+                    verified_fen TEXT NOT NULL,
+                    move_seed INTEGER NOT NULL,
+                    comment_seed INTEGER NOT NULL,
+                    comment_id TEXT NOT NULL,
+                    result TEXT,
+                    updated_at TEXT NOT NULL
+                )""")
+            self.connection.execute(
+                """CREATE TABLE IF NOT EXISTS challenge_victories (
+                    opponent_id TEXT NOT NULL,
+                    human_color TEXT NOT NULL CHECK (human_color IN ('w', 'b')),
+                    match_id TEXT NOT NULL REFERENCES challenge_matches(match_id),
+                    earned_at TEXT NOT NULL,
+                    PRIMARY KEY (opponent_id, human_color)
                 )""")
 
     def _migrate_renamed_ids(self):

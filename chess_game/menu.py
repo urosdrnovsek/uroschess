@@ -49,6 +49,8 @@ class MenuLayoutMixin:
             self._build_course_menu()
         elif self.menu_view == "course_about":
             self._build_course_about()
+        elif self.menu_view == "challenge":
+            self._build_challenge_menu()
         elif self.menu_view in ("learn", "play", "ai_play"):
             self._build_menu_section()
         else:
@@ -127,6 +129,9 @@ class MenuLayoutMixin:
             self._menu_buttons.append(Button(
                 (x, top + 103, w, 48), "Two players",
                 lambda: self.start_game({WHITE, BLACK}), kind="step"))
+            self._menu_buttons.append(Button(
+                (x, top + 161, w, 48), "Character Challenge",
+                self._open_challenge_menu, kind="step"))
         else:
             self._menu_heads.append(("PLAY AGAINST AI", x, top + 16))
             for i, (label, colors) in enumerate((
@@ -148,6 +153,52 @@ class MenuLayoutMixin:
             lambda: self._open_menu_section(
                 "play" if self.menu_view == "ai_play" else "main"),
             kind="cta"))
+
+    def _build_challenge_menu(self):
+        from .challenge import ROSTER, stage_states
+        width = min(500, self.win_w - 24)
+        top = max(18, min(85, self.win_h - 590))
+        card = pygame.Rect((self.win_w - width) // 2, top, width, 490)
+        self._menu_card = card
+        x, w = card.x + 20, card.w - 40
+        self._menu_heads.append(("CHARACTER CHALLENGE", x, top + 13))
+        states = stage_states(self.challenge_store.victories())
+        saved = self.challenge_store.active()
+        for index, opponent in enumerate(ROSTER):
+            state = states[index]
+            detail = {
+                "locked": "Locked · beat the previous character twice",
+                "white_required": "Win with White to earn the first badge",
+                "black_required": "White won · now win with Black",
+                "complete": "White ✓  Black ✓ · stage complete",
+            }[state]
+            label = "{} · {}".format(opponent.name, opponent.strength)
+            action = (lambda c=WHITE if state == "white_required" else BLACK:
+                      self._start_challenge(c)) if index == 0 and state in (
+                          "white_required", "black_required", "complete") and not saved else None
+            self._menu_buttons.append(Button(
+                (x, top + 39 + index * 79, w, 70), label,
+                action or (lambda: None), kind="challenge", detail=detail,
+                value=opponent.portrait))
+        if saved:
+            self._menu_buttons.append(Button(
+                (x, card.bottom + 6, (w - 8) // 2, 36), "Resume",
+                self._resume_challenge, kind="cta"))
+            self._menu_buttons.append(Button(
+                (x + (w + 8) // 2, card.bottom + 6, (w - 8) // 2, 36),
+                "Discard", self._discard_challenge, kind="step"))
+        elif states[0] in ("black_required", "complete"):
+            self._menu_buttons.append(Button(
+                (x, card.bottom + 6, (w - 8) // 2, 36), "Replay White",
+                lambda: self._start_challenge(WHITE), kind="step"))
+            if states[0] == "complete":
+                self._menu_buttons.append(Button(
+                    (x + (w + 8) // 2, card.bottom + 6, (w - 8) // 2, 36),
+                    "Replay Black", lambda: self._start_challenge(BLACK),
+                    kind="step"))
+        self._menu_buttons.append(Button(
+            (x, card.bottom + 48, w, 36), "‹  Back to Play",
+            lambda: self._open_menu_section("play"), kind="cta"))
 
     def _build_opening_hub(self):
         width = min(660, self.win_w - 24)

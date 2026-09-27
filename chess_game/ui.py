@@ -28,6 +28,7 @@ import pygame
 from . import ai, sound, theme
 from .board import Board
 from .chess_thoughts import ChessThought, random_thought
+from .challenge import ChallengeStore, stage_states
 from .moves import legal_moves, in_check, game_status
 from . import notation
 from .pieces import WHITE, BLACK, GLYPHS, LETTERS, VALUES
@@ -48,7 +49,7 @@ from .study import (
 from .study.coaching import coach_advice, coach_thought
 from .study.course_progress import build_course_summary
 from .views import BoardView, Button, StudyView, draw_focus_ring
-from .views.chess_thought_view import draw_chess_thought
+from .views.chess_thought_view import draw_chess_thought, _portrait
 from .views.course_about_view import draw_course_about
 from .views.player_library_view import draw_player_card
 from .views.layout import layout_board
@@ -459,6 +460,8 @@ class ChessUI(MenuLayoutMixin):
         self.lesson_max_scroll = 0
         self.lesson_message = ""
         self.progress_store = None
+        self.challenge_store = None
+        self.challenge = None
         self._course_summary_cache = {}
         self.progress_error = ""
         self.preferences_error = ""
@@ -467,6 +470,7 @@ class ChessUI(MenuLayoutMixin):
         except ProgressStoreError as error:
             self.progress_error = str(error)
         if self.progress_store is not None:
+            self.challenge_store = ChallengeStore(self.progress_store)
             try:
                 self._apply_saved_preferences(
                     self.progress_store.load_settings())
@@ -646,6 +650,7 @@ class ChessUI(MenuLayoutMixin):
         self._maybe_start_ai()
 
     def start_game(self, human_colors):
+        self.challenge = None
         self._reset_button_focus()
         self._game_bg = None
         self.scene = "game"
@@ -653,6 +658,67 @@ class ChessUI(MenuLayoutMixin):
         self._ensure_fonts()
         self._new_game(human_colors)
         self._change_chess_thought(play_sound=False)
+
+    def _open_challenge_menu(self):
+        if self.challenge_store is None:
+            self._flash("Challenge progress is unavailable")
+            return
+        self._open_menu_section("challenge")
+
+    def _start_challenge(self, color):
+        try:
+            session = self.challenge_store.start(color)
+        except Exception as error:
+            self._flash(str(error))
+            return
+        self._open_challenge_session(session)
+
+    def _resume_challenge(self):
+        try:
+            session = self.challenge_store.resume()
+        except Exception as error:
+            self._flash(str(error))
+            return
+        if session:
+            self._open_challenge_session(session)
+
+    def _discard_challenge(self):
+        saved = self.challenge_store.active()
+        if saved:
+            try:
+                self.challenge_store.discard(saved["match_id"])
+            except Exception as error:
+                self._flash("Discard failed: " + str(error))
+                return
+            self._menu_buttons = []
+            self._dirty = True
+
+    def _open_challenge_session(self, session):
+        self._reset_button_focus()
+        self.scene = "game"
+        self._new_game({WHITE, BLACK})
+        self.challenge = session
+        self.challenge_ai_error = False
+        self.human_colors = {session.color}
+        self.board = session.board
+        self.moves = list(session.moves)
+        self.sans = []
+        replay = Board()
+        for move in self.moves:
+            self.sans.append(notation.to_san(replay, move))
+            replay.make_move(move)
+        self.last_move = self.moves[-1] if self.moves else None
+        self.status = session.status
+        self.flipped = session.color == BLACK
+        self._layout()
+        self._ensure_fonts()
+        self._game_bg = None
+        self._maybe_start_ai()
+        self._dirty = True
+
+    def _open_challenge_from_game(self):
+        self._to_menu()
+        self._open_challenge_menu()
 
     def start_replay(self, entry, return_to=None):
         self._reset_button_focus()
@@ -997,6 +1063,15 @@ class ChessUI(MenuLayoutMixin):
             return
         if self.thinking:
             return
+        if self.challenge is not None:
+            self.thinking = True
+            self.think_started = time.monotonic()
+            try:
+                move = self.challenge.choose_move()
+                self.ai_queue.put((move, 0, None))
+            except Exception as error:
+                self.ai_queue.put((None, None, str(error)))
+            return
         self.thinking = True
         self.think_started = time.monotonic()
         tl, dcap = self._ai_params()
@@ -1022,16 +1097,46 @@ class ChessUI(MenuLayoutMixin):
             return False
         self.thinking = False
         if error is not None:
+            if self.challenge is not None:
+                self.challenge_ai_error = True
             self._flash("AI move failed: " + error)
             self._dirty = True
             return True
+        if self.challenge is not None:
+            self.challenge_ai_error = False
         self.eval_cp = score if self.board.side_to_move == WHITE else -score
         if move is not None:
-            self._apply(move)
+            self._apply(move, actor=(BLACK if self.challenge.color == WHITE else WHITE)
+                        if self.challenge is not None else None)
         return True
 
     # ================================================================= flow
-    def _apply(self, move):
+    def _apply(self, move, actor=None):
+        if self.challenge is not None:
+            try:
+                self.challenge.accept(move, actor or self.challenge.color)
+            except Exception as error:
+                if actor is not None and actor != self.challenge.color:
+                    self.challenge_ai_error = True
+                self._flash("Challenge move was not saved: " + str(error))
+                return
+            self.challenge_ai_error = False
+            self.board = self.challenge.board
+            self.status = self.challenge.status
+            self.moves = list(self.challenge.moves)
+            previous = Board()
+            self.sans = []
+            for played in self.moves:
+                self.sans.append(notation.to_san(previous, played))
+                previous.make_move(played)
+            self.last_move = move
+            self.selected = None
+            self.legal_from_selected = []
+            self.pending_promo = None
+            sound.play("end" if self.status != "ongoing" else "move")
+            self._maybe_start_ai()
+            self._dirty = True
+            return
         victim = self.board.piece_at(move.to)
         san = notation.to_san(self.board, move)
         self.board.make_move(move)
@@ -1060,6 +1165,8 @@ class ChessUI(MenuLayoutMixin):
         self._maybe_start_ai()
 
     def _takeback(self):
+        if self.challenge is not None:
+            return
         if self.thinking or not self.moves:
             return
         drop = 1
@@ -1130,7 +1237,8 @@ class ChessUI(MenuLayoutMixin):
             return
         if (self._portrait_hit_rect is not None
                 and self._portrait_hit_rect.collidepoint(pos)):
-            self._change_chess_thought()
+            if self.challenge is None:
+                self._change_chess_thought()
             return
         if self.scene == "replay":
             for rect, ply in self._replay_move_hits:
@@ -1521,6 +1629,28 @@ class ChessUI(MenuLayoutMixin):
 
     def _build_game_buttons(self):
         self._game_buttons = []
+        if self.challenge is not None:
+            if self.status == "ongoing":
+                specs = ([("Retry Chicky", self._maybe_start_ai)]
+                         if self.challenge_ai_error else [])
+                specs += [("Save PGN", self._save_pgn),
+                          ("Save & return", self._open_challenge_from_game)]
+            else:
+                states = stage_states(self.challenge_store.victories())
+                again = ("Play as Black" if states[0] == "black_required"
+                         else "Try again")
+                color = BLACK if states[0] == "black_required" else self.challenge.color
+                specs = [(again, lambda c=color: self._start_challenge(c)),
+                         ("Challenges", self._open_challenge_from_game)]
+            if self.show_panel:
+                x, y, w = self.panel_x + 12, self.panel_y + self.panel_h - 100, self.panel_w - 24
+            else:
+                x, y, w = self.status_x, self.status_y + self.status_h + 10, self.status_w
+            y -= max(0, len(specs) - 2) * 42
+            for i, (label, action) in enumerate(specs):
+                self._game_buttons.append(Button(
+                    (x, y + i * 42, w, 36), label, action))
+            return
         specs = [
             ("New", lambda: self._new_game(self.human_colors)),
             ("Takeback", self._takeback),
@@ -1679,6 +1809,8 @@ class ChessUI(MenuLayoutMixin):
                 return
 
     def _toggle_flip(self):
+        if self.challenge is not None:
+            return
         self.flipped = not self.flipped
         self._game_bg = None
 
@@ -1688,6 +1820,7 @@ class ChessUI(MenuLayoutMixin):
         if self.scene == "lesson":
             self._save_lesson_progress()
         self.scene = "menu"
+        self.challenge = None
         self.menu_view = "main"
         self.coach_profile = None
         self._menu_buttons = []
@@ -1751,6 +1884,8 @@ class ChessUI(MenuLayoutMixin):
             self._flash(f"Save failed: {e}")
 
     def _load_pgn(self):
+        if self.challenge is not None:
+            return
         if self.thinking:
             return
         try:
@@ -1806,6 +1941,9 @@ class ChessUI(MenuLayoutMixin):
         lesson_thought = (coach_thought(
             self.coach_profile, self.lesson, self.lesson_message)
             if self.scene == "lesson" and self.coach_profile else self.chess_thought)
+        if self.challenge is not None:
+            lesson_thought = ChessThought("Chicky", "Chicky",
+                                         self.challenge.comment, "chicky.bmp", "")
         if self.scene == "menu":
             self._draw_menu(thought_progress)
         else:
@@ -1818,15 +1956,20 @@ class ChessUI(MenuLayoutMixin):
                     self.screen, self._board_thought_rect,
                     lesson_thought, self.status_font, self.text_font,
                     self.tag_font, self.pal, compact=True,
-                    previous=(None if self.coach_profile else self._thought_previous),
+                    previous=(None if self.coach_profile or self.challenge
+                              else self._thought_previous),
                     progress=thought_progress)
             if self.show_panel:
                 if self.scene == "replay":
                     self._draw_replay_panel(thought_progress)
                 elif self.scene == "lesson":
                     self._draw_lesson_panel(thought_progress)
+                elif self.challenge is not None:
+                    self._draw_challenge_panel()
                 else:
                     self._draw_panel(thought_progress)
+            elif self.challenge is not None:
+                self._draw_challenge_buttons()
             self._draw_status()
             if self.scene in ("game", "lesson") and self.pending_promo is not None:
                 self._draw_promo()
@@ -1945,6 +2088,22 @@ class ChessUI(MenuLayoutMixin):
 
     def _draw_menu_button(self, b, hot, rad, focused=False):
         p = self.pal
+        if b.kind == "challenge":
+            _flat_button(self.screen, b.rect,
+                         p.btn_hot if hot else p.btn, p.panel_line, rad)
+            portrait = _portrait(b.value, 54, p.field, p.text)
+            self.screen.blit(portrait, (b.rect.x + 8, b.rect.y + 8))
+            x = b.rect.x + 72
+            width = b.rect.right - x - 8
+            title = _fit_text(self.text_font, b.label, width)
+            detail = _fit_text(self.small_font, b.detail, width)
+            self.screen.blit(self.text_font.render(title, True, p.text),
+                             (x, b.rect.y + 10))
+            self.screen.blit(self.small_font.render(detail, True, p.text_dim),
+                             (x, b.rect.y + 40))
+            if focused:
+                draw_focus_ring(self.screen, b.rect, p.accent, rad)
+            return
         if b.kind == "player":
             course = self.game_library.course(b.value)
             player = self.game_library.player(course.player_id)
@@ -2109,6 +2268,40 @@ class ChessUI(MenuLayoutMixin):
             piece, (cx, cy), self.white_col, self.black_col)
 
     # ---- panel --------------------------------------------------------
+    def _draw_challenge_buttons(self):
+        p = self.pal
+        mx, my = pygame.mouse.get_pos()
+        for index, button in enumerate(self._game_buttons):
+            _flat_button(self.screen, button.rect,
+                         p.btn_hot if button.rect.collidepoint(mx, my) else p.btn,
+                         p.panel_line)
+            label = _fit_text(self.small_font, button.label, button.rect.w - 12)
+            text = self.small_font.render(label, True, p.text)
+            self.screen.blit(text, text.get_rect(center=button.rect.center))
+            if index == self._button_focus:
+                draw_focus_ring(self.screen, button.rect, p.accent, 8)
+
+    def _draw_challenge_panel(self):
+        p = self.pal
+        card = pygame.Rect(self.panel_x, self.panel_y, self.panel_w, self.panel_h)
+        _round_rect_alpha(self.screen, card, (*p.panel, 255), p.rounding)
+        _hairline(self.screen, card, p.panel_line, p.rounding)
+        color = "White" if self.challenge.color == WHITE else "Black"
+        lines = ["CHICKY CHALLENGE", "You: " + color,
+                 "Win with " + color + " to earn a badge"]
+        if self.status != "ongoing":
+            if self.status == "checkmate":
+                lines.append("You won!" if self.board.side_to_move != self.challenge.color
+                             else "Chicky won")
+            else:
+                lines.append("Draw: " + self.status.replace("draw-", ""))
+        for index, line in enumerate(lines):
+            font = self.status_font if index == 0 else self.small_font
+            line = _fit_text(font, line, card.w - 24)
+            self.screen.blit(font.render(line, True, p.text),
+                             (card.x + 12, card.y + 20 + index * 32))
+        self._draw_challenge_buttons()
+
     def _draw_panel(self, thought_progress=1.0):
         p = self.pal
         rad = p.rounding
@@ -2297,6 +2490,18 @@ class ChessUI(MenuLayoutMixin):
                 text = "Move reviewed"
             else:
                 text = "Read the question"
+        elif self.challenge is not None:
+            color = "White" if self.challenge.color == WHITE else "Black"
+            if self.status == "checkmate":
+                text = ("You beat Chicky with " + color if
+                        self.board.side_to_move != self.challenge.color else
+                        "Chicky won · try again")
+            elif self.status != "ongoing":
+                text = "Draw · " + self.status.replace("draw-", "")
+            elif self.thinking:
+                text = "Chicky is choosing a move"
+            else:
+                text = "Your move · " + color
         elif self.status == "checkmate":
             winner = "White" if self.board.side_to_move == BLACK else "Black"
             text = f"Checkmate — {winner} wins   ·   R new game"
@@ -2416,7 +2621,8 @@ class ChessUI(MenuLayoutMixin):
 
     def _on_key(self, key, modifiers=0):
         if key == pygame.K_n:
-            self._change_chess_thought()
+            if self.challenge is None:
+                self._change_chess_thought()
             return True
         if key == pygame.K_TAB:
             self._move_button_focus(bool(modifiers & pygame.KMOD_SHIFT))
@@ -2443,12 +2649,14 @@ class ChessUI(MenuLayoutMixin):
                 else:
                     self._leave_lesson()
                 return True
-            if self.menu_view in ("colors", "library", "learn", "play",
+            if self.menu_view in ("colors", "library", "learn", "play", "challenge",
                                   "ai_play", "opening_hub", "course",
                                   "course_about"):
                 if self.menu_view == "colors":
                     self._close_colors()
                 elif self.menu_view == "ai_play":
+                    self._open_menu_section("play")
+                elif self.menu_view == "challenge":
                     self._open_menu_section("play")
                 elif self.menu_view == "course":
                     self._open_menu_section("opening_hub")
@@ -2524,7 +2732,7 @@ class ChessUI(MenuLayoutMixin):
             self._move_cursor(*arrows[key])
         elif key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
             self._activate_cursor()
-        elif key == pygame.K_r and not self.thinking:
+        elif key == pygame.K_r and not self.thinking and self.challenge is None:
             self._new_game(self.human_colors)
         elif key == pygame.K_f:
             self._toggle_flip()
@@ -2532,7 +2740,7 @@ class ChessUI(MenuLayoutMixin):
             self._takeback()
         elif key == pygame.K_s:
             self._save_pgn()
-        elif key == pygame.K_l:
+        elif key == pygame.K_l and self.challenge is None:
             self._load_pgn()
         return True
 

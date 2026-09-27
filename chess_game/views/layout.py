@@ -7,6 +7,28 @@ def layout_board(ui):
     P, GAP, SGAP, SH = 16, 14, 12, 42
     ui.pad, ui.status_h = P, SH
     ui._board_thought_rect = None
+    if getattr(ui, "challenge", None) is not None and ui.scene == "game":
+        ui.show_panel = ui.win_w >= 720
+        ui._portrait_in_panel = False
+        ui.panel_w = 250 if ui.show_panel else 0
+        ui.panel_x = ui.win_w - P - ui.panel_w
+        ui.panel_y = P
+        ui.panel_h = ui.win_h - 2 * P
+        inner_w = ui.win_w - 2 * P - (ui.panel_w + GAP if ui.show_panel else 0)
+        thought_h = 92
+        controls_h = 0 if ui.show_panel else 92
+        available = ui.win_h - 2 * P - thought_h - SH - SGAP - controls_h - 18
+        sq = max(20, min(inner_w, available) // 8)
+        ui.SQ = sq
+        ui.board_px = sq * 8
+        ui.frame = max(5, sq // 5)
+        ui.board_x = P + (inner_w - ui.board_px) // 2
+        ui.board_y = P + thought_h + max(0, (available - ui.board_px) // 2)
+        ui.status_x = P
+        ui.status_y = ui.board_y + ui.board_px + ui.frame + SGAP
+        ui.status_w = inner_w
+        ui._board_thought_rect = pygame.Rect(P, P, inner_w, thought_h - 8)
+        return
     medium_side = (ui.scene in ("lesson", "replay")
                    and 560 <= ui.win_w < 820 and ui.win_h <= 640)
     lesson_narrow = (ui.scene in ("lesson", "replay")
