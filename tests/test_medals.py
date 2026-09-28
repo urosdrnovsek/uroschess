@@ -194,6 +194,7 @@ def test_result_snapshot_shows_new_badge_then_rematch_medal(tmp_path):
                 "medal": True, "new_badge": expected_badge}
             assert snapshot["counts"]["pippa-pomeranian"] == expected_count
             assert snapshot["states"][1] == "black_required"
+            assert ui.shelf_character_index == 1
             ui._build_menu_buttons()
             assert ui.menu_view == "challenge_result"
             ui._draw_menu()
@@ -232,6 +233,44 @@ def test_collection_draws_one_circle_per_win_then_one_gold(tmp_path, monkeypatch
         ui.collection_counts["tom-rabbit"] = 11
         ui._draw_menu()
         assert len([item for item in drawn if item[0] == "tom.bmp"]) == 1
+    finally:
+        ui.progress_store.close()
+        pygame.quit()
+
+
+def test_main_menu_shelf_displays_medals_and_cycles_characters(tmp_path, monkeypatch):
+    import pygame
+    from chess_game.ui import ChessUI
+
+    ui = ChessUI(tmp_path / "progress.sqlite3")
+    try:
+        ui.collection_counts.update({"chicky": 3, "pippa-pomeranian": 10})
+        ui._build_menu_buttons()
+        assert {button.label for button in ui._menu_buttons} >= {
+            "Medal collection", "‹", "›"}
+        drawn = []
+        original = ui._draw_medal_portrait
+
+        def record(filename, center, size, gold=False):
+            drawn.append((filename, size, gold))
+            return original(filename, center, size, gold)
+
+        monkeypatch.setattr(ui, "_draw_medal_portrait", record)
+        ui._draw_menu()
+        assert len(drawn) == 3
+        assert all(item[0] == "chicky.bmp" and not item[2] for item in drawn)
+        ui._change_shelf_character(1)
+        drawn.clear()
+        ui._draw_menu()
+        assert len(drawn) == 1
+        assert drawn[0][0] == "pomeranian.bmp" and drawn[0][2]
+        assert drawn[0][1] > 24
+        ui.shelf_character_index = 6
+        ui._open_collection()
+        ui._build_menu_buttons()
+        assert ui.collection_page == 1
+        assert any(button.label.startswith("Monty · ")
+                   for button in ui._collection_cards)
     finally:
         ui.progress_store.close()
         pygame.quit()

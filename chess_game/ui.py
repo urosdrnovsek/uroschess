@@ -486,6 +486,7 @@ class ChessUI(MenuLayoutMixin):
         self.challenge_progress_snapshot = None
         self.collection_counts = {opponent.ident: 0 for opponent in ROSTER}
         self.collection_page = 0
+        self.shelf_character_index = 0
         self._medal_portraits = {}
         self._course_summary_cache = {}
         self.progress_error = ""
@@ -730,6 +731,8 @@ class ChessUI(MenuLayoutMixin):
         if self.challenge is not None and self.challenge.status != "ongoing":
             self._to_menu()
         self._refresh_collection()
+        page_size = 2 if self.win_h < 520 else 4
+        self.collection_page = self.shelf_character_index // page_size
         self.scene = "menu"
         self._open_menu_section("collection")
 
@@ -739,6 +742,11 @@ class ChessUI(MenuLayoutMixin):
         self.collection_page = max(0, min(last, self.collection_page + delta))
         self._reset_button_focus()
         self._menu_buttons = []
+        self._dirty = True
+
+    def _change_shelf_character(self, delta):
+        self.shelf_character_index = (
+            self.shelf_character_index + delta) % len(ROSTER)
         self._dirty = True
 
     def _acknowledge_master(self):
@@ -940,6 +948,8 @@ class ChessUI(MenuLayoutMixin):
             return
         self.challenge_progress_snapshot = snapshot
         self.collection_counts = snapshot["counts"]
+        if snapshot["reward"] is not None:
+            self.shelf_character_index = ROSTER.index(self.challenge.opponent)
 
     def _cancel_challenge_search(self):
         self.challenge_generation += 1
@@ -2515,18 +2525,28 @@ class ChessUI(MenuLayoutMixin):
         _round_rect_alpha(self.screen, rect, (*p.panel, 235),
                           min(p.rounding, 12))
         _hairline(self.screen, rect, p.panel_line, min(p.rounding, 12))
-        cell = (rect.w - 12) / len(ROSTER)
-        for index, opponent in enumerate(ROSTER):
-            count = self.collection_counts[opponent.ident]
-            center_x = round(rect.x + 6 + cell * (index + .5))
-            title = _fit_text(self.tag_font, opponent.name, int(cell) - 4)
-            rendered = self.tag_font.render(title, True, p.text)
-            self.screen.blit(rendered, rendered.get_rect(
-                centerx=center_x, y=rect.y + 51))
-            fitted = _fit_text(self.tag_font, str(count) + " wins", int(cell) - 4)
-            rendered = self.tag_font.render(fitted, True, p.text)
-            self.screen.blit(rendered, rendered.get_rect(
-                centerx=center_x, y=rect.y + 70))
+        opponent = ROSTER[self.shelf_character_index]
+        summary = medal_summary(self.collection_counts[opponent.ident])
+        rendered = self.small_font.render(opponent.name, True, p.text)
+        self.screen.blit(rendered, rendered.get_rect(
+            centerx=rect.centerx, y=rect.y + 42))
+        center_y = rect.y + 84
+        if summary.gold_portrait:
+            self._draw_medal_portrait(opponent.portrait,
+                                     (rect.centerx, center_y), 42, gold=True)
+        else:
+            inner_x, inner_width = rect.x + 45, rect.w - 90
+            diameter = min(24, (inner_width - 27) // 10)
+            gap = (inner_width - 10 * diameter) // 9
+            for index in range(10):
+                center = (inner_x + diameter // 2 +
+                          index * (diameter + gap), center_y)
+                if index < summary.small_portraits:
+                    self._draw_medal_portrait(
+                        opponent.portrait, center, diameter)
+                else:
+                    pygame.draw.circle(self.screen, p.panel_line, center,
+                                       diameter // 2, width=1)
 
     def _draw_challenge_result(self):
         if self.challenge is None:

@@ -42,6 +42,8 @@ The result card reports this match's medal and whether its colour badge is
 new, plus the next unlocked opponent. In Collection, each character has a
 ten-circle row: each win fills one circular portrait; at ten wins the row is
 replaced by one larger gold portrait circle, while the lifetime count keeps
-increasing. The compact main menu shelf shows text totals and opens Collection.
+increasing. The main menu shelf displays the same medal row, with arrows to
+switch characters; after a win it selects that character automatically. Its
+Collection button opens the corresponding collection page.
 The Master title is durable and its celebration is acknowledged only by an
 explicit action.

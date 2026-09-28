@@ -116,6 +116,13 @@ class MenuLayoutMixin:
             (left + 8, shelf_y + (3 if compact else 5), card_width - 16,
              30 if compact else 32),
             "Medal collection", self._open_collection, kind="step"))
+        if self._collection_shelf_rect.h >= 95:
+            self._menu_buttons.extend((
+                Button((left + 7, shelf_y + 49, 32, 48), "‹",
+                       lambda: self._change_shelf_character(-1), kind="step"),
+                Button((left + card_width - 39, shelf_y + 49, 32, 48), "›",
+                       lambda: self._change_shelf_character(1), kind="step"),
+            ))
 
     def _build_collection_menu(self):
         from .challenge import ROSTER, medal_summary
