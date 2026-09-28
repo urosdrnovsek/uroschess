@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 import json
 import random
 import uuid
+from pathlib import Path
 
 from .board import Board
 from .challenge_commentary import VOICES
@@ -53,6 +54,54 @@ ROSTER = (
 )
 OPPONENTS = {opponent.ident: opponent for opponent in ROSTER}
 
+RECOVERY_MESSAGES = {
+    "malformed_history": "The saved move history cannot be read.",
+    "invalid_history": "The saved moves are not a legal match history.",
+    "position_mismatch": "The saved position does not match its moves.",
+    "unsupported_policy": "This saved match uses an older opponent policy.",
+    "unsupported_opponent": "This saved match uses an unknown opponent.",
+    "invalid_metadata": "The saved match details cannot be verified.",
+    "invalid_commentary": "The saved commentary does not match the moves.",
+}
+
+
+@dataclass(frozen=True)
+class ChallengeVerification:
+    match_id: str
+    reason: str = None
+    session: object = None
+
+    @property
+    def valid(self):
+        return self.reason is None
+
+
+@dataclass(frozen=True)
+class MedalSummary:
+    win_count: int
+    small_portraits: int
+    gold_portrait: bool
+    label: str
+
+
+def medal_summary(win_count):
+    if not isinstance(win_count, int) or win_count < 0:
+        raise ValueError("Win count must be a nonnegative integer")
+    if win_count == 0:
+        return MedalSummary(0, 0, False, "No medals yet")
+    if win_count < 10:
+        return MedalSummary(win_count, win_count, False,
+                            "{} {}".format(win_count, "medal" if win_count == 1
+                                           else "medals"))
+    return MedalSummary(win_count, 0, True,
+                        "Gold medal · {} lifetime wins".format(win_count))
+
+
+class ChallengeSaveError(ValueError):
+    def __init__(self, result):
+        self.result = result
+        super().__init__(RECOVERY_MESSAGES[result.reason])
+
 
 def stage_states(victories, legacy_access=()):
     """Derive all unlocks from verified (opponent ID, human colour) wins."""
@@ -76,10 +125,6 @@ def _now():
     return datetime.now(timezone.utc).isoformat()
 
 
-def _legal_uci(board, uci):
-    return next((move for move in legal_moves(board) if str(move) == uci), None)
-
-
 def _verified_result(session):
     board = Board()
     for ply, move in enumerate(session.moves):
@@ -94,6 +139,116 @@ def _verified_result(session):
     return to_fen(board) == to_fen(session.board) and game_status(board) == "checkmate"
 
 
+def verify_historical_win(row, policy_row):
+    """Check retained terminal evidence without replaying timed search decisions."""
+    opponent = OPPONENTS.get(row["opponent_id"])
+    if (opponent is None or row["state"] != "finished" or
+            row["result"] != "checkmate" or row["policy_revision"] != 1 or
+            row["human_color"] not in (WHITE, BLACK) or
+            row["comment_id"] != "character_loses" or
+            not isinstance(row["move_seed"], int) or
+            not isinstance(row["comment_seed"], int)):
+        return False
+    try:
+        parameters = json.loads(policy_row["parameters_json"]) if policy_row else {}
+        history = json.loads(row["moves_json"])
+    except (TypeError, ValueError, RecursionError):
+        return False
+    if (parameters != opponent.policy_parameters and not
+            (opponent.ident == "chicky" and parameters == {})):
+        return False
+    if (not isinstance(history, list) or not history or
+            any(not isinstance(uci, str) or len(uci) not in (4, 5)
+                for uci in history)):
+        return False
+    board = Board()
+    for ply, uci in enumerate(history):
+        if game_status(board) != "ongoing":
+            return False
+        options = legal_moves(board)
+        move = next((item for item in options if str(item) == uci), None)
+        if move is None:
+            return False
+        if (opponent.preset is None and board.side_to_move != row["human_color"]
+                and move != random.Random("{}:{}".format(
+                    row["move_seed"], ply)).choice(options)):
+            return False
+        board.make_move(move)
+    return (to_fen(board) == row["verified_fen"] and
+            game_status(board) == "checkmate" and
+            board.side_to_move != row["human_color"])
+
+
+def verify_saved_match(row, policy_row, store):
+    """Reconstruct an active match without changing its record or awarding wins."""
+    match_id = row["match_id"]
+
+    def invalid(reason):
+        return ChallengeVerification(match_id, reason)
+
+    opponent = OPPONENTS.get(row["opponent_id"])
+    if opponent is None:
+        return invalid("unsupported_opponent")
+    if (row["policy_revision"] != 1 or
+            (policy_row is None and opponent.ident != "chicky")):
+        return invalid("unsupported_policy")
+    try:
+        parameters = json.loads(policy_row["parameters_json"]) if policy_row else {}
+    except (TypeError, ValueError, RecursionError):
+        return invalid("unsupported_policy")
+    if (parameters != opponent.policy_parameters and not
+            (opponent.ident == "chicky" and parameters == {})):
+        return invalid("unsupported_policy")
+    if (row["state"] != "active" or row["result"] is not None or
+            row["human_color"] not in (WHITE, BLACK) or
+            not isinstance(row["move_seed"], int) or
+            not isinstance(row["comment_seed"], int) or
+            not isinstance(row["comment_id"], str) or
+            not isinstance(row["verified_fen"], str)):
+        return invalid("invalid_metadata")
+    try:
+        history = json.loads(row["moves_json"])
+    except (TypeError, ValueError, RecursionError):
+        return invalid("malformed_history")
+    if (not isinstance(history, list) or
+            any(not isinstance(uci, str) or len(uci) not in (4, 5)
+                for uci in history)):
+        return invalid("malformed_history")
+
+    session = ChallengeSession(store, match_id, row["human_color"], opponent,
+                               row["move_seed"], row["comment_seed"])
+    expected_comment = "greeting"
+    for uci in history:
+        if game_status(session.board) != "ongoing":
+            return invalid("invalid_history")
+        options = legal_moves(session.board)
+        move = next((item for item in options if str(item) == uci), None)
+        if move is None:
+            return invalid("invalid_history")
+        actor = session.board.side_to_move
+        if (opponent.preset is None and actor != session.color and
+                move != random.Random("{}:{}".format(
+                    session.move_seed, len(session.moves))).choice(options)):
+            return invalid("unsupported_policy")
+        session.board.make_move(move)
+        if actor != session.color and game_status(session.board) == "ongoing":
+            order = list(range(len(VOICES[opponent.ident].after_move)))
+            random.Random(session.comment_seed).shuffle(order)
+            index = (len(session.moves) -
+                     (1 if session.color == WHITE else 0)) // 2
+            current = str(order[index % len(order)])
+            expected_comment = (str(order[(index + 1) % len(order)])
+                                if current == expected_comment else current)
+        session.moves.append(move)
+    if (to_fen(session.board) != row["verified_fen"] or
+            game_status(session.board) != "ongoing"):
+        return invalid("position_mismatch")
+    if row["comment_id"] != expected_comment:
+        return invalid("invalid_commentary")
+    session.comment_id = expected_comment
+    return ChallengeVerification(match_id, session=session)
+
+
 class ChallengeStore:
     def __init__(self, progress_store):
         self.connection = progress_store.connection
@@ -102,6 +257,28 @@ class ChallengeStore:
         rows = self.connection.execute(
             "SELECT opponent_id, human_color FROM challenge_victories").fetchall()
         return {(row["opponent_id"], row["human_color"]) for row in rows}
+
+    def medal_counts(self):
+        counts = {opponent.ident: 0 for opponent in ROSTER}
+        for row in self.connection.execute(
+                "SELECT opponent_id, COUNT(*) AS total FROM challenge_win_events "
+                "GROUP BY opponent_id"):
+            if row["opponent_id"] in counts:
+                counts[row["opponent_id"]] = row["total"]
+        return counts
+
+    def reward_for_match(self, match_id):
+        event = self.connection.execute(
+            "SELECT opponent_id, human_color FROM challenge_win_events "
+            "WHERE match_id = ?", (match_id,)).fetchone()
+        if event is None:
+            return None
+        badge = self.connection.execute(
+            "SELECT match_id FROM challenge_victories WHERE opponent_id = ? "
+            "AND human_color = ?", (event["opponent_id"],
+                                  event["human_color"])).fetchone()
+        return {"medal": True, "new_badge": badge is not None and
+                badge["match_id"] == match_id}
 
     def stages(self):
         legacy_access = {row["opponent_id"] for row in self.connection.execute(
@@ -143,52 +320,83 @@ class ChallengeStore:
         return session
 
     def resume(self):
+        result = self.inspect_active()
+        if result is None:
+            return None
+        if not result.valid:
+            raise ChallengeSaveError(result)
+        return result.session
+
+    def inspect_active(self):
         row = self.active()
         if row is None:
             return None
-        opponent = OPPONENTS.get(row["opponent_id"])
-        if opponent is None or row["policy_revision"] != 1:
-            raise ValueError("This saved match uses unsupported challenge rules")
         policy_row = self.connection.execute(
             "SELECT parameters_json FROM challenge_policies WHERE match_id = ?",
             (row["match_id"],)).fetchone()
-        parameters = json.loads(policy_row[0]) if policy_row else {}
-        if (parameters != opponent.policy_parameters and not
-                (opponent.ident == "chicky" and parameters == {})):
-            raise ValueError("This saved match uses an older opponent policy")
-        session = ChallengeSession(self, row["match_id"], row["human_color"],
-                                   opponent,
-                                   row["move_seed"], row["comment_seed"])
-        session.comment_id = row["comment_id"]
-        try:
-            for uci in json.loads(row["moves_json"]):
-                move = _legal_uci(session.board, uci)
-                if move is None or game_status(session.board) != "ongoing":
-                    raise ValueError("Saved challenge has an invalid move")
-                if (opponent.preset is None and
-                        session.board.side_to_move != session.color and
-                        move != random.Random("{}:{}".format(
-                            session.move_seed, len(session.moves))).choice(
-                                legal_moves(session.board))):
-                    raise ValueError("Saved Chicky move violates its policy")
-                session.board.make_move(move)
-                session.moves.append(move)
-            if (to_fen(session.board) != row["verified_fen"] or
-                    game_status(session.board) != "ongoing"):
-                raise ValueError("Saved challenge position cannot be verified")
-            character_moves = (len(session.moves) +
-                               (1 if session.color == BLACK else 0)) // 2
-            if character_moves == 0:
-                valid_comment = session.comment_id == "greeting"
-            else:
-                valid_comment = (session.comment_id.isdigit() and
-                                 0 <= int(session.comment_id) <
-                                 len(VOICES[opponent.ident].after_move))
-            if not valid_comment:
-                raise ValueError("Saved challenge commentary cannot be verified")
-        except (TypeError, json.JSONDecodeError, KeyError) as error:
-            raise ValueError("Saved challenge cannot be verified") from error
-        return session
+        return verify_saved_match(row, policy_row, self)
+
+    def archive_invalid(self, match_id):
+        """Clear an invalid active slot while retaining its original evidence."""
+        with self.connection:
+            self.connection.execute("BEGIN IMMEDIATE")
+            row = self.active()
+            if row is None or row["match_id"] != match_id:
+                raise ValueError("This saved match is no longer active")
+            policy_row = self.connection.execute(
+                "SELECT parameters_json FROM challenge_policies WHERE match_id = ?",
+                (match_id,)).fetchone()
+            result = verify_saved_match(row, policy_row, self)
+            if result.valid:
+                raise ValueError("This match is valid; resume or discard it")
+            now = _now()
+            self.connection.execute(
+                """INSERT INTO challenge_recovery
+                   (match_id, reason_code, diagnosed_at, archived_at,
+                    original_updated_at)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (match_id, result.reason, now, now, row["updated_at"]))
+            updated = self.connection.execute(
+                """UPDATE challenge_matches SET state = 'abandoned', updated_at = ?
+                   WHERE match_id = ? AND state = 'active'""", (now, match_id))
+            if updated.rowcount != 1:
+                raise ValueError("This saved match is no longer active")
+        return result
+
+    def archived_recoveries(self):
+        return self.connection.execute(
+            """SELECT recovery.match_id, recovery.reason_code,
+                      recovery.archived_at, matches.opponent_id
+               FROM challenge_recovery AS recovery
+               JOIN challenge_matches AS matches ON matches.match_id = recovery.match_id
+               ORDER BY recovery.archived_at DESC, recovery.match_id DESC""").fetchall()
+
+    def export_match(self, match_id, destination):
+        """Copy the raw saved record to a new local JSON file."""
+        row = self.connection.execute(
+            "SELECT * FROM challenge_matches WHERE match_id = ?",
+            (match_id,)).fetchone()
+        if row is None:
+            raise ValueError("Saved challenge match was not found")
+        policy = self.connection.execute(
+            "SELECT * FROM challenge_policies WHERE match_id = ?",
+            (match_id,)).fetchone()
+        recovery = self.connection.execute(
+            "SELECT * FROM challenge_recovery WHERE match_id = ?",
+            (match_id,)).fetchone()
+        original = dict(row)
+        if recovery is not None:
+            original["state"] = "active"
+            original["updated_at"] = recovery["original_updated_at"]
+        payload = {"format": "uroschess-challenge-recovery-1",
+                   "match": dict(row), "policy": dict(policy) if policy else None,
+                   "recovery": dict(recovery) if recovery else None,
+                   "original_match": original}
+        path = Path(destination)
+        with path.open("x", encoding="utf-8") as target:
+            json.dump(payload, target, indent=2, sort_keys=True)
+            target.write("\n")
+        return path
 
     def discard(self, match_id):
         with self.connection:
@@ -243,6 +451,11 @@ class ChallengeStore:
                         session.opponent.policy_parameters, sort_keys=True)))
             if (result == "checkmate" and session.board.side_to_move != session.color
                     and _verified_result(session)):
+                self.connection.execute(
+                    """INSERT INTO challenge_win_events
+                       (match_id, opponent_id, human_color, earned_at,
+                        verification_revision) VALUES (?, ?, ?, ?, 1)""",
+                    (session.match_id, session.opponent.ident, session.color, now))
                 index = ROSTER.index(session.opponent)
                 required = self.stages()[index]
                 if (session.color == WHITE and required == "white_required" or

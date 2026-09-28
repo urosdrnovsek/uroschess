@@ -1,0 +1,2062 @@
+{
+  "format": "uroschess-opponent-calibration-1",
+  "generated_at": "2026-09-28T17:52:05.570350+00:00",
+  "runtime": {
+    "python": "3.14.7",
+    "platform": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
+    "processor": "",
+    "cpu_count": 6,
+    "elapsed_seconds": 121.493
+  },
+  "method": "Adjacent opponents play each selected position in both colour assignments with each seed. Only finished games enter W/D/L; truncations and search failures are separate. Small samples and time-dependent search prevent an Elo or reliable strength claim.",
+  "positions": {
+    "start": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "tactical": "4k3/8/8/8/8/8/4q3/4R2K w - - 0 1",
+    "endgame": "4k3/6p1/8/8/8/8/1P6/4K3 w - - 0 1"
+  },
+  "seeds": [
+    11
+  ],
+  "max_plies": 4,
+  "policies": {
+    "chicky": {
+      "kind": "random",
+      "revision": 1
+    },
+    "pippa-pomeranian": {
+      "kind": "search",
+      "preset": "Easy",
+      "seconds": 0.25,
+      "depth": 1,
+      "revision": 1,
+      "random_move_chance": 0.5
+    },
+    "tina-turtle": {
+      "kind": "search",
+      "preset": "Easy",
+      "seconds": 0.25,
+      "depth": 1,
+      "revision": 1,
+      "random_move_chance": 0.3
+    },
+    "tom-rabbit": {
+      "kind": "search",
+      "preset": "Normal",
+      "seconds": 1.0,
+      "depth": 1,
+      "revision": 1,
+      "random_move_chance": 0.1
+    },
+    "bruno-bear": {
+      "kind": "search",
+      "preset": "Normal",
+      "seconds": 1.0,
+      "depth": 2,
+      "revision": 1
+    },
+    "olive-owl": {
+      "kind": "search",
+      "preset": "Hard",
+      "seconds": 2.0,
+      "depth": 32,
+      "revision": 1
+    },
+    "monty-cat": {
+      "kind": "search",
+      "preset": "Max",
+      "seconds": 6.0,
+      "depth": 64,
+      "revision": 1
+    }
+  },
+  "summaries": [
+    {
+      "pair": [
+        "chicky",
+        "pippa-pomeranian"
+      ],
+      "by_color": {
+        "w": {
+          "win": 0,
+          "draw": 0,
+          "loss": 0,
+          "truncated": 3,
+          "search_failure": 0
+        },
+        "b": {
+          "win": 0,
+          "draw": 0,
+          "loss": 0,
+          "truncated": 3,
+          "search_failure": 0
+        }
+      },
+      "median_search_seconds": 0.0091,
+      "median_completed_depth": 1,
+      "searches_without_completed_depth": 0
+    },
+    {
+      "pair": [
+        "pippa-pomeranian",
+        "tina-turtle"
+      ],
+      "by_color": {
+        "w": {
+          "win": 0,
+          "draw": 0,
+          "loss": 0,
+          "truncated": 3,
+          "search_failure": 0
+        },
+        "b": {
+          "win": 1,
+          "draw": 0,
+          "loss": 0,
+          "truncated": 2,
+          "search_failure": 0
+        }
+      },
+      "median_search_seconds": 0.00295,
+      "median_completed_depth": 1.0,
+      "searches_without_completed_depth": 0
+    },
+    {
+      "pair": [
+        "tina-turtle",
+        "tom-rabbit"
+      ],
+      "by_color": {
+        "w": {
+          "win": 0,
+          "draw": 0,
+          "loss": 0,
+          "truncated": 3,
+          "search_failure": 0
+        },
+        "b": {
+          "win": 0,
+          "draw": 0,
+          "loss": 0,
+          "truncated": 3,
+          "search_failure": 0
+        }
+      },
+      "median_search_seconds": 0.00275,
+      "median_completed_depth": 1.0,
+      "searches_without_completed_depth": 0
+    },
+    {
+      "pair": [
+        "tom-rabbit",
+        "bruno-bear"
+      ],
+      "by_color": {
+        "w": {
+          "win": 0,
+          "draw": 0,
+          "loss": 0,
+          "truncated": 3,
+          "search_failure": 0
+        },
+        "b": {
+          "win": 0,
+          "draw": 0,
+          "loss": 0,
+          "truncated": 3,
+          "search_failure": 0
+        }
+      },
+      "median_search_seconds": 0.0086,
+      "median_completed_depth": 2,
+      "searches_without_completed_depth": 0
+    },
+    {
+      "pair": [
+        "bruno-bear",
+        "olive-owl"
+      ],
+      "by_color": {
+        "w": {
+          "win": 0,
+          "draw": 0,
+          "loss": 0,
+          "truncated": 3,
+          "search_failure": 0
+        },
+        "b": {
+          "win": 0,
+          "draw": 0,
+          "loss": 0,
+          "truncated": 3,
+          "search_failure": 0
+        }
+      },
+      "median_search_seconds": 1.0304499999999999,
+      "median_completed_depth": 3.0,
+      "searches_without_completed_depth": 0
+    },
+    {
+      "pair": [
+        "olive-owl",
+        "monty-cat"
+      ],
+      "by_color": {
+        "w": {
+          "win": 0,
+          "draw": 0,
+          "loss": 0,
+          "truncated": 3,
+          "search_failure": 0
+        },
+        "b": {
+          "win": 0,
+          "draw": 0,
+          "loss": 0,
+          "truncated": 3,
+          "search_failure": 0
+        }
+      },
+      "median_search_seconds": 4.034800000000001,
+      "median_completed_depth": 7.0,
+      "searches_without_completed_depth": 0
+    }
+  ],
+  "games": [
+    {
+      "weaker": "chicky",
+      "stronger": "pippa-pomeranian",
+      "stronger_color": "w",
+      "position": "start",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "rnbqk1nr/pppp1ppp/8/2b1p3/8/5NP1/PPPPPP1P/RNBQKB1R w KQkq - 1 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "pippa-pomeranian",
+          "move": "g1f3",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 1,
+          "opponent": "chicky",
+          "move": "e7e5",
+          "source": "random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "pippa-pomeranian",
+          "move": "g2g3",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 3,
+          "opponent": "chicky",
+          "move": "f8c5",
+          "source": "random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        }
+      ]
+    },
+    {
+      "weaker": "chicky",
+      "stronger": "pippa-pomeranian",
+      "stronger_color": "b",
+      "position": "start",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "r1bqkb1r/pppppppp/2n4n/8/4P3/3P4/PPP2PPP/RNBQKBNR w KQkq - 1 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "chicky",
+          "move": "d2d3",
+          "source": "random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 1,
+          "opponent": "pippa-pomeranian",
+          "move": "g8h6",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "chicky",
+          "move": "e2e4",
+          "source": "random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 3,
+          "opponent": "pippa-pomeranian",
+          "move": "b8c6",
+          "source": "search",
+          "seconds": 0.014,
+          "completed_depth": 1,
+          "nodes": 44
+        }
+      ]
+    },
+    {
+      "weaker": "chicky",
+      "stronger": "pippa-pomeranian",
+      "stronger_color": "w",
+      "position": "tactical",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "4k3/7q/8/8/8/8/8/3R2K1 w - - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "pippa-pomeranian",
+          "move": "e1d1",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 1,
+          "opponent": "chicky",
+          "move": "e2e4",
+          "source": "random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "pippa-pomeranian",
+          "move": "h1g1",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 3,
+          "opponent": "chicky",
+          "move": "e4h7",
+          "source": "random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        }
+      ]
+    },
+    {
+      "weaker": "chicky",
+      "stronger": "pippa-pomeranian",
+      "stronger_color": "b",
+      "position": "tactical",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/4k3/1R6/8/8/3q4/8/7K w - - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "chicky",
+          "move": "e1b1",
+          "source": "random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 1,
+          "opponent": "pippa-pomeranian",
+          "move": "e8e7",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "chicky",
+          "move": "b1b6",
+          "source": "random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 3,
+          "opponent": "pippa-pomeranian",
+          "move": "e2d3",
+          "source": "search",
+          "seconds": 0.0091,
+          "completed_depth": 1,
+          "nodes": 52
+        }
+      ]
+    },
+    {
+      "weaker": "chicky",
+      "stronger": "pippa-pomeranian",
+      "stronger_color": "w",
+      "position": "endgame",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/5kp1/8/8/8/8/1P6/4K3 w - - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "pippa-pomeranian",
+          "move": "e1f2",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 1,
+          "opponent": "chicky",
+          "move": "e8e7",
+          "source": "random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "pippa-pomeranian",
+          "move": "f2e1",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 3,
+          "opponent": "chicky",
+          "move": "e7f7",
+          "source": "random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        }
+      ]
+    },
+    {
+      "weaker": "chicky",
+      "stronger": "pippa-pomeranian",
+      "stronger_color": "b",
+      "position": "endgame",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/2k3p1/8/8/1P6/8/4K3/8 w - - 3 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "chicky",
+          "move": "b2b4",
+          "source": "random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 1,
+          "opponent": "pippa-pomeranian",
+          "move": "e8d8",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "chicky",
+          "move": "e1e2",
+          "source": "random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 3,
+          "opponent": "pippa-pomeranian",
+          "move": "d8c7",
+          "source": "search",
+          "seconds": 0.0018,
+          "completed_depth": 1,
+          "nodes": 14
+        }
+      ]
+    },
+    {
+      "weaker": "pippa-pomeranian",
+      "stronger": "tina-turtle",
+      "stronger_color": "w",
+      "position": "start",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "r1bqkb1r/pppppppp/2n4n/8/8/2N2N2/PPPPPPPP/R1BQKB1R w KQkq - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "tina-turtle",
+          "move": "b1c3",
+          "source": "search",
+          "seconds": 0.0069,
+          "completed_depth": 1,
+          "nodes": 40
+        },
+        {
+          "ply": 1,
+          "opponent": "pippa-pomeranian",
+          "move": "g8h6",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "tina-turtle",
+          "move": "g1f3",
+          "source": "search",
+          "seconds": 0.0077,
+          "completed_depth": 1,
+          "nodes": 44
+        },
+        {
+          "ply": 3,
+          "opponent": "pippa-pomeranian",
+          "move": "b8c6",
+          "source": "search",
+          "seconds": 0.0085,
+          "completed_depth": 1,
+          "nodes": 40
+        }
+      ]
+    },
+    {
+      "weaker": "pippa-pomeranian",
+      "stronger": "tina-turtle",
+      "stronger_color": "b",
+      "position": "start",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "r1bqkb1r/pppppppp/2n4n/8/8/5NP1/PPPPPP1P/RNBQKB1R w KQkq - 1 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "pippa-pomeranian",
+          "move": "g1f3",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 1,
+          "opponent": "tina-turtle",
+          "move": "g8h6",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "pippa-pomeranian",
+          "move": "g2g3",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 3,
+          "opponent": "tina-turtle",
+          "move": "b8c6",
+          "source": "search",
+          "seconds": 0.0083,
+          "completed_depth": 1,
+          "nodes": 40
+        }
+      ]
+    },
+    {
+      "weaker": "pippa-pomeranian",
+      "stronger": "tina-turtle",
+      "stronger_color": "w",
+      "position": "tactical",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/2k5/8/8/8/8/4R3/6K1 w - - 3 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "tina-turtle",
+          "move": "e1e2",
+          "source": "search",
+          "seconds": 0.003,
+          "completed_depth": 1,
+          "nodes": 16
+        },
+        {
+          "ply": 1,
+          "opponent": "pippa-pomeranian",
+          "move": "e8d8",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "tina-turtle",
+          "move": "h1g1",
+          "source": "search",
+          "seconds": 0.0029,
+          "completed_depth": 1,
+          "nodes": 35
+        },
+        {
+          "ply": 3,
+          "opponent": "pippa-pomeranian",
+          "move": "d8c7",
+          "source": "search",
+          "seconds": 0.0018,
+          "completed_depth": 1,
+          "nodes": 6
+        }
+      ]
+    },
+    {
+      "weaker": "pippa-pomeranian",
+      "stronger": "tina-turtle",
+      "stronger_color": "b",
+      "position": "tactical",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "checkmate",
+      "outcome": "win",
+      "failure": null,
+      "final_fen": "4k3/8/8/8/8/7q/8/6RK w - - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "pippa-pomeranian",
+          "move": "e1d1",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 1,
+          "opponent": "tina-turtle",
+          "move": "e2d3",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "pippa-pomeranian",
+          "move": "d1g1",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 3,
+          "opponent": "tina-turtle",
+          "move": "d3h3",
+          "source": "search",
+          "seconds": 0.0086,
+          "completed_depth": 1,
+          "nodes": 59
+        }
+      ]
+    },
+    {
+      "weaker": "pippa-pomeranian",
+      "stronger": "tina-turtle",
+      "stronger_color": "w",
+      "position": "endgame",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/2k3p1/8/8/8/3K4/1P6/8 w - - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "tina-turtle",
+          "move": "e1d2",
+          "source": "search",
+          "seconds": 0.0016,
+          "completed_depth": 1,
+          "nodes": 14
+        },
+        {
+          "ply": 1,
+          "opponent": "pippa-pomeranian",
+          "move": "e8d8",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "tina-turtle",
+          "move": "d2d3",
+          "source": "search",
+          "seconds": 0.0022,
+          "completed_depth": 1,
+          "nodes": 20
+        },
+        {
+          "ply": 3,
+          "opponent": "pippa-pomeranian",
+          "move": "d8c7",
+          "source": "search",
+          "seconds": 0.002,
+          "completed_depth": 1,
+          "nodes": 14
+        }
+      ]
+    },
+    {
+      "weaker": "pippa-pomeranian",
+      "stronger": "tina-turtle",
+      "stronger_color": "b",
+      "position": "endgame",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/2k3p1/8/8/8/8/1P6/4K3 w - - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "pippa-pomeranian",
+          "move": "e1f2",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 1,
+          "opponent": "tina-turtle",
+          "move": "e8d8",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "pippa-pomeranian",
+          "move": "f2e1",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 3,
+          "opponent": "tina-turtle",
+          "move": "d8c7",
+          "source": "search",
+          "seconds": 0.0014,
+          "completed_depth": 1,
+          "nodes": 13
+        }
+      ]
+    },
+    {
+      "weaker": "tina-turtle",
+      "stronger": "tom-rabbit",
+      "stronger_color": "w",
+      "position": "start",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "r1bqkb1r/pppppppp/2n4n/8/8/2N2N2/PPPPPPPP/R1BQKB1R w KQkq - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "tom-rabbit",
+          "move": "b1c3",
+          "source": "search",
+          "seconds": 0.0067,
+          "completed_depth": 1,
+          "nodes": 40
+        },
+        {
+          "ply": 1,
+          "opponent": "tina-turtle",
+          "move": "g8h6",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "tom-rabbit",
+          "move": "g1f3",
+          "source": "search",
+          "seconds": 0.0078,
+          "completed_depth": 1,
+          "nodes": 44
+        },
+        {
+          "ply": 3,
+          "opponent": "tina-turtle",
+          "move": "b8c6",
+          "source": "search",
+          "seconds": 0.0086,
+          "completed_depth": 1,
+          "nodes": 40
+        }
+      ]
+    },
+    {
+      "weaker": "tina-turtle",
+      "stronger": "tom-rabbit",
+      "stronger_color": "b",
+      "position": "start",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "r1bqkb1r/pppppppp/2n4n/8/8/2N2N2/PPPPPPPP/R1BQKB1R w KQkq - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "tina-turtle",
+          "move": "b1c3",
+          "source": "search",
+          "seconds": 0.0069,
+          "completed_depth": 1,
+          "nodes": 40
+        },
+        {
+          "ply": 1,
+          "opponent": "tom-rabbit",
+          "move": "g8h6",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "tina-turtle",
+          "move": "g1f3",
+          "source": "search",
+          "seconds": 0.0075,
+          "completed_depth": 1,
+          "nodes": 44
+        },
+        {
+          "ply": 3,
+          "opponent": "tom-rabbit",
+          "move": "b8c6",
+          "source": "search",
+          "seconds": 0.0085,
+          "completed_depth": 1,
+          "nodes": 40
+        }
+      ]
+    },
+    {
+      "weaker": "tina-turtle",
+      "stronger": "tom-rabbit",
+      "stronger_color": "w",
+      "position": "tactical",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/2k5/8/8/8/8/4R3/6K1 w - - 3 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "tom-rabbit",
+          "move": "e1e2",
+          "source": "search",
+          "seconds": 0.003,
+          "completed_depth": 1,
+          "nodes": 16
+        },
+        {
+          "ply": 1,
+          "opponent": "tina-turtle",
+          "move": "e8d8",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "tom-rabbit",
+          "move": "h1g1",
+          "source": "search",
+          "seconds": 0.0027,
+          "completed_depth": 1,
+          "nodes": 35
+        },
+        {
+          "ply": 3,
+          "opponent": "tina-turtle",
+          "move": "d8c7",
+          "source": "search",
+          "seconds": 0.0018,
+          "completed_depth": 1,
+          "nodes": 6
+        }
+      ]
+    },
+    {
+      "weaker": "tina-turtle",
+      "stronger": "tom-rabbit",
+      "stronger_color": "b",
+      "position": "tactical",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/2k5/8/8/8/8/4R3/6K1 w - - 3 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "tina-turtle",
+          "move": "e1e2",
+          "source": "search",
+          "seconds": 0.0034,
+          "completed_depth": 1,
+          "nodes": 16
+        },
+        {
+          "ply": 1,
+          "opponent": "tom-rabbit",
+          "move": "e8d8",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "tina-turtle",
+          "move": "h1g1",
+          "source": "search",
+          "seconds": 0.0028,
+          "completed_depth": 1,
+          "nodes": 35
+        },
+        {
+          "ply": 3,
+          "opponent": "tom-rabbit",
+          "move": "d8c7",
+          "source": "search",
+          "seconds": 0.0018,
+          "completed_depth": 1,
+          "nodes": 6
+        }
+      ]
+    },
+    {
+      "weaker": "tina-turtle",
+      "stronger": "tom-rabbit",
+      "stronger_color": "w",
+      "position": "endgame",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/2k3p1/8/8/8/3K4/1P6/8 w - - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "tom-rabbit",
+          "move": "e1d2",
+          "source": "search",
+          "seconds": 0.0015,
+          "completed_depth": 1,
+          "nodes": 14
+        },
+        {
+          "ply": 1,
+          "opponent": "tina-turtle",
+          "move": "e8d8",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "tom-rabbit",
+          "move": "d2d3",
+          "source": "search",
+          "seconds": 0.0021,
+          "completed_depth": 1,
+          "nodes": 20
+        },
+        {
+          "ply": 3,
+          "opponent": "tina-turtle",
+          "move": "d8c7",
+          "source": "search",
+          "seconds": 0.0019,
+          "completed_depth": 1,
+          "nodes": 14
+        }
+      ]
+    },
+    {
+      "weaker": "tina-turtle",
+      "stronger": "tom-rabbit",
+      "stronger_color": "b",
+      "position": "endgame",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/2k3p1/8/8/8/3K4/1P6/8 w - - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "tina-turtle",
+          "move": "e1d2",
+          "source": "search",
+          "seconds": 0.0016,
+          "completed_depth": 1,
+          "nodes": 14
+        },
+        {
+          "ply": 1,
+          "opponent": "tom-rabbit",
+          "move": "e8d8",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "tina-turtle",
+          "move": "d2d3",
+          "source": "search",
+          "seconds": 0.0021,
+          "completed_depth": 1,
+          "nodes": 20
+        },
+        {
+          "ply": 3,
+          "opponent": "tom-rabbit",
+          "move": "d8c7",
+          "source": "search",
+          "seconds": 0.0019,
+          "completed_depth": 1,
+          "nodes": 14
+        }
+      ]
+    },
+    {
+      "weaker": "tom-rabbit",
+      "stronger": "bruno-bear",
+      "stronger_color": "w",
+      "position": "start",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "r1bqkb1r/pppppppp/2n4n/8/8/2N2N2/PPPPPPPP/R1BQKB1R w KQkq - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "bruno-bear",
+          "move": "b1c3",
+          "source": "search",
+          "seconds": 0.0325,
+          "completed_depth": 2,
+          "nodes": 140
+        },
+        {
+          "ply": 1,
+          "opponent": "tom-rabbit",
+          "move": "g8h6",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "bruno-bear",
+          "move": "g1f3",
+          "source": "search",
+          "seconds": 0.041,
+          "completed_depth": 2,
+          "nodes": 164
+        },
+        {
+          "ply": 3,
+          "opponent": "tom-rabbit",
+          "move": "b8c6",
+          "source": "search",
+          "seconds": 0.0086,
+          "completed_depth": 1,
+          "nodes": 40
+        }
+      ]
+    },
+    {
+      "weaker": "tom-rabbit",
+      "stronger": "bruno-bear",
+      "stronger_color": "b",
+      "position": "start",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "r1bqkb1r/pppppppp/2n2n2/8/8/2N2N2/PPPPPPPP/R1BQKB1R w KQkq - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "tom-rabbit",
+          "move": "b1c3",
+          "source": "search",
+          "seconds": 0.0066,
+          "completed_depth": 1,
+          "nodes": 40
+        },
+        {
+          "ply": 1,
+          "opponent": "bruno-bear",
+          "move": "b8c6",
+          "source": "search",
+          "seconds": 0.0416,
+          "completed_depth": 2,
+          "nodes": 191
+        },
+        {
+          "ply": 2,
+          "opponent": "tom-rabbit",
+          "move": "g1f3",
+          "source": "search",
+          "seconds": 0.009,
+          "completed_depth": 1,
+          "nodes": 46
+        },
+        {
+          "ply": 3,
+          "opponent": "bruno-bear",
+          "move": "g8f6",
+          "source": "search",
+          "seconds": 0.0599,
+          "completed_depth": 2,
+          "nodes": 229
+        }
+      ]
+    },
+    {
+      "weaker": "tom-rabbit",
+      "stronger": "bruno-bear",
+      "stronger_color": "w",
+      "position": "tactical",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/2k5/8/8/8/8/4R3/6K1 w - - 3 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "bruno-bear",
+          "move": "e1e2",
+          "source": "search",
+          "seconds": 0.0102,
+          "completed_depth": 2,
+          "nodes": 46
+        },
+        {
+          "ply": 1,
+          "opponent": "tom-rabbit",
+          "move": "e8d8",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "bruno-bear",
+          "move": "h1g1",
+          "source": "search",
+          "seconds": 0.0147,
+          "completed_depth": 2,
+          "nodes": 92
+        },
+        {
+          "ply": 3,
+          "opponent": "tom-rabbit",
+          "move": "d8c7",
+          "source": "search",
+          "seconds": 0.0017,
+          "completed_depth": 1,
+          "nodes": 6
+        }
+      ]
+    },
+    {
+      "weaker": "tom-rabbit",
+      "stronger": "bruno-bear",
+      "stronger_color": "b",
+      "position": "tactical",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/8/3k4/8/8/8/4R3/6K1 w - - 3 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "tom-rabbit",
+          "move": "e1e2",
+          "source": "search",
+          "seconds": 0.0029,
+          "completed_depth": 1,
+          "nodes": 16
+        },
+        {
+          "ply": 1,
+          "opponent": "bruno-bear",
+          "move": "e8d7",
+          "source": "search",
+          "seconds": 0.0099,
+          "completed_depth": 2,
+          "nodes": 86
+        },
+        {
+          "ply": 2,
+          "opponent": "tom-rabbit",
+          "move": "h1g1",
+          "source": "search",
+          "seconds": 0.0035,
+          "completed_depth": 1,
+          "nodes": 35
+        },
+        {
+          "ply": 3,
+          "opponent": "bruno-bear",
+          "move": "d7d6",
+          "source": "search",
+          "seconds": 0.011,
+          "completed_depth": 2,
+          "nodes": 90
+        }
+      ]
+    },
+    {
+      "weaker": "tom-rabbit",
+      "stronger": "bruno-bear",
+      "stronger_color": "w",
+      "position": "endgame",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/2k3p1/8/8/8/3K4/1P6/8 w - - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "bruno-bear",
+          "move": "e1d2",
+          "source": "search",
+          "seconds": 0.0063,
+          "completed_depth": 2,
+          "nodes": 51
+        },
+        {
+          "ply": 1,
+          "opponent": "tom-rabbit",
+          "move": "e8d8",
+          "source": "policy_random",
+          "seconds": 0.0,
+          "completed_depth": 0,
+          "nodes": 0
+        },
+        {
+          "ply": 2,
+          "opponent": "bruno-bear",
+          "move": "d2d3",
+          "source": "search",
+          "seconds": 0.0085,
+          "completed_depth": 2,
+          "nodes": 66
+        },
+        {
+          "ply": 3,
+          "opponent": "tom-rabbit",
+          "move": "d8c7",
+          "source": "search",
+          "seconds": 0.0019,
+          "completed_depth": 1,
+          "nodes": 14
+        }
+      ]
+    },
+    {
+      "weaker": "tom-rabbit",
+      "stronger": "bruno-bear",
+      "stronger_color": "b",
+      "position": "endgame",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/6p1/3k4/8/8/3K4/1P6/8 w - - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "tom-rabbit",
+          "move": "e1d2",
+          "source": "search",
+          "seconds": 0.0015,
+          "completed_depth": 1,
+          "nodes": 14
+        },
+        {
+          "ply": 1,
+          "opponent": "bruno-bear",
+          "move": "e8d7",
+          "source": "search",
+          "seconds": 0.0083,
+          "completed_depth": 2,
+          "nodes": 63
+        },
+        {
+          "ply": 2,
+          "opponent": "tom-rabbit",
+          "move": "d2d3",
+          "source": "search",
+          "seconds": 0.0027,
+          "completed_depth": 1,
+          "nodes": 20
+        },
+        {
+          "ply": 3,
+          "opponent": "bruno-bear",
+          "move": "d7d6",
+          "source": "search",
+          "seconds": 0.0097,
+          "completed_depth": 2,
+          "nodes": 70
+        }
+      ]
+    },
+    {
+      "weaker": "bruno-bear",
+      "stronger": "olive-owl",
+      "stronger_color": "w",
+      "position": "start",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "r1bqkb1r/pppppppp/2n2n2/8/8/2N2N2/PPPPPPPP/R1BQKB1R w KQkq - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "olive-owl",
+          "move": "b1c3",
+          "source": "search",
+          "seconds": 2.0101,
+          "completed_depth": 4,
+          "nodes": 9216
+        },
+        {
+          "ply": 1,
+          "opponent": "bruno-bear",
+          "move": "b8c6",
+          "source": "search",
+          "seconds": 0.0422,
+          "completed_depth": 2,
+          "nodes": 191
+        },
+        {
+          "ply": 2,
+          "opponent": "olive-owl",
+          "move": "g1f3",
+          "source": "search",
+          "seconds": 2.016,
+          "completed_depth": 4,
+          "nodes": 7936
+        },
+        {
+          "ply": 3,
+          "opponent": "bruno-bear",
+          "move": "g8f6",
+          "source": "search",
+          "seconds": 0.0603,
+          "completed_depth": 2,
+          "nodes": 229
+        }
+      ]
+    },
+    {
+      "weaker": "bruno-bear",
+      "stronger": "olive-owl",
+      "stronger_color": "b",
+      "position": "start",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "r1bqkb1r/pppppppp/2n2n2/8/8/2N2N2/PPPPPPPP/R1BQKB1R w KQkq - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "bruno-bear",
+          "move": "b1c3",
+          "source": "search",
+          "seconds": 0.0329,
+          "completed_depth": 2,
+          "nodes": 140
+        },
+        {
+          "ply": 1,
+          "opponent": "olive-owl",
+          "move": "b8c6",
+          "source": "search",
+          "seconds": 2.0467,
+          "completed_depth": 4,
+          "nodes": 7936
+        },
+        {
+          "ply": 2,
+          "opponent": "bruno-bear",
+          "move": "g1f3",
+          "source": "search",
+          "seconds": 0.0445,
+          "completed_depth": 2,
+          "nodes": 175
+        },
+        {
+          "ply": 3,
+          "opponent": "olive-owl",
+          "move": "g8f6",
+          "source": "search",
+          "seconds": 2.0627,
+          "completed_depth": 4,
+          "nodes": 7936
+        }
+      ]
+    },
+    {
+      "weaker": "bruno-bear",
+      "stronger": "olive-owl",
+      "stronger_color": "w",
+      "position": "tactical",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/8/3k4/8/8/8/4R1K1/8 w - - 3 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "olive-owl",
+          "move": "e1e2",
+          "source": "search",
+          "seconds": 2.0138,
+          "completed_depth": 7,
+          "nodes": 15360
+        },
+        {
+          "ply": 1,
+          "opponent": "bruno-bear",
+          "move": "e8d7",
+          "source": "search",
+          "seconds": 0.0095,
+          "completed_depth": 2,
+          "nodes": 86
+        },
+        {
+          "ply": 2,
+          "opponent": "olive-owl",
+          "move": "h1g2",
+          "source": "search",
+          "seconds": 2.0006,
+          "completed_depth": 6,
+          "nodes": 20992
+        },
+        {
+          "ply": 3,
+          "opponent": "bruno-bear",
+          "move": "d7d6",
+          "source": "search",
+          "seconds": 0.0112,
+          "completed_depth": 2,
+          "nodes": 88
+        }
+      ]
+    },
+    {
+      "weaker": "bruno-bear",
+      "stronger": "olive-owl",
+      "stronger_color": "b",
+      "position": "tactical",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/8/3k4/8/8/8/4R3/6K1 w - - 3 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "bruno-bear",
+          "move": "e1e2",
+          "source": "search",
+          "seconds": 0.0101,
+          "completed_depth": 2,
+          "nodes": 46
+        },
+        {
+          "ply": 1,
+          "opponent": "olive-owl",
+          "move": "e8d7",
+          "source": "search",
+          "seconds": 2.0058,
+          "completed_depth": 7,
+          "nodes": 19968
+        },
+        {
+          "ply": 2,
+          "opponent": "bruno-bear",
+          "move": "h1g1",
+          "source": "search",
+          "seconds": 0.0185,
+          "completed_depth": 2,
+          "nodes": 103
+        },
+        {
+          "ply": 3,
+          "opponent": "olive-owl",
+          "move": "d7d6",
+          "source": "search",
+          "seconds": 2.0021,
+          "completed_depth": 7,
+          "nodes": 17920
+        }
+      ]
+    },
+    {
+      "weaker": "bruno-bear",
+      "stronger": "olive-owl",
+      "stronger_color": "w",
+      "position": "endgame",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/6p1/3k4/8/8/3K4/1P6/8 w - - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "olive-owl",
+          "move": "e1d2",
+          "source": "search",
+          "seconds": 2.0143,
+          "completed_depth": 8,
+          "nodes": 22272
+        },
+        {
+          "ply": 1,
+          "opponent": "bruno-bear",
+          "move": "e8d7",
+          "source": "search",
+          "seconds": 0.0081,
+          "completed_depth": 2,
+          "nodes": 63
+        },
+        {
+          "ply": 2,
+          "opponent": "olive-owl",
+          "move": "d2d3",
+          "source": "search",
+          "seconds": 2.0155,
+          "completed_depth": 8,
+          "nodes": 20736
+        },
+        {
+          "ply": 3,
+          "opponent": "bruno-bear",
+          "move": "d7d6",
+          "source": "search",
+          "seconds": 0.0099,
+          "completed_depth": 2,
+          "nodes": 70
+        }
+      ]
+    },
+    {
+      "weaker": "bruno-bear",
+      "stronger": "olive-owl",
+      "stronger_color": "b",
+      "position": "endgame",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/3k2p1/8/8/8/3K4/1P6/8 w - - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "bruno-bear",
+          "move": "e1d2",
+          "source": "search",
+          "seconds": 0.0063,
+          "completed_depth": 2,
+          "nodes": 51
+        },
+        {
+          "ply": 1,
+          "opponent": "olive-owl",
+          "move": "e8d8",
+          "source": "search",
+          "seconds": 2.0103,
+          "completed_depth": 8,
+          "nodes": 21248
+        },
+        {
+          "ply": 2,
+          "opponent": "bruno-bear",
+          "move": "d2d3",
+          "source": "search",
+          "seconds": 0.0083,
+          "completed_depth": 2,
+          "nodes": 66
+        },
+        {
+          "ply": 3,
+          "opponent": "olive-owl",
+          "move": "d8d7",
+          "source": "search",
+          "seconds": 2.0009,
+          "completed_depth": 7,
+          "nodes": 20736
+        }
+      ]
+    },
+    {
+      "weaker": "olive-owl",
+      "stronger": "monty-cat",
+      "stronger_color": "w",
+      "position": "start",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "r1bqkb1r/pppppppp/2n2n2/8/8/2N2N2/PPPPPPPP/R1BQKB1R w KQkq - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "monty-cat",
+          "move": "b1c3",
+          "source": "search",
+          "seconds": 6.0395,
+          "completed_depth": 5,
+          "nodes": 30464
+        },
+        {
+          "ply": 1,
+          "opponent": "olive-owl",
+          "move": "b8c6",
+          "source": "search",
+          "seconds": 2.0675,
+          "completed_depth": 4,
+          "nodes": 7936
+        },
+        {
+          "ply": 2,
+          "opponent": "monty-cat",
+          "move": "g1f3",
+          "source": "search",
+          "seconds": 6.0039,
+          "completed_depth": 4,
+          "nodes": 26624
+        },
+        {
+          "ply": 3,
+          "opponent": "olive-owl",
+          "move": "g8f6",
+          "source": "search",
+          "seconds": 2.0636,
+          "completed_depth": 4,
+          "nodes": 7936
+        }
+      ]
+    },
+    {
+      "weaker": "olive-owl",
+      "stronger": "monty-cat",
+      "stronger_color": "b",
+      "position": "start",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "r1bqkb1r/pppppppp/2n2n2/8/8/2N2N2/PPPPPPPP/R1BQKB1R w KQkq - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "olive-owl",
+          "move": "b1c3",
+          "source": "search",
+          "seconds": 2.0044,
+          "completed_depth": 4,
+          "nodes": 9216
+        },
+        {
+          "ply": 1,
+          "opponent": "monty-cat",
+          "move": "b8c6",
+          "source": "search",
+          "seconds": 6.0577,
+          "completed_depth": 5,
+          "nodes": 25600
+        },
+        {
+          "ply": 2,
+          "opponent": "olive-owl",
+          "move": "g1f3",
+          "source": "search",
+          "seconds": 2.0119,
+          "completed_depth": 4,
+          "nodes": 7680
+        },
+        {
+          "ply": 3,
+          "opponent": "monty-cat",
+          "move": "g8f6",
+          "source": "search",
+          "seconds": 6.0587,
+          "completed_depth": 4,
+          "nodes": 23040
+        }
+      ]
+    },
+    {
+      "weaker": "olive-owl",
+      "stronger": "monty-cat",
+      "stronger_color": "w",
+      "position": "tactical",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/8/3k4/8/8/8/4R1K1/8 w - - 3 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "monty-cat",
+          "move": "e1e2",
+          "source": "search",
+          "seconds": 6.0119,
+          "completed_depth": 8,
+          "nodes": 63488
+        },
+        {
+          "ply": 1,
+          "opponent": "olive-owl",
+          "move": "e8d7",
+          "source": "search",
+          "seconds": 2.0033,
+          "completed_depth": 7,
+          "nodes": 19712
+        },
+        {
+          "ply": 2,
+          "opponent": "monty-cat",
+          "move": "h1g2",
+          "source": "search",
+          "seconds": 6.0276,
+          "completed_depth": 7,
+          "nodes": 63744
+        },
+        {
+          "ply": 3,
+          "opponent": "olive-owl",
+          "move": "d7d6",
+          "source": "search",
+          "seconds": 2.0012,
+          "completed_depth": 6,
+          "nodes": 18432
+        }
+      ]
+    },
+    {
+      "weaker": "olive-owl",
+      "stronger": "monty-cat",
+      "stronger_color": "b",
+      "position": "tactical",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/8/3k4/8/8/8/4R1K1/8 w - - 3 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "olive-owl",
+          "move": "e1e2",
+          "source": "search",
+          "seconds": 2.0089,
+          "completed_depth": 7,
+          "nodes": 15360
+        },
+        {
+          "ply": 1,
+          "opponent": "monty-cat",
+          "move": "e8d7",
+          "source": "search",
+          "seconds": 6.0324,
+          "completed_depth": 8,
+          "nodes": 64768
+        },
+        {
+          "ply": 2,
+          "opponent": "olive-owl",
+          "move": "h1g2",
+          "source": "search",
+          "seconds": 2.0094,
+          "completed_depth": 6,
+          "nodes": 20992
+        },
+        {
+          "ply": 3,
+          "opponent": "monty-cat",
+          "move": "d7d6",
+          "source": "search",
+          "seconds": 6.0158,
+          "completed_depth": 7,
+          "nodes": 70144
+        }
+      ]
+    },
+    {
+      "weaker": "olive-owl",
+      "stronger": "monty-cat",
+      "stronger_color": "w",
+      "position": "endgame",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/3k2p1/8/8/8/3K4/1P6/8 w - - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "monty-cat",
+          "move": "e1d2",
+          "source": "search",
+          "seconds": 6.0215,
+          "completed_depth": 10,
+          "nodes": 67840
+        },
+        {
+          "ply": 1,
+          "opponent": "olive-owl",
+          "move": "e8d8",
+          "source": "search",
+          "seconds": 2.0071,
+          "completed_depth": 8,
+          "nodes": 20992
+        },
+        {
+          "ply": 2,
+          "opponent": "monty-cat",
+          "move": "d2d3",
+          "source": "search",
+          "seconds": 6.0211,
+          "completed_depth": 10,
+          "nodes": 64000
+        },
+        {
+          "ply": 3,
+          "opponent": "olive-owl",
+          "move": "d8d7",
+          "source": "search",
+          "seconds": 2.0123,
+          "completed_depth": 7,
+          "nodes": 20736
+        }
+      ]
+    },
+    {
+      "weaker": "olive-owl",
+      "stronger": "monty-cat",
+      "stronger_color": "b",
+      "position": "endgame",
+      "seed": 11,
+      "max_plies": 4,
+      "plies": 4,
+      "status": "ongoing",
+      "outcome": "truncated",
+      "failure": null,
+      "final_fen": "8/6p1/3k4/8/8/3K4/1P6/8 w - - 4 3",
+      "moves": [
+        {
+          "ply": 0,
+          "opponent": "olive-owl",
+          "move": "e1d2",
+          "source": "search",
+          "seconds": 2.0108,
+          "completed_depth": 8,
+          "nodes": 22272
+        },
+        {
+          "ply": 1,
+          "opponent": "monty-cat",
+          "move": "e8d7",
+          "source": "search",
+          "seconds": 6.0021,
+          "completed_depth": 10,
+          "nodes": 64000
+        },
+        {
+          "ply": 2,
+          "opponent": "olive-owl",
+          "move": "d2d3",
+          "source": "search",
+          "seconds": 2.0122,
+          "completed_depth": 7,
+          "nodes": 20480
+        },
+        {
+          "ply": 3,
+          "opponent": "monty-cat",
+          "move": "d7d6",
+          "source": "search",
+          "seconds": 6.0057,
+          "completed_depth": 9,
+          "nodes": 64256
+        }
+      ]
+    }
+  ]
+}

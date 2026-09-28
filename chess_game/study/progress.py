@@ -9,7 +9,7 @@ from pathlib import Path
 import sqlite3
 
 
-SCHEMA_VERSION = 8
+SCHEMA_VERSION = 10
 
 # Digests of earlier published identifiers. Keep the former identities out of
 # shipped source while allowing existing local progress to follow renamed lessons.
@@ -99,6 +99,8 @@ class ProgressStore:
 
     def _migrate(self):
         with self.connection:
+            # sqlite3 does not begin a transaction for DDL on its own.
+            self.connection.execute("BEGIN IMMEDIATE")
             self.connection.execute(
                 "CREATE TABLE IF NOT EXISTS schema_info (version INTEGER NOT NULL)")
             row = self.connection.execute(
@@ -192,6 +194,45 @@ class ProgressStore:
                                 (successor,))
                 version = 8
                 self.connection.execute("UPDATE schema_info SET version = 8")
+            if version == 8:
+                self.connection.execute(
+                    """CREATE TABLE IF NOT EXISTS challenge_recovery (
+                        match_id TEXT PRIMARY KEY REFERENCES challenge_matches(match_id),
+                        reason_code TEXT NOT NULL,
+                        diagnosed_at TEXT NOT NULL,
+                        archived_at TEXT NOT NULL,
+                        original_updated_at TEXT NOT NULL
+                    )""")
+                version = 9
+                self.connection.execute("UPDATE schema_info SET version = 9")
+            if version == 9:
+                self.connection.execute(
+                    """CREATE TABLE IF NOT EXISTS challenge_win_events (
+                        match_id TEXT PRIMARY KEY REFERENCES challenge_matches(match_id),
+                        opponent_id TEXT NOT NULL,
+                        human_color TEXT NOT NULL CHECK (human_color IN ('w', 'b')),
+                        earned_at TEXT NOT NULL,
+                        verification_revision INTEGER NOT NULL
+                    )""")
+                tables = {row[0] for row in self.connection.execute(
+                    "SELECT name FROM sqlite_master WHERE type = 'table'")}
+                if "challenge_matches" in tables:
+                    from ..challenge import verify_historical_win
+                    policies_exist = "challenge_policies" in tables
+                    for match in self.connection.execute(
+                            "SELECT * FROM challenge_matches WHERE state = 'finished'"):
+                        policy = (self.connection.execute(
+                            "SELECT parameters_json FROM challenge_policies "
+                            "WHERE match_id = ?", (match["match_id"],)).fetchone()
+                            if policies_exist else None)
+                        if verify_historical_win(match, policy):
+                            self.connection.execute(
+                                """INSERT OR IGNORE INTO challenge_win_events
+                                   VALUES (?, ?, ?, ?, 1)""",
+                                (match["match_id"], match["opponent_id"],
+                                 match["human_color"], match["updated_at"]))
+                version = 10
+                self.connection.execute("UPDATE schema_info SET version = 10")
             if version != SCHEMA_VERSION:
                 raise ProgressStoreError(
                     "progress schema version {} is not supported; data was left "
@@ -265,6 +306,22 @@ class ProgressStore:
                     earned_at TEXT NOT NULL,
                     match_id TEXT NOT NULL REFERENCES challenge_matches(match_id),
                     celebration_seen_at TEXT
+                )""")
+            self.connection.execute(
+                """CREATE TABLE IF NOT EXISTS challenge_recovery (
+                    match_id TEXT PRIMARY KEY REFERENCES challenge_matches(match_id),
+                    reason_code TEXT NOT NULL,
+                    diagnosed_at TEXT NOT NULL,
+                    archived_at TEXT NOT NULL,
+                    original_updated_at TEXT NOT NULL
+                )""")
+            self.connection.execute(
+                """CREATE TABLE IF NOT EXISTS challenge_win_events (
+                    match_id TEXT PRIMARY KEY REFERENCES challenge_matches(match_id),
+                    opponent_id TEXT NOT NULL,
+                    human_color TEXT NOT NULL CHECK (human_color IN ('w', 'b')),
+                    earned_at TEXT NOT NULL,
+                    verification_revision INTEGER NOT NULL
                 )""")
 
     def _migrate_renamed_ids(self):

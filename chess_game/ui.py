@@ -16,9 +16,13 @@ import math
 import os
 import queue
 import random
+import sqlite3
+import tempfile
 import threading
 import time
+import uuid
 import webbrowser
+from pathlib import Path
 
 os.environ.setdefault("SDL_VIDEO_X11_WMCLASS", "uroschess")
 os.environ.setdefault("SDL_VIDEO_WAYLAND_WMCLASS", "uroschess")
@@ -28,7 +32,9 @@ import pygame
 from . import ai, sound, theme
 from .board import Board
 from .chess_thoughts import ChessThought, random_thought
-from .challenge import ChallengeStore, OPPONENTS, ROSTER
+from .challenge import (ChallengeSaveError, ChallengeStore, ChallengeVerification,
+                        OPPONENTS, ROSTER, RECOVERY_MESSAGES, stage_states,
+                        medal_summary)
 from .character_stories import STORIES
 from .challenge_commentary import VOICES
 from .moves import legal_moves, in_check, game_status
@@ -470,6 +476,17 @@ class ChessUI(MenuLayoutMixin):
         self.character_index = 0
         self.challenge_generation = 0
         self.challenge_cancel_event = None
+        self.challenge_snapshot = {
+            "states": stage_states(set()), "saved": False, "master": False}
+        self.recovery_result = None
+        self.recovery_note = ""
+        self.archive_entries = ()
+        self.archive_index = 0
+        self.challenge_save_error = None
+        self.challenge_progress_snapshot = None
+        self.collection_counts = {opponent.ident: 0 for opponent in ROSTER}
+        self.collection_page = 0
+        self._medal_portraits = {}
         self._course_summary_cache = {}
         self.progress_error = ""
         self.preferences_error = ""
@@ -479,6 +496,7 @@ class ChessUI(MenuLayoutMixin):
             self.progress_error = str(error)
         if self.progress_store is not None:
             self.challenge_store = ChallengeStore(self.progress_store)
+            self._refresh_collection()
             try:
                 self._apply_saved_preferences(
                     self.progress_store.load_settings())
@@ -666,6 +684,8 @@ class ChessUI(MenuLayoutMixin):
     def start_game(self, human_colors):
         self._cancel_challenge_search()
         self.challenge = None
+        self.challenge_save_error = None
+        self.challenge_progress_snapshot = None
         self._reset_button_focus()
         self._game_bg = None
         self.scene = "game"
@@ -678,9 +698,158 @@ class ChessUI(MenuLayoutMixin):
         if self.challenge_store is None:
             self._flash("Challenge progress is unavailable")
             return
+        try:
+            verification = self.challenge_store.inspect_active()
+            if verification is not None and not verification.valid:
+                self._open_challenge_recovery(verification)
+                return
+            award = self.challenge_store.award()
+            self.challenge_snapshot = {
+                "states": self.challenge_store.stages(),
+                "saved": verification is not None,
+                "master": award is not None,
+            }
+        except sqlite3.Error as error:
+            self._open_challenge_unavailable(error)
+            return
         if self.challenge is not None:
             self.challenge_page = ROSTER.index(self.challenge.opponent) // 4
-        self._open_menu_section("challenge")
+        self._open_menu_section("master_award" if award is not None and
+                                award["celebration_seen_at"] is None else
+                                "challenge")
+
+    def _refresh_collection(self):
+        if self.challenge_store is None:
+            return
+        try:
+            self.collection_counts = self.challenge_store.medal_counts()
+        except sqlite3.Error as error:
+            self._flash("Medals could not be read: {}".format(error))
+
+    def _open_collection(self):
+        if self.challenge is not None and self.challenge.status != "ongoing":
+            self._to_menu()
+        self._refresh_collection()
+        self.scene = "menu"
+        self._open_menu_section("collection")
+
+    def _change_collection_page(self, delta):
+        page_size = 2 if self.win_h < 520 else 4
+        last = (len(ROSTER) - 1) // page_size
+        self.collection_page = max(0, min(last, self.collection_page + delta))
+        self._reset_button_focus()
+        self._menu_buttons = []
+        self._dirty = True
+
+    def _acknowledge_master(self):
+        try:
+            self.challenge_store.mark_celebration_seen()
+            if self.challenge is not None:
+                self._refresh_challenge_progress()
+        except sqlite3.Error as error:
+            self._flash("Master acknowledgement was not saved: {}".format(error))
+            return
+        self._menu_buttons = []
+        if self.menu_view == "master_award":
+            self._open_challenge_menu()
+        self._dirty = True
+
+    def _next_challenge_from_result(self):
+        if self.challenge is None:
+            self._open_challenge_menu()
+            return
+        opponent = self.challenge.opponent
+        states = (self.challenge_progress_snapshot or {}).get("states")
+        index = ROSTER.index(opponent)
+        if states and states[index] == "black_required":
+            self._start_challenge(BLACK, opponent.ident)
+        elif states and states[index] == "complete" and index < len(ROSTER) - 1:
+            self._start_challenge(WHITE, ROSTER[index + 1].ident)
+        else:
+            self._start_challenge(self.challenge.color, opponent.ident)
+
+    def _open_challenge_recovery(self, result):
+        self.recovery_result = result
+        self.recovery_note = RECOVERY_MESSAGES[result.reason]
+        self.scene = "menu"
+        self._open_menu_section("challenge_recovery")
+
+    def _open_challenge_unavailable(self, error):
+        self.recovery_note = "Progress could not be read: {}".format(error)
+        self.scene = "menu"
+        self._open_menu_section("challenge_unavailable")
+
+    def _open_challenge_archive(self):
+        if self.challenge_store is None:
+            self._flash("Challenge progress is unavailable")
+            return
+        try:
+            self.archive_entries = self.challenge_store.archived_recoveries()
+        except sqlite3.Error as error:
+            self._open_challenge_unavailable(error)
+            return
+        self.archive_index = 0
+        self._show_challenge_archive()
+
+    def _show_challenge_archive(self):
+        if self.archive_entries:
+            row = self.archive_entries[self.archive_index]
+            self.recovery_result = ChallengeVerification(
+                row["match_id"], row["reason_code"])
+            name = OPPONENTS.get(row["opponent_id"])
+            opponent = name.name if name else row["opponent_id"]
+            self.recovery_note = "{} · {} · archived {}".format(
+                opponent, RECOVERY_MESSAGES.get(
+                    row["reason_code"], "Recovery reason is unavailable.").rstrip("."),
+                row["archived_at"][:10])
+        else:
+            self.recovery_result = None
+            self.recovery_note = "No archived challenge saves yet."
+        self._open_menu_section("challenge_archive")
+
+    def _change_challenge_archive(self, delta):
+        self.archive_index = max(0, min(len(self.archive_entries) - 1,
+                                        self.archive_index + delta))
+        self._show_challenge_archive()
+
+    def _export_challenge_recovery(self):
+        result = self.recovery_result
+        if result is None:
+            return
+        directory = (Path(tempfile.gettempdir()) if
+                     str(self.progress_store.path) == ":memory:" else
+                     self.progress_store.path.parent)
+        destination = (directory /
+                       "recovery-{}.json".format(uuid.uuid4().hex[:12]))
+        try:
+            self.challenge_store.export_match(result.match_id, destination)
+        except (OSError, sqlite3.Error, ValueError) as error:
+            self.recovery_note = "Export failed: {}".format(error)
+            self._dirty = True
+            return
+        parent = str(destination.parent)
+        home = os.path.expanduser("~")
+        if parent.startswith(home + os.sep):
+            parent = "~" + parent[len(home):]
+        self.recovery_note = "Saved as {} in {}".format(
+            destination.name, parent.replace("/", "/ "))
+        self._dirty = True
+
+    def _archive_challenge_recovery(self):
+        result = self.recovery_result
+        if result is None:
+            return
+        try:
+            self.challenge_store.archive_invalid(result.match_id)
+        except sqlite3.Error as error:
+            self._open_challenge_unavailable(error)
+            return
+        except ValueError as error:
+            self.recovery_note = str(error)
+            self._dirty = True
+            return
+        self.recovery_result = None
+        self._open_challenge_menu()
 
     def _change_challenge_page(self, delta):
         page = max(0, min((len(ROSTER) - 1) // 4,
@@ -706,25 +875,31 @@ class ChessUI(MenuLayoutMixin):
     def _resume_challenge(self):
         try:
             session = self.challenge_store.resume()
-        except Exception as error:
-            self._flash(str(error))
+        except ChallengeSaveError as error:
+            self._open_challenge_recovery(error.result)
+            return
+        except sqlite3.Error as error:
+            self._open_challenge_unavailable(error)
             return
         if session:
             self._open_challenge_session(session)
 
     def _discard_challenge(self):
-        saved = self.challenge_store.active()
-        if saved:
-            try:
-                self.challenge_store.discard(saved["match_id"])
-            except Exception as error:
-                self._flash("Discard failed: " + str(error))
+        try:
+            checked = self.challenge_store.inspect_active()
+            if checked is not None and not checked.valid:
+                self._open_challenge_recovery(checked)
                 return
-            self._menu_buttons = []
-            self._dirty = True
+            if checked is not None:
+                self.challenge_store.discard(checked.match_id)
+        except sqlite3.Error as error:
+            self._open_challenge_unavailable(error)
+            return
+        self._open_challenge_menu()
 
     def _open_challenge_session(self, session):
         self._cancel_challenge_search()
+        self.challenge_save_error = None
         self._reset_button_focus()
         self.scene = "game"
         self._new_game({WHITE, BLACK})
@@ -742,11 +917,29 @@ class ChessUI(MenuLayoutMixin):
         self.last_move = self.moves[-1] if self.moves else None
         self.status = session.status
         self.flipped = session.color == BLACK
+        self._refresh_challenge_progress()
         self._layout()
         self._ensure_fonts()
         self._game_bg = None
         self._maybe_start_ai()
         self._dirty = True
+
+    def _refresh_challenge_progress(self):
+        try:
+            snapshot = {
+                "victories": self.challenge_store.victories(),
+                "states": self.challenge_store.stages(),
+                "award": self.challenge_store.award(),
+                "counts": self.challenge_store.medal_counts(),
+                "reward": (self.challenge_store.reward_for_match(
+                    self.challenge.match_id) if self.challenge is not None else None),
+            }
+        except sqlite3.Error as error:
+            self.challenge_progress_snapshot = None
+            self._flash("Challenge rewards could not be read: {}".format(error))
+            return
+        self.challenge_progress_snapshot = snapshot
+        self.collection_counts = snapshot["counts"]
 
     def _cancel_challenge_search(self):
         self.challenge_generation += 1
@@ -771,12 +964,23 @@ class ChessUI(MenuLayoutMixin):
         try:
             self.challenge.resign()
         except Exception as error:
-            self.challenge_ai_error = self.board.side_to_move != self.challenge.color
+            self.challenge_save_error = (None, None)
             self._flash("Resignation was not saved: " + str(error))
+            self._dirty = True
             return
+        self.challenge_save_error = None
         self.challenge_resign_pending = False
         self.status = "resignation"
+        self._refresh_challenge_progress()
         sound.play("end")
+        self._show_challenge_result()
+
+    def _show_challenge_result(self):
+        self._reset_button_focus()
+        self.scene = "menu"
+        self.menu_view = "challenge_result"
+        self._menu_buttons = []
+        self._dirty = True
         self._dirty = True
 
     def start_replay(self, entry, return_to=None):
@@ -1119,6 +1323,8 @@ class ChessUI(MenuLayoutMixin):
         return tl, dcap
 
     def _maybe_start_ai(self):
+        if self.challenge_save_error is not None:
+            return
         if self.status != "ongoing":
             return
         if self.board.side_to_move in self.human_colors:
@@ -1227,14 +1433,17 @@ class ChessUI(MenuLayoutMixin):
             try:
                 self.challenge.accept(move, actor or self.challenge.color)
             except Exception as error:
-                if actor is not None and actor != self.challenge.color:
-                    self.challenge_ai_error = True
+                self.challenge_save_error = (move, actor)
+                self._cancel_challenge_search()
                 self._flash("Challenge move was not saved: " + str(error))
+                self._dirty = True
                 return
+            self.challenge_save_error = None
             self.challenge_ai_error = False
             self.challenge_resign_pending = False
             self.board = self.challenge.board
             self.status = self.challenge.status
+            self._refresh_challenge_progress()
             self.moves = list(self.challenge.moves)
             previous = Board()
             self.sans = []
@@ -1247,6 +1456,8 @@ class ChessUI(MenuLayoutMixin):
             self.pending_promo = None
             sound.play("end" if self.status != "ongoing" else "move")
             self._maybe_start_ai()
+            if self.status != "ongoing":
+                self._show_challenge_result()
             self._dirty = True
             return
         victim = self.board.piece_at(move.to)
@@ -1275,6 +1486,16 @@ class ChessUI(MenuLayoutMixin):
             self.eval_cp = ai.evaluate(self.board)
         self._dirty = True
         self._maybe_start_ai()
+
+    def _retry_challenge_save(self):
+        pending = self.challenge_save_error
+        if pending is None:
+            return
+        self.challenge_save_error = None
+        if pending[0] is None:
+            self._resign_challenge()
+        else:
+            self._apply(*pending)
 
     def _takeback(self):
         if self.challenge is not None:
@@ -1313,6 +1534,7 @@ class ChessUI(MenuLayoutMixin):
                     and self.status == "ongoing"
                     and self.pending_promo is None)
         return (self.scene == "game" and self.status == "ongoing"
+                and self.challenge_save_error is None
                 and not self.thinking and self.pending_promo is None
                 and self.board.side_to_move in self.human_colors)
 
@@ -1743,7 +1965,12 @@ class ChessUI(MenuLayoutMixin):
     def _build_game_buttons(self):
         self._game_buttons = []
         if self.challenge is not None:
-            if self.status == "ongoing":
+            if self.challenge_save_error is not None:
+                retry_label = ("Retry resignation" if self.challenge_save_error[0]
+                               is None else "Retry move save")
+                specs = [(retry_label, self._retry_challenge_save),
+                         ("Save & return", self._open_challenge_from_game)]
+            elif self.status == "ongoing":
                 specs = ([("Retry " + self.challenge.opponent.name,
                            self._maybe_start_ai)]
                          if self.challenge_ai_error else [])
@@ -1752,12 +1979,15 @@ class ChessUI(MenuLayoutMixin):
                            else "Resign", self._resign_challenge),
                           ("Save & return", self._open_challenge_from_game)]
             else:
-                states = self.challenge_store.stages()
+                snapshot = self.challenge_progress_snapshot
+                states = snapshot["states"] if snapshot else None
                 opponent = self.challenge.opponent
                 index = ROSTER.index(opponent)
                 won = (self.status == "checkmate" and
                        self.board.side_to_move != self.challenge.color)
-                if won and states[index] == "black_required":
+                if states is None:
+                    specs = [("Challenges", self._open_challenge_from_game)]
+                elif won and states[index] == "black_required":
                     next_label, next_id, color = "Play as Black", opponent.ident, BLACK
                 elif won and states[index] == "complete" and index < len(ROSTER) - 1:
                     next_label, next_id, color = (
@@ -1766,9 +1996,10 @@ class ChessUI(MenuLayoutMixin):
                 else:
                     next_label, next_id, color = (
                         "Try again", opponent.ident, self.challenge.color)
-                specs = [(next_label, lambda c=color, ident=next_id:
-                          self._start_challenge(c, ident)),
-                         ("Challenges", self._open_challenge_from_game)]
+                if states is not None:
+                    specs = [(next_label, lambda c=color, ident=next_id:
+                              self._start_challenge(c, ident)),
+                             ("Challenges", self._open_challenge_from_game)]
             if self.show_panel:
                 x, y, w = self.panel_x + 12, self.panel_y + self.panel_h - 100, self.panel_w - 24
                 y -= max(0, len(specs) - 2) * 42
@@ -1950,15 +2181,14 @@ class ChessUI(MenuLayoutMixin):
 
     def _to_menu(self):
         self._cancel_challenge_search()
+        self.challenge_save_error = None
         self._reset_button_focus()
         self.replay_autoplay = False
         if self.scene == "lesson":
             self._save_lesson_progress()
-        if (self.challenge is not None and self.challenge.status != "ongoing" and
-                self.challenge_store.award() is not None):
-            self.challenge_store.mark_celebration_seen()
         self.scene = "menu"
         self.challenge = None
+        self.challenge_progress_snapshot = None
         self.menu_view = "main"
         self.coach_profile = None
         self._menu_buttons = []
@@ -2153,10 +2383,32 @@ class ChessUI(MenuLayoutMixin):
                                 max(30, card.right - hx - 12))
             self.screen.blit(self.small_font.render(heading, True, p.accent),
                              (hx, hy))
+        if self.menu_view in ("challenge_recovery", "challenge_unavailable",
+                              "challenge_archive"):
+            lines = _wrap_text(self.small_font, self.recovery_note, card.w - 40)
+            for index, line in enumerate(lines[:4]):
+                self.screen.blit(self.small_font.render(line, True, p.text),
+                                 (card.x + 20, card.y + 43 + index * 19))
+        if self.menu_view == "main":
+            self._draw_collection_shelf()
+        if self.menu_view == "collection":
+            for card_button in self._collection_cards:
+                self._draw_menu_button(card_button, False, rad)
         for index, b in enumerate(self._menu_buttons):
             self._draw_menu_button(
                 b, b.rect.collidepoint(mx, my), rad,
                 focused=index == self._button_focus)
+
+        if self.menu_view == "challenge_result":
+            self._draw_challenge_result()
+        elif self.menu_view == "master_award":
+            lines = ("You earned the Uroschess Master title.",
+                     "Every character was beaten with both colours.",
+                     "This celebration appears until you dismiss it.")
+            for index, line in enumerate(lines):
+                rendered = self.small_font.render(
+                    _fit_text(self.small_font, line, card.w - 40), True, p.text)
+                self.screen.blit(rendered, (card.x + 20, card.y + 50 + index * 28))
 
         if self.menu_view == "characters":
             self._draw_character_profile()
@@ -2198,19 +2450,23 @@ class ChessUI(MenuLayoutMixin):
             thought = (ChessThought(player.name, player.short_name,
                                    course_advice, player.portrait, "")
                        if player else self.chess_thought)
-            if self.menu_view == "challenge_color":
-                opponent = OPPONENTS[self.challenge_choice_id]
+            if self.menu_view in ("challenge_color", "challenge_result"):
+                opponent = (OPPONENTS[self.challenge_choice_id]
+                            if self.menu_view == "challenge_color" else
+                            self.challenge.opponent)
                 thought = ChessThought(opponent.name, opponent.name,
                                       VOICES[opponent.ident].greeting,
                                       opponent.portrait, "")
             if player is None:
-                self._portrait_hit_rect = (None if self.menu_view == "challenge_color"
+                self._portrait_hit_rect = (None if self.menu_view in (
+                    "challenge_color", "challenge_result")
                                            else self._feature_rect.copy())
             draw_chess_thought(
                 self.screen, self._feature_rect, thought,
                 self.status_font, self.text_font, self.tag_font, self.pal,
                 compact=True, large=True,
-                previous=None if player or self.menu_view == "challenge_color"
+                previous=None if player or self.menu_view in (
+                    "challenge_color", "challenge_result")
                 else self._thought_previous,
                 progress=thought_progress)
 
@@ -2233,6 +2489,92 @@ class ChessUI(MenuLayoutMixin):
             warning = self.small_font.render(
                 "Preferences could not be loaded or saved.", True, p.bad)
             self.screen.blit(warning, (card.centerx + 26, card.bottom - 22))
+
+    def _draw_medal_portrait(self, filename, center, size, gold=False):
+        p = self.pal
+        key = (filename, size, p.field, p.text)
+        if key not in self._medal_portraits:
+            portrait = _portrait(filename, size, p.field, p.text).convert_alpha()
+            radius = size / 2
+            for y in range(size):
+                for x in range(size):
+                    if (x + .5 - radius) ** 2 + (y + .5 - radius) ** 2 > radius ** 2:
+                        portrait.set_at((x, y), (0, 0, 0, 0))
+            self._medal_portraits[key] = portrait
+        portrait = self._medal_portraits[key]
+        self.screen.blit(portrait, (center[0] - size // 2,
+                                    center[1] - size // 2))
+        pygame.draw.circle(self.screen, (222, 178, 63) if gold else p.accent,
+                           center, size // 2, width=3 if gold else 2)
+
+    def _draw_collection_shelf(self):
+        rect = self._collection_shelf_rect
+        if rect.h < 95:
+            return
+        p = self.pal
+        _round_rect_alpha(self.screen, rect, (*p.panel, 235),
+                          min(p.rounding, 12))
+        _hairline(self.screen, rect, p.panel_line, min(p.rounding, 12))
+        cell = (rect.w - 12) / len(ROSTER)
+        size = max(20, min(32, int(cell) - 8))
+        for index, opponent in enumerate(ROSTER):
+            count = self.collection_counts[opponent.ident]
+            center = (round(rect.x + 6 + cell * (index + .5)), rect.y + 63)
+            if count:
+                self._draw_medal_portrait(opponent.portrait, center, size,
+                                         gold=count >= 10)
+            else:
+                self.screen.blit(_portrait(opponent.portrait, size, p.field, p.text),
+                                 (center[0] - size // 2, center[1] - size // 2))
+            label = "{} {}".format(opponent.name, count)
+            fitted = _fit_text(self.tag_font, label, int(cell) - 4)
+            rendered = self.tag_font.render(fitted, True, p.text)
+            self.screen.blit(rendered, rendered.get_rect(
+                centerx=center[0], y=center[1] + size // 2 + 3))
+
+    def _draw_challenge_result(self):
+        if self.challenge is None:
+            return
+        p = self.pal
+        card = self._menu_card
+        opponent = self.challenge.opponent
+        snapshot = self.challenge_progress_snapshot or {}
+        reward = snapshot.get("reward")
+        count = snapshot.get("counts", {}).get(opponent.ident, 0)
+        won = reward is not None
+        if won:
+            title = "You beat {} with {}".format(
+                opponent.name, "White" if self.challenge.color == WHITE else "Black")
+            badge = ("New {} badge" if reward["new_badge"] else
+                     "{} badge already earned").format(
+                         "White" if self.challenge.color == WHITE else "Black")
+            lines = (title, "Medal earned · {} lifetime wins".format(count), badge)
+        elif self.status == "resignation":
+            lines = ("You resigned", "No medal earned", "Try again when ready")
+        elif self.status == "checkmate":
+            lines = (opponent.name + " won", "No medal earned", "Try again when ready")
+        else:
+            lines = ("Draw · " + self.status.replace("draw-", ""),
+                     "No medal earned", "Try again when ready")
+        states = snapshot.get("states")
+        index = ROSTER.index(opponent)
+        if won and states and states[index] == "black_required":
+            next_line = "Next: play {} with Black".format(opponent.name)
+        elif won and states and states[index] == "complete" and index < len(ROSTER) - 1:
+            next_line = "Unlocked: {}".format(ROSTER[index + 1].name)
+        else:
+            next_line = "Next: play another match"
+        award = snapshot.get("award")
+        if award is not None and award["match_id"] == self.challenge.match_id:
+            next_line = "Uroschess Master · " + (
+                "celebration ready" if award["celebration_seen_at"] is None
+                else "title earned")
+        for row, line in enumerate((*lines, next_line)):
+            font = self.status_font if row == 0 else self.small_font
+            rendered = font.render(_fit_text(font, line, card.w - 40), True, p.text)
+            self.screen.blit(rendered, (card.x + 20,
+                                        card.y + (39 if self.win_h < 420 else 51) +
+                                        row * (28 if self.win_h < 420 else 36)))
 
     def _draw_character_profile(self):
         card = self._menu_card
@@ -2281,8 +2623,21 @@ class ChessUI(MenuLayoutMixin):
         if b.kind == "challenge":
             _flat_button(self.screen, b.rect,
                          p.btn_hot if hot else p.btn, p.panel_line, rad)
-            portrait = _portrait(b.value, 54, p.field, p.text)
-            self.screen.blit(portrait, (b.rect.x + 8, b.rect.y + 18))
+            count = None
+            if self.menu_view == "collection":
+                opponent = next(item for item in ROSTER
+                                if item.portrait == b.value)
+                count = self.collection_counts[opponent.ident]
+                if count >= 10:
+                    self._draw_medal_portrait(
+                        b.value, (b.rect.x + 39, b.rect.y + 41), 64,
+                        gold=True)
+                else:
+                    self.screen.blit(_portrait(b.value, 54, p.field, p.text),
+                                     (b.rect.x + 8, b.rect.y + 15))
+            else:
+                portrait = _portrait(b.value, 54, p.field, p.text)
+                self.screen.blit(portrait, (b.rect.x + 8, b.rect.y + 18))
             x = b.rect.x + 72
             width = b.rect.right - x - 8
             name, strength = b.label.split(" · ", 1)
@@ -2297,6 +2652,12 @@ class ChessUI(MenuLayoutMixin):
                 self.screen.blit(self.small_font.render(detail, True, p.text),
                                  (x, b.rect.y + 36 +
                                   line_index * self.small_font.get_linesize()))
+            if count is not None and 1 <= count <= 9:
+                size = min(18, max(10, (width - 4) // count - 2))
+                for index in range(count):
+                    self._draw_medal_portrait(
+                        b.value, (x + size // 2 + index * (size + 2),
+                                  b.rect.y + 70), size)
             if focused:
                 draw_focus_ring(self.screen, b.rect, p.accent, rad)
             return
@@ -2483,8 +2844,9 @@ class ChessUI(MenuLayoutMixin):
         _round_rect_alpha(self.screen, card, (*p.panel, 255), p.rounding)
         _hairline(self.screen, card, p.panel_line, p.rounding)
         color = "White" if self.challenge.color == WHITE else "Black"
+        snapshot = self.challenge_progress_snapshot or {}
         earned = ((self.challenge.opponent.ident, self.challenge.color)
-                  in self.challenge_store.victories())
+                  in snapshot.get("victories", set()))
         lines = [self.challenge.opponent.name.upper() + " CHALLENGE", "You: " + color,
                  color + " badge earned · rematch" if earned else
                  "Win with " + color + " to earn a badge"]
@@ -2496,7 +2858,7 @@ class ChessUI(MenuLayoutMixin):
                 lines.append("You resigned · match lost")
             else:
                 lines.append("Draw: " + self.status.replace("draw-", ""))
-        award = self.challenge_store.award()
+        award = snapshot.get("award")
         if (award is not None and award["match_id"] == self.challenge.match_id and
                 award["celebration_seen_at"] is None):
             lines.append("You are a Uroschess Master!")
@@ -2698,7 +3060,8 @@ class ChessUI(MenuLayoutMixin):
         elif self.challenge is not None:
             opponent = self.challenge.opponent.name
             color = "White" if self.challenge.color == WHITE else "Black"
-            award = self.challenge_store.award()
+            snapshot = self.challenge_progress_snapshot or {}
+            award = snapshot.get("award")
             if (award is not None and award["match_id"] == self.challenge.match_id
                     and award["celebration_seen_at"] is None):
                 text = "You are a Uroschess Master!"
@@ -2872,7 +3235,8 @@ class ChessUI(MenuLayoutMixin):
                 return True
             if self.menu_view in ("colors", "library", "learn", "play", "challenge",
                                   "characters",
-                                  "challenge_color",
+                                  "challenge_color", "challenge_recovery",
+                                  "challenge_unavailable", "challenge_archive",
                                   "ai_play", "opening_hub", "course",
                                   "course_about"):
                 if self.menu_view == "colors":
@@ -2885,6 +3249,9 @@ class ChessUI(MenuLayoutMixin):
                     self._open_menu_section("main")
                 elif self.menu_view == "challenge_color":
                     self._open_challenge_menu()
+                elif self.menu_view in ("challenge_recovery",
+                                        "challenge_unavailable", "challenge_archive"):
+                    self._open_menu_section("play")
                 elif self.menu_view == "course":
                     self._open_menu_section("opening_hub")
                 elif self.menu_view == "course_about":

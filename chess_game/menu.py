@@ -35,6 +35,7 @@ class MenuLayoutMixin:
 
     def _build_menu_buttons(self):
         self._menu_buttons = []
+        self._collection_cards = []
         self._menu_heads = []
         if self.menu_view == "colors":
             self._build_menu_colors()
@@ -50,6 +51,15 @@ class MenuLayoutMixin:
             self._build_challenge_menu()
         elif self.menu_view == "challenge_color":
             self._build_challenge_color_menu()
+        elif self.menu_view == "collection":
+            self._build_collection_menu()
+        elif self.menu_view == "challenge_result":
+            self._build_challenge_result_menu()
+        elif self.menu_view == "master_award":
+            self._build_master_award_menu()
+        elif self.menu_view in ("challenge_recovery", "challenge_unavailable",
+                                "challenge_archive"):
+            self._build_challenge_issue_menu()
         elif self.menu_view == "characters":
             self._build_character_menu()
         elif self.menu_view in ("learn", "play", "ai_play"):
@@ -74,8 +84,9 @@ class MenuLayoutMixin:
     def _build_menu_main(self):
         card_width = min(472, self.win_w - 24)
         left = (self.win_w - card_width) // 2
-        top = self._simple_menu_top()
-        card = pygame.Rect(left, top, card_width, 286)
+        compact = self.win_h < 440
+        top = 12 if compact else max(12, min(218, self.win_h - 540))
+        card = pygame.Rect(left, top, card_width, 200 if compact else 286)
         self._menu_card = card
         x, w = card.x + 24, card.w - 48
         cx = card.centerx
@@ -86,16 +97,110 @@ class MenuLayoutMixin:
                 ("Meet the characters", lambda: self._open_menu_section(
                     "characters")))):
             self._menu_buttons.append(Button(
-                (x, card.y + 18 + index * 64, w, 54), label, action,
+                (x, card.y + (9 + index * 47 if compact else
+                              18 + index * 64), w, 40 if compact else 54),
+                label, action,
                 kind="cta" if index == 0 else "step"))
         self._menu_buttons.append(
-            Button((cx - min(200, w // 2), card.bottom + 8,
-                    min(400, w), 42), "Appearance",
+            Button((cx - min(200, w // 2), card.bottom + (4 if compact else 8),
+                    min(400, w), 32 if compact else 42), "Appearance",
                    self._open_colors, kind="cta"))
         self._menu_buttons.append(
-            Button((cx - min(200, w // 2), card.bottom + 50,
-                    min(400, w), 36), "Exit",
+            Button((cx - min(200, w // 2), card.bottom + (37 if compact else 50),
+                    min(400, w), 28 if compact else 36), "Exit",
                    self._exit, kind="exit"))
+        shelf_y = card.bottom + (69 if compact else 94)
+        self._collection_shelf_rect = pygame.Rect(
+            left, shelf_y, card_width, max(32, min(112, self.win_h - shelf_y - 8)))
+        self._menu_buttons.append(Button(
+            (left + 8, shelf_y + (3 if compact else 5), card_width - 16,
+             30 if compact else 32),
+            "Medal collection", self._open_collection, kind="step"))
+
+    def _build_collection_menu(self):
+        from .challenge import ROSTER, medal_summary
+        width = min(500, self.win_w - 24)
+        compact = self.win_h < 520
+        top = 12 if compact else max(12, min(145, self.win_h - 540))
+        card = pygame.Rect((self.win_w - width) // 2, top, width,
+                           min(462, self.win_h - top - 55))
+        self._menu_card = card
+        x, w = card.x + 20, card.w - 40
+        self._menu_heads.append(("MEDAL COLLECTION · LIFETIME WINS", x, top + 13))
+        page_size = 2 if compact else 4
+        page_count = (len(ROSTER) + page_size - 1) // page_size
+        self.collection_page = max(0, min(self.collection_page, page_count - 1))
+        for row, opponent in enumerate(ROSTER[
+                self.collection_page * page_size:
+                self.collection_page * page_size + page_size]):
+            count = self.collection_counts[opponent.ident]
+            summary = medal_summary(count)
+            self._collection_cards.append(Button(
+                (x, top + 39 + row * (84 if compact else 90), w,
+                 78 if compact else 82),
+                opponent.name + " · " + opponent.strength,
+                lambda: None, kind="challenge", detail=summary.label,
+                value=opponent.portrait))
+        half = (w - 8) // 2
+        nav_y = card.bottom - 45 if compact else top + 405
+        if self.collection_page:
+            self._menu_buttons.append(Button(
+                (x, nav_y, half, 36), "‹ Previous medals",
+                lambda: self._change_collection_page(-1), kind="step"))
+        if self.collection_page < page_count - 1:
+            self._menu_buttons.append(Button(
+                (x + half + 8, nav_y, w - half - 8, 36),
+                "More medals ›", lambda: self._change_collection_page(1),
+                kind="step"))
+        self._menu_buttons.append(Button(
+            (x, card.bottom + 7, w, 38), "‹ Back to menu",
+            lambda: self._open_menu_section("main"), kind="cta"))
+
+    def _build_challenge_result_menu(self):
+        width = min(472, self.win_w - 24)
+        compact = self.win_h < 420
+        top = 12 if compact else max(12, min(170, self.win_h - 430))
+        card = pygame.Rect((self.win_w - width) // 2, top, width,
+                           235 if compact else 292)
+        self._menu_card = card
+        x, w = card.x + 20, card.w - 40
+        self._menu_heads.append(("CHARACTER CHALLENGE RESULT", x, top + 14))
+        reward = (self.challenge_progress_snapshot or {}).get("reward")
+        award = (self.challenge_progress_snapshot or {}).get("award")
+        pending = (award is not None and award["celebration_seen_at"] is None
+                   and reward is not None and award["match_id"] ==
+                   self.challenge.match_id)
+        if pending:
+            self._menu_buttons.append(Button(
+                (x, top + (160 if compact else 204), w,
+                 32 if compact else 38), "Celebrate Uroschess Master",
+                self._acknowledge_master, kind="cta"))
+        else:
+            self._menu_buttons.append(Button(
+                (x, top + (160 if compact else 204), w,
+                 32 if compact else 38), "Play another challenge",
+                self._next_challenge_from_result, kind="cta"))
+        self._menu_buttons.append(Button(
+            (x, top + (198 if compact else 249), w,
+             32 if compact else 36), "Medal collection",
+            self._open_collection, kind="step"))
+        self._menu_buttons.append(Button(
+            (x, card.bottom + 7, w, 34 if compact else 38), "‹ All challenges",
+            self._open_challenge_from_game, kind="step"))
+
+    def _build_master_award_menu(self):
+        width = min(472, self.win_w - 24)
+        top = max(12, min(180, self.win_h - 380))
+        card = pygame.Rect((self.win_w - width) // 2, top, width, 235)
+        self._menu_card = card
+        x, w = card.x + 20, card.w - 40
+        self._menu_heads.append(("UROSCHESS MASTER", x, top + 16))
+        self._menu_buttons.append(Button(
+            (x, top + 143, w, 40), "Dismiss celebration",
+            self._acknowledge_master, kind="cta"))
+        self._menu_buttons.append(Button(
+            (x, card.bottom + 8, w, 38), "‹ Back to Play",
+            lambda: self._open_menu_section("play"), kind="step"))
 
     def _build_character_menu(self):
         from .challenge import ROSTER
@@ -160,6 +265,9 @@ class MenuLayoutMixin:
             self._menu_buttons.append(Button(
                 (x, top + 161, w, 48), "Character Challenge",
                 self._open_challenge_menu, kind="step"))
+            self._menu_buttons.append(Button(
+                (x, top + 219, w, 48), "Saved match archive",
+                self._open_challenge_archive, kind="step"))
         else:
             self._menu_heads.append(("PLAY AGAINST AI", x, top + 16))
             for i, (label, colors) in enumerate((
@@ -189,11 +297,12 @@ class MenuLayoutMixin:
         card = pygame.Rect((self.win_w - width) // 2, top, width, 490)
         self._menu_card = card
         x, w = card.x + 20, card.w - 40
+        snapshot = self.challenge_snapshot
         heading = ("UROSCHESS MASTER · CHARACTER CHALLENGE"
-                   if self.challenge_store.award() else "CHARACTER CHALLENGE")
+                   if snapshot["master"] else "CHARACTER CHALLENGE")
         self._menu_heads.append((heading, x, top + 13))
-        states = self.challenge_store.stages()
-        saved = self.challenge_store.active()
+        states = snapshot["states"]
+        saved = snapshot["saved"]
         page_count = (len(ROSTER) + 3) // 4
         self.challenge_page = max(0, min(self.challenge_page, page_count - 1))
         first = self.challenge_page * 4
@@ -239,7 +348,7 @@ class MenuLayoutMixin:
     def _build_challenge_color_menu(self):
         from .challenge import OPPONENTS, ROSTER
         opponent = OPPONENTS[self.challenge_choice_id]
-        state = self.challenge_store.stages()[ROSTER.index(opponent)]
+        state = self.challenge_snapshot["states"][ROSTER.index(opponent)]
         width = min(472, self.win_w - 24)
         top = self._simple_menu_top()
         card = pygame.Rect((self.win_w - width) // 2, top, width, 260)
@@ -259,6 +368,52 @@ class MenuLayoutMixin:
         self._menu_buttons.append(Button(
             (x, card.bottom + 8, w, 38), "‹  All characters",
             self._open_challenge_menu, kind="step"))
+
+    def _build_challenge_issue_menu(self):
+        width = min(500, self.win_w - 24)
+        top = max(18, min(164, self.win_h - 450))
+        card = pygame.Rect((self.win_w - width) // 2, top, width, 332)
+        self._menu_card = card
+        x, w = card.x + 20, card.w - 40
+        recovery = self.menu_view == "challenge_recovery"
+        archive = self.menu_view == "challenge_archive"
+        if recovery:
+            heading = "SAVED MATCH NEEDS ATTENTION"
+        elif archive and self.archive_entries:
+            heading = "ARCHIVED MATCH {} / {}".format(
+                self.archive_index + 1, len(self.archive_entries))
+        elif archive:
+            heading = "SAVED MATCH ARCHIVE"
+        else:
+            heading = "CHALLENGE PROGRESS UNAVAILABLE"
+        self._menu_heads.append((heading, x, top + 15))
+        if recovery:
+            actions = (
+                ("Retry saved match", self._resume_challenge),
+                ("Export saved match", self._export_challenge_recovery),
+                ("Archive and start again", self._archive_challenge_recovery),
+                ("Back to Play", lambda: self._open_menu_section("play")),
+            )
+        elif archive:
+            actions = []
+            if self.archive_entries:
+                actions.append(("Export saved match", self._export_challenge_recovery))
+                if self.archive_index > 0:
+                    actions.append(("Previous archive",
+                                    lambda: self._change_challenge_archive(-1)))
+                if self.archive_index + 1 < len(self.archive_entries):
+                    actions.append(("Next archive",
+                                    lambda: self._change_challenge_archive(1)))
+            actions.append(("Back to Play", lambda: self._open_menu_section("play")))
+        else:
+            actions = (
+                ("Retry", self._open_challenge_menu),
+                ("Back to Play", lambda: self._open_menu_section("play")),
+            )
+        for index, (label, action) in enumerate(actions):
+            self._menu_buttons.append(Button(
+                (x, top + 122 + index * 48, w, 40), label, action,
+                kind="cta" if index == 0 else "step"))
 
     def _build_opening_hub(self):
         width = min(660, self.win_w - 24)

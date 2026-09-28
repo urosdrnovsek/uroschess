@@ -40,6 +40,26 @@ Schema-4 unfinished records with prior help totals are restored conservatively
 as helped, because the old format cannot identify the helped step. Completed
 history and earlier content revisions remain available.
 
+Progress schema 9 adds `challenge_recovery` for archived invalid challenge
+matches. A recovery row records the saved match ID, verifier reason, diagnosis
+time, archive time, and original update time. The original match and policy
+rows remain available;
+archiving changes only the match state and update time. The active slot is
+cleared in the same transaction. Export produces a local JSON copy of the raw
+match, policy, and recovery rows. Database failures are retryable and never
+mark a match invalid. See [ADR 0002](architecture/0002-challenge-recovery.md).
+
+Progress schema 10 adds `challenge_win_events`, keyed by match ID. Every
+verified human checkmate victory in Character Challenge creates one event in
+the same transaction as the terminal match and any new badge or Master award.
+Rematches create new events but not duplicate badges. Draws, losses,
+resignations, unfinished and archived matches, imported replays, and casual
+games do not create events. Migration checks retained legal histories, final
+positions, human winner, commentary and supported recorded policies before
+backfilling; unsupported records keep their existing badges without an inferred
+medal. The UI derives the seven medal counts from this ledger and caches them
+outside drawing. See [ADR 0003](architecture/0003-challenge-win-events.md).
+
 Course prerequisites use stable lesson IDs. An unfinished prerequisite adds a
 Practise basics route from the chosen player's page; the course remains open.
 Course browsing remembers its page. A finished player lesson's Watch source

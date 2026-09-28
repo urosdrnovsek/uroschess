@@ -39,7 +39,17 @@ Omarchy colours when available and otherwise uses a built-in dark theme.
   how long the computer thinks. **Character Challenge** is a separate offline
   journey through Chicky, Pippa, Tina, Tom, Bruno, Olivia, and Monty. Beat each
   character with White and then Black to unlock the next; fourteen wins earn
-  the Uroschess Master title. An unfinished match can be resumed later.
+  the Uroschess Master title. An unfinished match can be resumed later. If its
+  saved history cannot be verified, Character Challenge explains the problem
+  and offers Retry, Export, and Archive and start again. The Play menu keeps a
+  Saved match archive so diagnostic copies can be exported later. Exports are
+  written beside the local progress database; the recovery screen shows the
+  filename and folder. Every verified checkmate win also earns a character
+  medal, including rematches. The main menu's **Medal collection** shows
+  lifetime totals: up to nine small portrait medals, then one larger gold
+  portrait with the count. The result screen distinguishes a new colour badge
+  from a previously earned one. The Master celebration is dismissed explicitly
+  and its title remains earned.
 - **Learn:** try short move exercises about openings, tactics, and endgames.
   Each question has a hint and an answer you can reveal. You can retry and
   return later; progress is saved on this computer.
