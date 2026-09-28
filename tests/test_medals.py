@@ -202,6 +202,41 @@ def test_result_snapshot_shows_new_badge_then_rematch_medal(tmp_path):
         pygame.quit()
 
 
+def test_collection_draws_one_circle_per_win_then_one_gold(tmp_path, monkeypatch):
+    import pygame
+    from chess_game.ui import ChessUI
+
+    ui = ChessUI(tmp_path / "progress.sqlite3")
+    try:
+        ui.collection_counts.update({
+            "chicky": 0, "pippa-pomeranian": 1,
+            "tina-turtle": 9, "tom-rabbit": 10})
+        ui._open_menu_section("collection")
+        ui._build_menu_buttons()
+        drawn = []
+        original = ui._draw_medal_portrait
+
+        def record(filename, center, size, gold=False):
+            drawn.append((filename, size, gold))
+            return original(filename, center, size, gold)
+
+        monkeypatch.setattr(ui, "_draw_medal_portrait", record)
+        ui._draw_menu()
+        assert len([item for item in drawn if item[0] == "chicky.bmp"]) == 0
+        assert len([item for item in drawn if item[0] == "pomeranian.bmp"]) == 1
+        assert len([item for item in drawn if item[0] == "tina.bmp"]) == 9
+        gold = [item for item in drawn if item[0] == "tom.bmp"]
+        assert len(gold) == 1 and gold[0][2]
+        assert gold[0][1] > drawn[0][1]
+        drawn.clear()
+        ui.collection_counts["tom-rabbit"] = 11
+        ui._draw_menu()
+        assert len([item for item in drawn if item[0] == "tom.bmp"]) == 1
+    finally:
+        ui.progress_store.close()
+        pygame.quit()
+
+
 def test_collection_and_master_acknowledgement_ui(tmp_path):
     import pygame
     from chess_game.ui import ChessUI

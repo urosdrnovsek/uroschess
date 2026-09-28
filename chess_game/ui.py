@@ -2516,21 +2516,17 @@ class ChessUI(MenuLayoutMixin):
                           min(p.rounding, 12))
         _hairline(self.screen, rect, p.panel_line, min(p.rounding, 12))
         cell = (rect.w - 12) / len(ROSTER)
-        size = max(20, min(32, int(cell) - 8))
         for index, opponent in enumerate(ROSTER):
             count = self.collection_counts[opponent.ident]
-            center = (round(rect.x + 6 + cell * (index + .5)), rect.y + 63)
-            if count:
-                self._draw_medal_portrait(opponent.portrait, center, size,
-                                         gold=count >= 10)
-            else:
-                self.screen.blit(_portrait(opponent.portrait, size, p.field, p.text),
-                                 (center[0] - size // 2, center[1] - size // 2))
-            label = "{} {}".format(opponent.name, count)
-            fitted = _fit_text(self.tag_font, label, int(cell) - 4)
+            center_x = round(rect.x + 6 + cell * (index + .5))
+            title = _fit_text(self.tag_font, opponent.name, int(cell) - 4)
+            rendered = self.tag_font.render(title, True, p.text)
+            self.screen.blit(rendered, rendered.get_rect(
+                centerx=center_x, y=rect.y + 51))
+            fitted = _fit_text(self.tag_font, str(count) + " wins", int(cell) - 4)
             rendered = self.tag_font.render(fitted, True, p.text)
             self.screen.blit(rendered, rendered.get_rect(
-                centerx=center[0], y=center[1] + size // 2 + 3))
+                centerx=center_x, y=rect.y + 70))
 
     def _draw_challenge_result(self):
         if self.challenge is None:
@@ -2620,24 +2616,45 @@ class ChessUI(MenuLayoutMixin):
 
     def _draw_menu_button(self, b, hot, rad, focused=False):
         p = self.pal
+        if b.kind == "medal_row":
+            _flat_button(self.screen, b.rect, p.btn, p.panel_line, rad)
+            opponent = next(item for item in ROSTER
+                            if item.portrait == b.value)
+            summary = medal_summary(self.collection_counts[opponent.ident])
+            name, strength = b.label.split(" · ", 1)
+            self.screen.blit(self.text_font.render(name, True, p.text),
+                             (b.rect.x + 8, b.rect.y + 5))
+            strength_text = self.tag_font.render(strength, True, p.text)
+            self.screen.blit(strength_text,
+                             (b.rect.right - 8 - strength_text.get_width(),
+                              b.rect.y + 10))
+            if summary.gold_portrait:
+                size = min(50, b.rect.h - 27)
+                center = (b.rect.x + 8 + size // 2, b.rect.bottom - 3 - size // 2)
+                self._draw_medal_portrait(b.value, center, size, gold=True)
+                detail = _fit_text(self.small_font, summary.label, b.rect.w - 80)
+                self.screen.blit(self.small_font.render(detail, True, p.text),
+                                 (b.rect.x + 72, b.rect.y + 44))
+            else:
+                self.screen.blit(self.small_font.render(summary.label, True, p.text),
+                                 (b.rect.x + 8, b.rect.y + 28))
+                diameter = min(26, (b.rect.w - 61) // 10)
+                gap = (b.rect.w - 16 - 10 * diameter) // 9
+                center_y = b.rect.bottom - 5 - diameter // 2
+                for index in range(10):
+                    center = (b.rect.x + 8 + diameter // 2 +
+                              index * (diameter + gap), center_y)
+                    if index < summary.small_portraits:
+                        self._draw_medal_portrait(b.value, center, diameter)
+                    else:
+                        pygame.draw.circle(self.screen, p.panel_line, center,
+                                           diameter // 2, width=1)
+            return
         if b.kind == "challenge":
             _flat_button(self.screen, b.rect,
                          p.btn_hot if hot else p.btn, p.panel_line, rad)
-            count = None
-            if self.menu_view == "collection":
-                opponent = next(item for item in ROSTER
-                                if item.portrait == b.value)
-                count = self.collection_counts[opponent.ident]
-                if count >= 10:
-                    self._draw_medal_portrait(
-                        b.value, (b.rect.x + 39, b.rect.y + 41), 64,
-                        gold=True)
-                else:
-                    self.screen.blit(_portrait(b.value, 54, p.field, p.text),
-                                     (b.rect.x + 8, b.rect.y + 15))
-            else:
-                portrait = _portrait(b.value, 54, p.field, p.text)
-                self.screen.blit(portrait, (b.rect.x + 8, b.rect.y + 18))
+            portrait = _portrait(b.value, 54, p.field, p.text)
+            self.screen.blit(portrait, (b.rect.x + 8, b.rect.y + 18))
             x = b.rect.x + 72
             width = b.rect.right - x - 8
             name, strength = b.label.split(" · ", 1)
@@ -2652,12 +2669,6 @@ class ChessUI(MenuLayoutMixin):
                 self.screen.blit(self.small_font.render(detail, True, p.text),
                                  (x, b.rect.y + 36 +
                                   line_index * self.small_font.get_linesize()))
-            if count is not None and 1 <= count <= 9:
-                size = min(18, max(10, (width - 4) // count - 2))
-                for index in range(count):
-                    self._draw_medal_portrait(
-                        b.value, (x + size // 2 + index * (size + 2),
-                                  b.rect.y + 70), size)
             if focused:
                 draw_focus_ring(self.screen, b.rect, p.accent, rad)
             return

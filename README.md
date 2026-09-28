@@ -45,9 +45,10 @@ Omarchy colours when available and otherwise uses a built-in dark theme.
   Saved match archive so diagnostic copies can be exported later. Exports are
   written beside the local progress database; the recovery screen shows the
   filename and folder. Every verified checkmate win also earns a character
-  medal, including rematches. The main menu's **Medal collection** shows
-  lifetime totals: up to nine small portrait medals, then one larger gold
-  portrait with the count. The result screen distinguishes a new colour badge
+  medal, including rematches. The main menu links to **Medal collection**,
+  where each character has ten circular slots. Each win fills one portrait
+  circle; the tenth replaces the row with one larger gold circle and a lifetime
+  count. The result screen distinguishes a new colour badge
   from a previously earned one. The Master celebration is dismissed explicitly
   and its title remains earned.
 - **Learn:** try short move exercises about openings, tactics, and endgames.

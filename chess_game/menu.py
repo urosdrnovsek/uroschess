@@ -139,7 +139,7 @@ class MenuLayoutMixin:
                 (x, top + 39 + row * (84 if compact else 90), w,
                  78 if compact else 82),
                 opponent.name + " · " + opponent.strength,
-                lambda: None, kind="challenge", detail=summary.label,
+                lambda: None, kind="medal_row", detail=summary.label,
                 value=opponent.portrait))
         half = (w - 8) // 2
         nav_y = card.bottom - 45 if compact else top + 405

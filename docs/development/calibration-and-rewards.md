@@ -39,6 +39,9 @@ needed before any strength tuning.
 
 Schema 10 and the medal UI are described in [ADR 0003](../architecture/0003-challenge-win-events.md).
 The result card reports this match's medal and whether its colour badge is
-new, plus the next unlocked opponent. The Collection view and compact main
-menu shelf show lifetime counts for all seven characters. The Master title is
-durable and its celebration is acknowledged only by an explicit action.
+new, plus the next unlocked opponent. In Collection, each character has a
+ten-circle row: each win fills one circular portrait; at ten wins the row is
+replaced by one larger gold portrait circle, while the lifetime count keeps
+increasing. The compact main menu shelf shows text totals and opens Collection.
+The Master title is durable and its celebration is acknowledged only by an
+explicit action.
