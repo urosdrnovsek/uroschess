@@ -30,13 +30,15 @@ def main():
         resolved = resolve_lesson(entry.game, entry.lesson)
         print("lesson: {} ({} verified steps)".format(
             entry.lesson.lesson_id, len(resolved)))
-    for course in library.courses_for_category("opening"):
-        _require_source(course.association_source,
-                        "course association " + course.course_id)
-        _require_source(course.source_game,
-                        "course source game " + course.course_id)
-        print("course: {} ({} lessons)".format(
-            course.course_id, len(course.lesson_ids)))
+    for course in library.courses:
+        if course.content_kind != "original":
+            _require_source(course.association_source,
+                            "course association " + course.course_id)
+            _require_source(course.source_game,
+                            "course source game " + course.course_id)
+        count = len(course.lesson_ids)
+        print("course: {} ({} {})".format(
+            course.course_id, count, "lesson" if count == 1 else "lessons"))
     print("content pack {!r} is valid".format(library.pack_id))
 
 

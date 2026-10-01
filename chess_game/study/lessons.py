@@ -279,8 +279,7 @@ class LessonController:
         answer = next((item for item in choices if item.uci == uci), None)
         if answer is None:
             result = AttemptResult(
-                "not_covered",
-                "Hmm, that is not what I had in mind. Try another move.",
+                "not_covered", question.other_legal_move_text,
                 uci, learner_move)
             self._last_attempt = result
             self._display_board = question_board
@@ -306,8 +305,7 @@ class LessonController:
             self._last_attempt = result
             return result
 
-        feedback = ("Hmm, that is not what I had in mind. Try another move."
-                    if answer.outcome == "wrong" else answer.feedback)
+        feedback = answer.feedback
         result = AttemptResult(answer.outcome, feedback, uci, learner_move)
         # Incorrect attempts are feedback only: leave the lesson position
         # visible so the learner can choose again from the same board.

@@ -5,9 +5,17 @@
 
 Uroschess is a small desktop chess app. Play against the computer or another
 person at the same computer, and use short lessons to practise making a plan.
-The lessons may be useful for children who already know how the pieces move,
-what check and checkmate mean. They cover ideas such as developing
-pieces, looking after the king, coordinating an attack, and simple endgames.
+Chicky's beginner course introduces piece moves, simple captures, king safety,
+and checkmate. Pippa's first course practises useful developing moves, and
+Tina's first course shows how a pawn becomes a queen, how a king can support
+one, and why stalemate is a draw. Tom's first opening course practises spotting
+an attack on a pawn and choosing a sound reply. Bruno's planning lesson
+improves a quiet bishop and puts a rook on an open file. Olivia's first puzzle
+uses a knight fork to win a queen. The strategy lessons
+may be useful for children
+who already know how the pieces move and what check and
+checkmate mean. They cover ideas such as developing pieces, looking after the
+king, coordinating an attack, and simple endgames.
 
 | Play | Learn |
 | --- | --- |
@@ -51,7 +59,13 @@ Omarchy colours when available and otherwise uses a built-in dark theme.
   The Collection screen also shows lifetime counts. The result screen
   distinguishes a new colour badge from a previously earned one. The Master
   celebration is dismissed explicitly and its title remains earned.
-- **Learn:** try short move exercises about openings, tactics, and endgames.
+- **Learn:** start with Chicky's seven beginner lessons, each with a guided move
+  and an independent try, then try Pippa's opening exercise, Tina's endgame
+  course, Tom's opening threat exercise, Bruno's middlegame plan, Olivia's
+  knight fork puzzle, or other short lessons about openings and endgames.
+  Monty's analysis of a recorded tournament game unlocks after one verified
+  Character Challenge win against him with either colour. This is separate
+  from the Master title, which still needs both colours.
   Each question has a hint and an answer you can reveal. You can retry and
   return later; progress is saved on this computer.
 - **Watch games:** step through recorded moves and brief notes. The historical
@@ -60,11 +74,18 @@ Omarchy colours when available and otherwise uses a built-in dark theme.
 
 Bruno the Bear and Olivia the Owl are fictional coaches with original chess
 tips. Their portraits and advice were created for Uroschess.
+Monty's commentary is also original; his favourite historical game is the
+[1889 Amsterdam tournament score](https://en.wikipedia.org/wiki/Lasker_versus_Bauer,_Amsterdam,_1889),
+shown without player identities in the app.
 
 Choose **Meet the characters** on the main menu to browse all seven animals,
 read their short stories, and see their favourite chess pieces. Click the
 larger portrait on the main menu, or press **N**, to see another character's
 quote.
+
+![Chicky's first knight movement lesson](docs/chicky-lesson.png)
+
+![Chicky's pawn movement and capture lesson](docs/chicky-pawn-lesson.png)
 
 | Main menu | Opening lessons |
 | --- | --- |

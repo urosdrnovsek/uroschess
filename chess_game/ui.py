@@ -55,7 +55,8 @@ from .study import (
     SquareHighlight,
     load_game_library,
 )
-from .study.coaching import coach_advice, coach_thought
+from .study.coaching import (BEGINNER_COACH_IDS, BEGINNER_RETRY_MESSAGE,
+                             coach_advice, coach_thought)
 from .study.course_progress import build_course_summary
 from .views import BoardView, Button, StudyView, draw_focus_ring
 from .views.chess_thought_view import draw_chess_thought, _portrait
@@ -421,6 +422,9 @@ class ChessUI(MenuLayoutMixin):
         self.library_return = "main"
         self.library_page = 0
         self.course_page = 0
+        self.guided_course_page = 0
+        self.course_lesson_page = 0
+        self.course_return_view = "opening_hub"
         self.last_learn_browse = None
         self.replay_return = None
         self.active_course_id = None
@@ -468,6 +472,7 @@ class ChessUI(MenuLayoutMixin):
         self.lesson_scroll = 0
         self.lesson_max_scroll = 0
         self.lesson_message = ""
+        self.lesson_message_kind = "hint"
         self.progress_store = None
         self.challenge_store = None
         self.challenge = None
@@ -1026,6 +1031,14 @@ class ChessUI(MenuLayoutMixin):
         self._change_chess_thought(play_sound=False)
 
     def start_lesson(self, entry, course_id=None):
+        if self.game_library:
+            locked_course = next((course for course in self.game_library.courses
+                                  if course.entitlement_id and
+                                  entry.lesson.lesson_id in course.lesson_ids and
+                                  not self._course_unlocked(course)), None)
+            if locked_course is not None:
+                self._flash("Beat Monty once in Character Challenge to unlock his lesson.")
+                return
         self._reset_button_focus()
         return_view = self.menu_view if self.scene == "menu" else self.lesson_return_view
         self.scene = "lesson"
@@ -1043,6 +1056,8 @@ class ChessUI(MenuLayoutMixin):
         self.flipped = False
         self.lesson_scroll = 0
         self.lesson_message = ""
+        self.lesson_message_kind = "hint"
+        self.lesson_retry_feedback = ""
         record = None
         step_records = {}
         if self.progress_store is None and not self.progress_error:
@@ -1091,16 +1106,22 @@ class ChessUI(MenuLayoutMixin):
 
     def _course_id_for_lesson(self, lesson_id):
         if self.game_library:
-            for course in self.game_library.courses:
-                if lesson_id in course.lesson_ids:
-                    return course.course_id
+            candidates = [course.course_id for course in self.game_library.courses
+                          if course.published and lesson_id in course.lesson_ids]
+            if self.active_course_id in candidates:
+                return self.active_course_id
+            if len(candidates) == 1:
+                return candidates[0]
         return None
 
     def _repeat_coach_advice(self):
         if self.coach_profile is None or self.lesson is None:
             return
         self.lesson_message = coach_advice(self.lesson, self.lesson_message)
-        self._show_latest_lesson_message()
+        if self.lesson_message_kind == "try_again":
+            self._show_latest_lesson_message()
+        else:
+            self._show_latest_lesson_message()
         sound.play("click")
         self._dirty = True
 
@@ -1142,6 +1163,7 @@ class ChessUI(MenuLayoutMixin):
 
     def _lesson_hint(self):
         self.lesson_message = self.lesson.request_hint()
+        self.lesson_message_kind = "hint"
         self._show_latest_lesson_message()
         self._save_lesson_progress()
         self._dirty = True
@@ -1220,9 +1242,21 @@ class ChessUI(MenuLayoutMixin):
             result = self.lesson.explore_uci(uci)
         else:
             return False
-        self.lesson_message = (result.feedback
-                               if result.outcome == "not_covered" else "")
-        if result.outcome != "illegal":
+        beginner_coach = self.lesson.lesson.coach_player_id in BEGINNER_COACH_IDS
+        if beginner_coach and result.outcome in ("wrong", "not_covered"):
+            if result.outcome == "wrong":
+                self.lesson.retry()
+            self.lesson_message = BEGINNER_RETRY_MESSAGE
+            self.lesson_message_kind = "try_again"
+            self.lesson_retry_feedback = result.feedback
+        else:
+            self.lesson_message = (result.feedback
+                                   if result.outcome == "not_covered" else "")
+            self.lesson_message_kind = "hint"
+            self.lesson_retry_feedback = ""
+        if self.lesson_message_kind == "try_again":
+            self._show_latest_lesson_message()
+        elif result.outcome != "illegal":
             self._show_latest_lesson_message()
         last_move = (None if result.outcome in ("wrong", "not_covered")
                      else result.move)
@@ -1735,12 +1769,43 @@ class ChessUI(MenuLayoutMixin):
             self._dirty = True
 
     def _open_course(self, course_id):
-        if self.game_library and self.game_library.course(course_id):
+        course = self.game_library.course(course_id) if self.game_library else None
+        if course and course.published and not self._course_unlocked(course):
+            self._flash("Beat Monty once in Character Challenge with either colour to unlock.")
+            return
+        if course and course.published:
+            if course_id != self.active_course_id:
+                self.course_lesson_page = 0
+            if self.menu_view in ("characters", "opening_hub", "guided_hub",
+                                  "learn"):
+                self.course_return_view = self.menu_view
+            else:
+                self.course_return_view = (
+                    "opening_hub" if course.category == "opening" else "learn")
             self.active_course_id = course_id
             self._remember_learn_browse(
                 view="course", course_id=course_id, page=self.course_page)
             self._save_preferences(last_course_id=course_id)
             self._open_menu_section("course")
+
+    def _course_unlocked(self, course):
+        return (not course.entitlement_id or
+                course.entitlement_id == "monty-first-verified-win" and
+                self.collection_counts.get("monty-cat", 0) > 0)
+
+    def _change_guided_course_page(self, delta):
+        count = (len(self._guided_courses()) + 1) // 2
+        page = max(0, min(self.guided_course_page + delta, max(0, count - 1)))
+        if page != self.guided_course_page:
+            self.guided_course_page = page
+            self._reset_button_focus()
+            self._menu_buttons = []
+            self._dirty = True
+
+    def _guided_courses(self):
+        return tuple(course for course in self.game_library.courses
+                     if course.published and course.category in
+                     ("middlegame", "tactics", "historical_analysis")) if self.game_library else ()
 
     def _remember_learn_browse(self, **context):
         self.last_learn_browse = context
@@ -1752,8 +1817,9 @@ class ChessUI(MenuLayoutMixin):
             return False
         view = context.get("view")
         if view == "course":
-            return bool(self.game_library and self.game_library.course(
-                context.get("course_id")))
+            course = (self.game_library.course(context.get("course_id"))
+                      if self.game_library else None)
+            return bool(course and course.published and self._course_unlocked(course))
         return view == "opening_hub" or (view == "library" and
                context.get("category") in
                ("path", "guided_game", "opening", "endgame"))
@@ -1771,10 +1837,14 @@ class ChessUI(MenuLayoutMixin):
             self._open_library(context["category"], context.get("page", 0))
 
     def _open_course_about(self):
-        self._open_menu_section("course_about")
+        course = self.game_library.course(self.active_course_id)
+        if course and course.source_game_id and course.association_source:
+            self._open_menu_section("course_about")
 
     def _watch_course_source(self):
         course = self.game_library.course(self.active_course_id)
+        if course is None or not course.source_game_id:
+            return
         entry = next((item for item in self.game_library.entries
                       if item.game.game_id == course.source_game_id), None)
         if entry:
@@ -1799,7 +1869,9 @@ class ChessUI(MenuLayoutMixin):
 
     def _course_progress(self, course):
         done = self._course_summary(course).done_count
-        return "{} of {} lessons done".format(done, len(course.lesson_ids))
+        count = len(course.lesson_ids)
+        return "{} of {} {} done".format(
+            done, count, "lesson" if count == 1 else "lessons")
 
     def _course_summary(self, course):
         key = (course.course_id, id(self.game_library), id(self.progress_store))
@@ -1825,9 +1897,14 @@ class ChessUI(MenuLayoutMixin):
             return
         self.start_lesson(entry, course_id=course.course_id)
 
-    def _course_entry_status(self, entry):
-        course = next((item for item in self.game_library.courses
-                       if entry.lesson.lesson_id in item.lesson_ids), None)
+    def _course_entry_status(self, entry, course=None):
+        if course is None:
+            course = self.game_library.course(self.active_course_id)
+        if course is None or entry.lesson.lesson_id not in course.lesson_ids:
+            course_id = self._course_id_for_lesson(entry.lesson.lesson_id)
+            course = self.game_library.course(course_id) if course_id else None
+        if course is None or entry.lesson.lesson_id not in course.lesson_ids:
+            return "NEXT"
         return (self._course_summary(course).status(entry.lesson.lesson_id)
                 if course else "NEXT")
 
@@ -1835,9 +1912,19 @@ class ChessUI(MenuLayoutMixin):
         course = self.game_library.course(self.active_course_id)
         entries = self.game_library.course_lessons(course)
         entry = next((item for item in entries
-                      if self._course_entry_status(item) in
+                      if self._course_entry_status(item, course) in
                       ("NEXT", "IN PROGRESS")), entries[-1])
+        self.course_lesson_page = course.lesson_ids.index(entry.lesson.lesson_id) // 2
         self.start_lesson(entry, course_id=course.course_id)
+
+    def _change_course_lesson_page(self, delta):
+        course = self.game_library.course(self.active_course_id)
+        last = max(0, (len(course.lesson_ids) - 1) // 2)
+        self.course_lesson_page = max(0, min(last,
+                                             self.course_lesson_page + delta))
+        self._reset_button_focus()
+        self._menu_buttons = []
+        self._dirty = True
 
     def _change_library_page(self, delta):
         entries = self._library_entries()
@@ -1909,6 +1996,18 @@ class ChessUI(MenuLayoutMixin):
     def _continue_learning(self):
         entries = self._path_entries()
         entry = self._resume_entry()
+        if entry is None and self.game_library:
+            has_history = (self.progress_store is not None and any(
+                self.progress_store.load(item.lesson.lesson_id)
+                for item in self.game_library.lesson_entries))
+            chicky = self.game_library.course("chicky-first-knight-steps")
+            if not has_history and chicky and chicky.published:
+                self.course_return_view = "learn"
+                self._open_course(chicky.course_id)
+                self.start_lesson(
+                    self.game_library.lesson_entry(chicky.lesson_ids[0]),
+                    course_id=chicky.course_id)
+                return
         if entry is None:
             entry = next((item for item in entries
                           if self._path_status(item) in ("NEXT", "IN PROGRESS")), None)
@@ -2166,13 +2265,20 @@ class ChessUI(MenuLayoutMixin):
 
     def _build_promo_buttons(self, sq):
         self._promo_buttons = []
-        px, py = self._sq_to_px(sq)
         color = self.board.side_to_move
-        top = min(py, self.board_y + self.board_px - 4 * self.SQ)
-        for i, t in enumerate(["q", "r", "b", "n"]):
-            rect = (px, top + i * self.SQ, self.SQ, self.SQ)
+        width = min(220, self.board_px - 8)
+        height = max(32, min(44, self.board_px // 5))
+        gap = 3 if self.board_px < 300 else 6
+        total = 4 * height + 3 * gap
+        x = self.board_x + (self.board_px - width) // 2
+        top = self.board_y + (self.board_px - total) // 2
+        for i, (t, name) in enumerate((
+                ("q", "Queen"), ("r", "Rook"),
+                ("b", "Bishop"), ("n", "Knight"))):
+            rect = (x, top + i * (height + gap), width, height)
             self._promo_buttons.append(
-                Button(rect, color + t, lambda t=t: self._choose_promo(t)))
+                Button(rect, color + t, lambda t=t: self._choose_promo(t),
+                       detail=name))
 
     def _choose_promo(self, t):
         for m in self.pending_promo:
@@ -2450,7 +2556,7 @@ class ChessUI(MenuLayoutMixin):
                       if course else None)
             course_advice = player.intro if player else ""
             if course:
-                statuses = [self._course_entry_status(entry) for entry in
+                statuses = [self._course_entry_status(entry, course) for entry in
                             self.game_library.course_lessons(course)]
                 if all(status in ("DONE", "REVISIT") for status in statuses):
                     course_advice = (
@@ -2597,6 +2703,8 @@ class ChessUI(MenuLayoutMixin):
         opponent = ROSTER[self.character_index]
         profile = STORIES[opponent.ident]
         portrait_size = min(190, card.h // 3, card.w - 80)
+        if opponent.ident == "chicky" and card.w < 400:
+            portrait_size = min(portrait_size, 135)
         if card.w < 400 and card.h < 540:
             portrait_size = min(portrait_size, 120)
         portrait_x = card.centerx - portrait_size // 2
@@ -3003,7 +3111,9 @@ class ChessUI(MenuLayoutMixin):
             self.panel_x, self.panel_y, self.panel_w, self.panel_h)
         self.lesson_max_scroll = self.study_view.draw_lesson_panel(
             panel, self.lesson, self._game_buttons,
-            pygame.mouse.get_pos(), self.lesson_scroll, self.lesson_message,
+            pygame.mouse.get_pos(), self.lesson_scroll,
+            (self.lesson_retry_feedback if self.lesson_message_kind == "try_again"
+             else self.lesson_message),
             self._button_focus,
             (coach_thought(self.coach_profile, self.lesson, self.lesson_message)
              if self.coach_profile else self.chess_thought)
@@ -3014,7 +3124,9 @@ class ChessUI(MenuLayoutMixin):
                             self.lesson.lesson.initial_help and
                             self.lesson.current_step.practice_mode == "guided"),
             coach_label=(self.coach_profile.short_name
-                         if self.coach_profile else ""))
+                         if self.coach_profile else ""),
+            transient_label=("TRY AGAIN" if self.lesson_message_kind == "try_again"
+                             else "HINT"))
         if self._portrait_in_panel:
             self._portrait_hit_rect = self.study_view.thought_hit_rect
         self.lesson_scroll = max(
@@ -3140,7 +3252,10 @@ class ChessUI(MenuLayoutMixin):
             _round_rect_alpha(self.screen, b.rect,
                               (*(p.btn_hot if hot else p.panel), 255), 6)
             pygame.draw.rect(self.screen, p.accent, b.rect, 2, border_radius=6)
-            self._draw_piece(b.label, b.rect.centerx, b.rect.centery)
+            self._draw_piece(b.label, b.rect.x + b.rect.h // 2, b.rect.centery)
+            label = self.small_font.render(b.detail, True, p.text)
+            self.screen.blit(label, label.get_rect(
+                midleft=(b.rect.x + b.rect.h + 5, b.rect.centery)))
             if index == self._button_focus:
                 draw_focus_ring(self.screen, b.rect, p.accent, 6)
 
@@ -3268,7 +3383,7 @@ class ChessUI(MenuLayoutMixin):
                                   "characters",
                                   "challenge_color", "challenge_recovery",
                                   "challenge_unavailable", "challenge_archive",
-                                  "ai_play", "opening_hub", "course",
+                                  "ai_play", "opening_hub", "guided_hub", "course",
                                   "course_about"):
                 if self.menu_view == "colors":
                     self._close_colors()
@@ -3284,10 +3399,10 @@ class ChessUI(MenuLayoutMixin):
                                         "challenge_unavailable", "challenge_archive"):
                     self._open_menu_section("play")
                 elif self.menu_view == "course":
-                    self._open_menu_section("opening_hub")
+                    self._open_menu_section(self.course_return_view)
                 elif self.menu_view == "course_about":
                     self._open_menu_section("course")
-                elif self.menu_view == "opening_hub":
+                elif self.menu_view in ("opening_hub", "guided_hub"):
                     self._open_menu_section("learn")
                 elif self.menu_view in ("learn", "play"):
                     self._open_menu_section("main")
@@ -3318,6 +3433,18 @@ class ChessUI(MenuLayoutMixin):
                 self._change_course_page(-1)
             elif key == pygame.K_PAGEDOWN:
                 self._change_course_page(1)
+            return True
+        if self.scene == "menu" and self.menu_view == "guided_hub":
+            if key == pygame.K_PAGEUP:
+                self._change_guided_course_page(-1)
+            elif key == pygame.K_PAGEDOWN:
+                self._change_guided_course_page(1)
+            return True
+        if self.scene == "menu" and self.menu_view == "course":
+            if key == pygame.K_PAGEUP:
+                self._change_course_lesson_page(-1)
+            elif key == pygame.K_PAGEDOWN:
+                self._change_course_lesson_page(1)
             return True
         if self.scene == "replay":
             if key == pygame.K_LEFT:

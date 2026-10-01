@@ -1,0 +1,77 @@
+{
+  "schema_version": 3,
+  "lesson_id": "monty-amsterdam-analysis",
+  "content_revision": 1,
+  "title": "Two bishops and a rook",
+  "level": "intermediate",
+  "estimated_minutes": 6,
+  "objective": "Predict a bishop sacrifice and a rook lift from a recorded tournament game.",
+  "prerequisites": ["legal moves", "check", "piece coordination"],
+  "concepts": ["historical analysis", "king attack", "rook lift"],
+  "game_id": "monty-amsterdam-1889",
+  "coach_player_id": "monty-cat",
+  "content_kind": "historical",
+  "related_source_game_id": "monty-amsterdam-1889",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original Monty commentary",
+    "license": "MIT",
+    "attribution": "Original teaching text about an anonymized 1889 Amsterdam tournament score"
+  },
+  "steps": [
+    {
+      "step_id": "first-bishop-offer",
+      "practice_mode": "guided",
+      "node_path": [
+        "f2f4", "d7d5", "e2e3", "g8f6", "b2b3", "e7e6", "c1b2", "f8e7",
+        "f1d3", "b7b6", "b1c3", "c8b7", "g1f3", "b8d7", "e1g1", "e8g8",
+        "c3e2", "c7c5", "e2g3", "d8c7", "f3e5", "d7e5", "b2e5", "c7c6",
+        "d1e2", "a7a6", "g3h5", "f6h5"
+      ],
+      "expected_fen": "r4rk1/1b2bppp/ppq1p3/2ppB2n/5P2/1P1BP3/P1PPQ1PP/R4RK1 w - - 0 15",
+      "explanation": "In this recorded tournament game, Black has taken White's knight on h5. Both sides developed their pieces before this attack. White now spots a forcing bishop check against Black's king.",
+      "detail": "Monty likes the brave move, but the position matters: a queen and second bishop can follow the king.",
+      "coach_prompt": "My favourite games make me look twice.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move the bishop from d3 to h7 with check.",
+        "hints": ["The bishop on d3 can capture the h7 pawn.", "Click d3, then h7."],
+        "tree": [
+          {"uci": "d3h7", "role": "learner", "outcome": "preferred", "feedback": "Bxh7+ offers the bishop, but it checks the king. White's queen can follow if Black accepts."},
+          {"uci": "e5g7", "role": "learner", "outcome": "wrong", "feedback": "Bxg7 attacks near the king, but the recorded move checks first with the other bishop."}
+        ],
+        "other_legal_move_text": "That may be a chess move, but the recorded attack begins with a bishop check from d3."
+      }
+    },
+    {
+      "step_id": "bring-the-rook",
+      "practice_mode": "independent",
+      "node_path": [
+        "f2f4", "d7d5", "e2e3", "g8f6", "b2b3", "e7e6", "c1b2", "f8e7",
+        "f1d3", "b7b6", "b1c3", "c8b7", "g1f3", "b8d7", "e1g1", "e8g8",
+        "c3e2", "c7c5", "e2g3", "d8c7", "f3e5", "d7e5", "b2e5", "c7c6",
+        "d1e2", "a7a6", "g3h5", "f6h5", "d3h7", "g8h7", "e2h5", "h7g8",
+        "e5g7", "g8g7", "h5g4", "g7h7"
+      ],
+      "expected_fen": "r4r2/1b2bp1k/ppq1p3/2pp4/5PQ1/1P2P3/P1PP2PP/R4RK1 w - - 2 19",
+      "explanation": "Black accepted both bishop offers, while White used queen checks to keep the king exposed. The queen alone cannot finish the attack. Find the recorded move that brings another piece toward Black's king.",
+      "detail": "Black found replies to each check. Now White needs the rook to join in, even though the move is quiet.",
+      "coach_prompt": "All right, Black defended. Which piece can help?",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Predict the quiet rook move that prepares an attack along the third row.",
+        "hints": ["The rook on f1 can rise toward the queen's side of the board.", "Move the rook from f1 to f3."],
+        "tree": [
+          {"uci": "f1f3", "role": "learner", "outcome": "preferred", "feedback": "Rf3 prepares Rh3+, bringing the rook into the attack. Black soon had to give up the queen to avoid mate."},
+          {"uci": "f1f2", "role": "learner", "outcome": "wrong", "feedback": "Rf2 lifts the rook, but f3 gives it a direct route to h3 for the next check."}
+        ],
+        "other_legal_move_text": "That may be useful, but the recorded move lifts the f1 rook to the third row."
+      }
+    }
+  ],
+  "takeaway": "The bishops opened lines, Black answered the checks, and a quiet rook lift brought another piece into the attack. Replay the recorded game to see the finish."
+}

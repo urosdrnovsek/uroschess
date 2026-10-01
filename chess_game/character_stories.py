@@ -40,7 +40,6 @@ STORIES = {
         "board had whispered a secret."),
     "monty-cat": CharacterStory(
         "King",
-        "Monty made a paper crown for his king and announced a royal parade. "
-        "The king moved one square. Monty bowed as if a crowd had cheered. "
-        "He still calls it his finest parade."),
+        "Monty made a paper crown for his king. Beat him once with either "
+        "colour in Character Challenge to unlock a favourite tournament game."),
 }

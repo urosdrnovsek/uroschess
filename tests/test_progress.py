@@ -110,21 +110,22 @@ def test_continue_learning_selects_latest_current_unfinished_lesson(tmp_path):
     ui.progress_store.close()
 
 
-def test_new_learner_starts_with_opening_basics_and_sees_path(tmp_path):
+def test_new_learner_starts_with_chicky_and_can_see_strategy_path(tmp_path):
     from chess_game.ui import ChessUI
     import pygame
 
     ui = ChessUI(tmp_path / "new-progress.sqlite3")
     ui._continue_learning()
-    assert ui.lesson.lesson.lesson_id == "opening-essentials"
-    assert ui._next_path_entry().lesson.lesson_id == "italian-development"
+    assert ui.lesson.lesson.lesson_id == "chicky-knight-steps"
+    assert ui.lesson_course_id == "chicky-first-knight-steps"
+    assert ui._next_path_entry().lesson.lesson_id == "chicky-pawn-steps"
     ui._to_menu()
     ui._open_library("path")
     ui._build_menu_buttons()
     entries = [button for button in ui._menu_buttons
                if button.kind == "library"]
     assert entries[0].label == "Start with a useful plan"
-    assert entries[0].detail.startswith("IN PROGRESS")
+    assert entries[0].detail.startswith("NEXT")
     ui.progress_store.close()
     pygame.quit()
 

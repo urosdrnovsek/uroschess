@@ -229,7 +229,7 @@ def test_course_source_replay_returns_to_about_and_browse_restores(tmp_path):
     reopened = ChessUI(path)
     reopened._open_menu_section("learn")
     reopened._build_menu_buttons()
-    assert any(button.label == "Return to last course or list"
+    assert any(button.label == "Return to last page"
                for button in reopened._menu_buttons)
     reopened._restore_learn_browse()
     assert reopened.menu_view == "course"
@@ -310,6 +310,337 @@ def test_every_published_course_page_is_reachable_with_keys_and_mouse():
             assert ui.active_course_id == card.value
             ui._open_menu_section("opening_hub")
             assert ui.course_page == 2
+    ui.progress_store.close()
+    pygame.quit()
+
+
+def test_chicky_course_opens_from_learn_and_character_page():
+    from chess_game.study import ChessAdapter, COMPLETED
+
+    ui = ChessUI(":memory:")
+    ui._on_resize(360, 700)
+    ui._set_text_scale(1.4)
+    ui._open_menu_section("learn")
+    ui._build_menu_buttons()
+    button = next(button for button in ui._menu_buttons
+                  if button.label == "Learn with Chicky")
+    button.action()
+    assert ui.active_course_id == "chicky-first-knight-steps"
+    ui._draw()
+    assert not any(button.label == "Sources" for button in ui._menu_buttons)
+    assert all(ui.screen.get_rect().contains(button.rect)
+               for button in ui._menu_buttons)
+    lesson_button = next(button for button in ui._menu_buttons
+                         if button.label == "Knight steps")
+    lesson_button.action()
+    assert ui.lesson_course_id == "chicky-first-knight-steps"
+    ui._apply_lesson_move(ChessAdapter.resolve_uci(ui.board, "g1f3"))
+    ui._lesson_continue()
+    assert ui.lesson.current_step.practice_mode == "independent"
+    ui._apply_lesson_move(ChessAdapter.resolve_uci(ui.board, "f3h4"))
+    ui._lesson_continue()
+    assert ui.lesson.state == COMPLETED
+    ui._leave_lesson()
+    assert ui.menu_view == "course"
+    assert ui._course_progress(ui.game_library.course(
+        "chicky-first-knight-steps")) == "1 of 7 lessons done"
+    ui._continue_course()
+    assert ui.lesson_entry.lesson.lesson_id == "chicky-pawn-steps"
+    ui._leave_lesson()
+    ui._on_key(pygame.K_PAGEDOWN)
+    ui._build_menu_buttons()
+    assert {button.label for button in ui._menu_buttons
+            if button.kind == "library"} == {"Rook lines", "Bishop diagonals"}
+    next(button for button in ui._menu_buttons
+         if button.label == "Bishop diagonals").action()
+    assert ui.lesson_course_id == "chicky-first-knight-steps"
+    ui._leave_lesson()
+    ui._on_key(pygame.K_PAGEDOWN)
+    ui._build_menu_buttons()
+    assert {button.label for button in ui._menu_buttons
+            if button.kind == "library"} == {"Queen routes", "Keep your king safe"}
+    ui._on_key(pygame.K_PAGEDOWN)
+    ui._build_menu_buttons()
+    assert {button.label for button in ui._menu_buttons
+            if button.kind == "library"} == {"A simple checkmate"}
+    ui._open_menu_section("characters")
+    ui.character_index = 0
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons
+         if button.label == "Learn").action()
+    assert ui.menu_view == "course"
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons
+         if button.label == "‹  Back").action()
+    assert ui.menu_view == "characters"
+    ui.progress_store.close()
+    pygame.quit()
+
+
+def test_pippa_course_and_beginner_wrong_moves_retry_without_extra_click():
+    from chess_game.study import ChessAdapter, QUESTION
+    from chess_game.study.coaching import coach_thought
+
+    ui = ChessUI(":memory:")
+    ui._on_resize(360, 700)
+    ui._set_text_scale(1.4)
+    ui._open_openings()
+    ui._on_key(pygame.K_PAGEDOWN)
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons
+         if button.value == "pippa-develop-first-ideas").action()
+    assert ui.active_course_id == "pippa-develop-first-ideas"
+    assert ui.course_return_view == "opening_hub"
+    ui._build_menu_buttons()
+    assert not any(button.label == "Sources" for button in ui._menu_buttons)
+    next(button for button in ui._menu_buttons
+         if button.label == "Bring out a piece").action()
+    assert ui.coach_profile.player_id == "pippa-pomeranian"
+    for wrong, right in (("f1b5", "f1c4"), ("b1a3", "b1c3")):
+        fen = ChessAdapter.fen(ui.board)
+        ui._apply_lesson_move(ChessAdapter.resolve_uci(ui.board, wrong))
+        assert ui.lesson.state == QUESTION
+        assert ChessAdapter.fen(ui.board) == fen
+        assert ui.selected is None
+        assert ui.lesson_message == "Hmm, let's try again!"
+        assert ui.lesson_message_kind == "try_again"
+        assert coach_thought(ui.coach_profile, ui.lesson,
+                            ui.lesson_message).quote == ui.lesson_message
+        ui._build_lesson_buttons()
+        assert not any(button.label == "Try again" for button in ui._game_buttons)
+        ui._draw()
+        if right == "f1c4":
+            ui._apply_lesson_move(ChessAdapter.resolve_uci(ui.board, "a2a3"))
+            assert ui.lesson.state == QUESTION
+            assert ChessAdapter.fen(ui.board) == fen
+            assert ui.lesson_message == "Hmm, let's try again!"
+        ui._apply_lesson_move(ChessAdapter.resolve_uci(ui.board, right))
+        if right == "f1c4":
+            ui._lesson_continue()
+    ui._lesson_continue()
+    assert ui._course_progress(ui.game_library.course(
+        "pippa-develop-first-ideas")) == "1 of 1 lesson done"
+    ui._leave_lesson()
+    ui._open_menu_section("characters")
+    ui.character_index = 1
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons
+         if button.label == "Learn").action()
+    assert ui.active_course_id == "pippa-develop-first-ideas"
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons
+         if button.label == "‹  Back").action()
+    assert ui.menu_view == "characters"
+
+    ui.start_lesson(ui.game_library.lesson_entry("chicky-knight-steps"),
+                    course_id="chicky-first-knight-steps")
+    fen = ChessAdapter.fen(ui.board)
+    ui._apply_lesson_move(ChessAdapter.resolve_uci(ui.board, "g1h3"))
+    assert ui.lesson.state == QUESTION
+    assert ChessAdapter.fen(ui.board) == fen
+    assert ui.lesson_message_kind == "try_again"
+    ui._apply_lesson_move(ChessAdapter.resolve_uci(ui.board, "g1f3"))
+    assert ui.lesson.step_solved
+    ui.progress_store.close()
+    pygame.quit()
+
+
+def test_tina_course_and_promotion_picker_retry_at_narrow_size():
+    from chess_game.study import ChessAdapter, COMPLETED, QUESTION
+
+    ui = ChessUI(":memory:")
+    ui._on_resize(360, 700)
+    ui._set_text_scale(1.4)
+    ui._open_menu_section("learn")
+    ui._build_menu_buttons()
+    assert all(ui.screen.get_rect().contains(button.rect)
+               for button in ui._menu_buttons)
+    next(button for button in ui._menu_buttons
+         if button.label == "Learn with Tina").action()
+    assert ui.active_course_id == "tina-first-promotion"
+    assert ui.course_return_view == "learn"
+    ui._build_menu_buttons()
+    assert not any(button.label == "Sources" for button in ui._menu_buttons)
+    next(button for button in ui._menu_buttons
+         if button.label == "Help a pawn promote").action()
+    assert ui.coach_profile.player_id == "tina-turtle"
+    ui._apply_lesson_move(ChessAdapter.resolve_uci(ui.board, "a6a7"))
+    ui._lesson_continue()
+    fen = ChessAdapter.fen(ui.board)
+    ui._select((1, 0))
+    assert ui._try_move_to((0, 0))
+    assert ui.pending_promo is not None
+    assert [button.detail for button in ui._promo_buttons] == [
+        "Queen", "Rook", "Bishop", "Knight"]
+    assert all(ui.screen.get_rect().contains(button.rect)
+               for button in ui._promo_buttons)
+    ui._choose_promo("r")
+    assert ui.lesson.state == QUESTION
+    assert ChessAdapter.fen(ui.board) == fen
+    assert ui.pending_promo is None
+    assert ui.lesson_message == "Hmm, let's try again!"
+    ui._select((1, 0))
+    assert ui._try_move_to((0, 0))
+    ui._choose_promo("q")
+    ui._lesson_continue()
+    assert ui.lesson.state == COMPLETED
+    assert ui._course_progress(ui.game_library.course(
+        "tina-first-promotion")) == "1 of 3 lessons done"
+    ui._leave_lesson()
+    ui._open_menu_section("learn")
+    ui._build_menu_buttons()
+    assert all(ui.screen.get_rect().contains(button.rect)
+               for button in ui._menu_buttons)
+    return_button = next(button for button in ui._menu_buttons
+                         if button.label == "Return to last page")
+    assert ui.small_font.size(return_button.label)[0] <= return_button.rect.w - 16
+    ui._open_menu_section("characters")
+    ui.character_index = 2
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons
+         if button.label == "Learn").action()
+    assert ui.active_course_id == "tina-first-promotion"
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons
+         if button.label == "‹  Back").action()
+    assert ui.menu_view == "characters"
+    ui.progress_store.close()
+    pygame.quit()
+
+
+def test_tina_stalemate_feedback_remains_visible_during_immediate_retry():
+    from chess_game.study import ChessAdapter, QUESTION
+
+    ui = ChessUI(":memory:")
+    ui._on_resize(360, 700)
+    ui._set_text_scale(1.4)
+    ui.start_lesson(ui.game_library.lesson_entry("mate-or-stalemate"),
+                    course_id="tina-first-promotion")
+    fen = ChessAdapter.fen(ui.board)
+    ui._apply_lesson_move(ChessAdapter.resolve_uci(ui.board, "b5b6"))
+    assert ui.lesson.state == QUESTION
+    assert ChessAdapter.fen(ui.board) == fen
+    assert ui.lesson_message == "Hmm, let's try again!"
+    assert "stalemate" in ui.lesson_retry_feedback.lower()
+    ui._draw()
+    assert ui.lesson_scroll == ui.lesson_max_scroll
+    ui._repeat_coach_advice()
+    ui._draw()
+    assert ui.lesson_scroll == ui.lesson_max_scroll
+    assert "stalemate" in ui.lesson_retry_feedback.lower()
+    ui._apply_lesson_move(ChessAdapter.resolve_uci(ui.board, "b5b7"))
+    assert not ui.lesson_retry_feedback
+    ui.progress_store.close()
+    pygame.quit()
+
+
+def test_tom_course_opens_from_openings_and_character_page():
+    ui = ChessUI(":memory:")
+    ui._on_resize(360, 700)
+    ui._set_text_scale(1.4)
+    ui._open_openings()
+    ui._on_key(pygame.K_PAGEDOWN)
+    ui._build_menu_buttons()
+    tom_card = next(button for button in ui._menu_buttons
+                    if button.value == "tom-answer-the-threat")
+    assert ui.screen.get_rect().contains(tom_card.rect)
+    tom_card.action()
+    assert ui.active_course_id == "tom-answer-the-threat"
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons
+         if button.label == "Answer the knight's threat").action()
+    assert ui.coach_profile.player_id == "tom-rabbit"
+    ui._leave_lesson()
+    ui._open_menu_section("characters")
+    ui.character_index = 3
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons
+         if button.label == "Learn").action()
+    assert ui.active_course_id == "tom-answer-the-threat"
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons
+         if button.label == "‹  Back").action()
+    assert ui.menu_view == "characters"
+    ui.progress_store.close()
+    pygame.quit()
+
+
+def test_bruno_plan_opens_from_learn_and_character_page():
+    ui = ChessUI(":memory:")
+    ui._on_resize(360, 700)
+    ui._set_text_scale(1.4)
+    ui._open_menu_section("learn")
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons
+         if button.label == "Guided games").action()
+    assert ui.menu_view == "guided_hub"
+    ui._build_menu_buttons()
+    assert all(ui.screen.get_rect().contains(button.rect)
+               for button in ui._menu_buttons)
+    next(button for button in ui._menu_buttons
+         if button.value == "bruno-find-a-plan").action()
+    assert ui.active_course_id == "bruno-find-a-plan"
+    assert ui.course_return_view == "guided_hub"
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons
+         if button.label == "Find the quiet piece").action()
+    assert ui.lesson_course_id == "bruno-find-a-plan"
+    ui._leave_lesson()
+    ui._open_menu_section("characters")
+    ui.character_index = 4
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons
+         if button.label == "Learn").action()
+    assert ui.active_course_id == "bruno-find-a-plan"
+    ui.progress_store.close()
+    pygame.quit()
+
+
+def test_olivia_puzzle_opens_from_learn_and_character_page():
+    ui = ChessUI(":memory:")
+    ui._on_resize(360, 700)
+    ui._set_text_scale(1.4)
+    ui._open_menu_section("guided_hub")
+    ui._build_menu_buttons()
+    assert all(ui.screen.get_rect().contains(button.rect)
+               for button in ui._menu_buttons)
+    next(button for button in ui._menu_buttons
+         if button.value == "olivia-spot-a-fork").action()
+    assert ui.active_course_id == "olivia-spot-a-fork"
+    assert ui.course_return_view == "guided_hub"
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons
+         if button.label == "Spot a knight fork").action()
+    assert ui.lesson_course_id == "olivia-spot-a-fork"
+    ui._leave_lesson()
+    ui._open_menu_section("characters")
+    ui.character_index = 5
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons
+         if button.label == "Learn").action()
+    assert ui.active_course_id == "olivia-spot-a-fork"
+    ui.progress_store.close()
+    pygame.quit()
+
+
+def test_long_course_keeps_later_lessons_reachable():
+    ui = ChessUI(":memory:")
+    ui._on_resize(360, 700)
+    course = ui.game_library.course("bruno-scotch-first-ideas")
+    extra = ui.game_library.lesson_entry("opening-essentials")
+    library = ui.game_library
+    longer = replace(course, lesson_ids=course.lesson_ids +
+                     (extra.lesson.lesson_id,))
+    ui.game_library = replace(library, courses=(longer,) + tuple(
+        other for other in library.courses if other.course_id != course.course_id))
+    ui._open_course(longer.course_id)
+    ui._build_menu_buttons()
+    assert not any(button.label == extra.lesson.title for button in ui._menu_buttons)
+    ui._on_key(pygame.K_PAGEDOWN)
+    ui._build_menu_buttons()
+    assert any(button.label == extra.lesson.title for button in ui._menu_buttons)
+    assert all(ui.screen.get_rect().contains(button.rect)
+               for button in ui._menu_buttons)
     ui.progress_store.close()
     pygame.quit()
 

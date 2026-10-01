@@ -1,0 +1,85 @@
+{
+  "schema_version": 3,
+  "lesson_id": "chicky-queen-routes",
+  "content_revision": 1,
+  "title": "Queen routes",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Move a queen along a clear straight line, then capture diagonally.",
+  "prerequisites": ["chicky-bishop-diagonals"],
+  "concepts": ["queen-movement", "captures"],
+  "game_id": "chicky-queen-routes-position",
+  "coach_player_id": "chicky",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original beginner lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "first-move",
+      "practice_mode": "guided",
+      "node_path": [],
+      "expected_fen": "k7/6p1/8/8/8/8/8/3Q3K w - - 0 1",
+      "explanation": "A queen can follow a rook's straight line or a bishop's diagonal. Her path must be clear.",
+      "detail": "You can ask for a hint or an answer if you need one.",
+      "coach_prompt": "Let's try the straight route first.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move the queen from d1 to d4.",
+        "hints": ["Follow the queen's column upward.", "Click d1, then d4."],
+        "tree": [
+          {
+            "uci": "d1d4",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Yes. Your queen travelled straight up the column, like a rook."
+          },
+          {
+            "uci": "d1d3",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "That is a legal straight move. For this first step, continue to d4."
+          }
+        ],
+        "other_legal_move_text": "That move is legal. Try the destination named in the question."
+      }
+    },
+    {
+      "step_id": "try-a-capture",
+      "practice_mode": "independent",
+      "node_path": ["d1d4", "a8b8"],
+      "expected_fen": "1k6/6p1/8/8/3Q4/8/8/7K w - - 2 2",
+      "explanation": "Now the queen can use a bishop's diagonal. Find the black pawn she can capture.",
+      "detail": "You can ask for a hint or an answer if you need one.",
+      "coach_prompt": "Find the diagonal route on your own.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Capture the black pawn with your queen.",
+        "hints": ["Look diagonally up and right from the queen.", "Move from d4 to g7."],
+        "tree": [
+          {
+            "uci": "d4g7",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Yes. Your queen followed a clear diagonal and captured the pawn on g7."
+          },
+          {
+            "uci": "d4f6",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "That is a legal diagonal move, but it stops before the pawn. Continue to g7 to capture."
+          }
+        ],
+        "other_legal_move_text": "That move is legal, but it does not capture the pawn. Look for a diagonal capture with your queen."
+      }
+    }
+  ],
+  "takeaway": "A queen moves along clear rows, columns, and diagonals. She cannot jump over pieces."
+}

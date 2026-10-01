@@ -1,0 +1,99 @@
+{
+  "schema_version": 3,
+  "lesson_id": "chicky-rook-lines",
+  "content_revision": 1,
+  "title": "Rook lines",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Move a rook along a column, then capture along a row.",
+  "prerequisites": [
+    "chicky-pawn-steps"
+  ],
+  "concepts": [
+    "rook-movement",
+    "captures"
+  ],
+  "game_id": "chicky-rook-lines-position",
+  "coach_player_id": "chicky",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original beginner lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "first-move",
+      "practice_mode": "guided",
+      "node_path": [],
+      "expected_fen": "7k/7p/8/8/3p4/8/R7/1K6 w - - 0 1",
+      "explanation": "A rook moves in straight lines along rows or columns. It can travel several squares when the path is clear.",
+      "detail": "You can ask for a hint or an answer if you need one.",
+      "coach_prompt": "Take one step at a time.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move the rook from a2 to a4.",
+        "hints": [
+          "Find the white tower-shaped piece.",
+          "Click a2, then a4."
+        ],
+        "tree": [
+          {
+            "uci": "a2a4",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Yes. Your rook travelled straight up the column."
+          },
+          {
+            "uci": "a2a3",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "That is a legal rook move. For this first step, keep going to a4."
+          }
+        ],
+        "other_legal_move_text": "That move is legal. Try the destination named in the question."
+      }
+    },
+    {
+      "step_id": "try-a-capture",
+      "practice_mode": "independent",
+      "node_path": [
+        "a2a4",
+        "h7h6"
+      ],
+      "expected_fen": "7k/8/7p/8/R2p4/8/8/1K6 w - - 0 2",
+      "explanation": "The rook is on a new row. Capture by landing on the black pawn. Rooks cannot jump over pieces.",
+      "detail": "You can ask for a hint or an answer if you need one.",
+      "coach_prompt": "Look for a capture on your own.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Capture a black pawn with your rook.",
+        "hints": [
+          "Look along the rook's row for a clear path.",
+          "Move from a4 to d4."
+        ],
+        "tree": [
+          {
+            "uci": "a4d4",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Yes. Your rook travelled across the row and captured the pawn on d4."
+          },
+          {
+            "uci": "a4a5",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "That is a legal rook move, but it does not capture a pawn. Look across the row."
+          }
+        ],
+        "other_legal_move_text": "That move is legal, but it does not make the capture in this exercise. Look for a capture with your rook."
+      }
+    }
+  ],
+  "takeaway": "Rooks move along rows and columns. Their path must be clear."
+}

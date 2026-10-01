@@ -1,0 +1,85 @@
+{
+  "schema_version": 3,
+  "lesson_id": "chicky-simple-mate",
+  "content_revision": 1,
+  "title": "A simple checkmate",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Set up a supported queen move, then give checkmate.",
+  "prerequisites": ["chicky-king-safety"],
+  "concepts": ["check", "checkmate", "king-support"],
+  "game_id": "chicky-simple-mate-position",
+  "coach_player_id": "chicky",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original beginner lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "set-up-queen",
+      "practice_mode": "guided",
+      "node_path": [],
+      "expected_fen": "k7/8/2K5/8/1Q6/8/8/8 w - - 0 1",
+      "explanation": "Black's king is near the edge. Your king helps by guarding nearby squares. Move the queen into position first.",
+      "detail": "You can ask for a hint or an answer if you need one.",
+      "coach_prompt": "Let's set up the queen.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move your queen from b4 to b5.",
+        "hints": ["Stay on the queen's column and move one square up.", "Click b4, then b5."],
+        "tree": [
+          {
+            "uci": "b4b5",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Yes. Your queen is closer to Black's king, and your king guards nearby squares."
+          },
+          {
+            "uci": "b4a5",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "That gives check, but Black's king can escape. For this setup, move the queen to b5."
+          }
+        ],
+        "other_legal_move_text": "That move is legal. For this guided setup, move the queen to b5."
+      }
+    },
+    {
+      "step_id": "find-mate",
+      "practice_mode": "independent",
+      "node_path": ["b4b5", "a8a7"],
+      "expected_fen": "8/k7/2K5/1Q6/8/8/8/8 w - - 2 2",
+      "explanation": "Checkmate means the king is in check and has no legal escape. Your king helps the queen cover nearby squares.",
+      "detail": "Find the finishing queen move on your own. You can ask for a hint or an answer.",
+      "coach_prompt": "Can you find the finish?",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Give checkmate with your queen.",
+        "hints": ["Look for a checking queen move protected by your king.", "Move your queen from b5 to b7."],
+        "tree": [
+          {
+            "uci": "b5b7",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Checkmate! Your queen checks on b7, and your king protects her. Black has no safe move."
+          },
+          {
+            "uci": "b5a6",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "That gives check, but Black's king can escape. Find a checking move that also covers the escape squares."
+          }
+        ],
+        "other_legal_move_text": "That move is legal, but it is not checkmate. Look for a checking queen move that covers every escape."
+      }
+    }
+  ],
+  "takeaway": "For checkmate, the king is in check and has no safe move. Your king can help protect the queen."
+}

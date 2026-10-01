@@ -1,0 +1,105 @@
+{
+  "schema_version": 3,
+  "lesson_id": "chicky-bishop-diagonals",
+  "content_revision": 1,
+  "title": "Bishop diagonals",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Move a bishop diagonally, then capture on a clear diagonal.",
+  "prerequisites": [
+    "chicky-rook-lines"
+  ],
+  "concepts": [
+    "bishop-movement",
+    "captures"
+  ],
+  "game_id": "chicky-bishop-diagonals-position",
+  "coach_player_id": "chicky",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original beginner lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "first-move",
+      "practice_mode": "guided",
+      "node_path": [],
+      "expected_fen": "7k/2p4p/8/8/8/8/8/K1B5 w - - 0 1",
+      "explanation": "A bishop moves diagonally, through squares of the same colour. It can travel several squares when the path is clear.",
+      "detail": "You can ask for a hint or an answer if you need one.",
+      "coach_prompt": "Take one step at a time.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move the bishop from c1 to f4.",
+        "hints": [
+          "Follow the sloping line up and right from the bishop.",
+          "Click c1, then f4."
+        ],
+        "tree": [
+          {
+            "uci": "c1f4",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Yes. Your bishop followed a diagonal from c1 to f4."
+          },
+          {
+            "uci": "c1e3",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "That is a legal diagonal move. For this first step, continue along the diagonal to f4."
+          }
+        ],
+        "other_legal_move_text": "That move is legal. Try the destination named in the question."
+      }
+    },
+    {
+      "step_id": "try-a-capture",
+      "practice_mode": "independent",
+      "node_path": [
+        "c1f4",
+        "h7h6"
+      ],
+      "expected_fen": "7k/2p5/7p/8/5B2/8/8/K7 w - - 0 2",
+      "explanation": "The bishop has moved. Find a black pawn on one of its diagonals. Bishops cannot jump over pieces.",
+      "detail": "You can ask for a hint or an answer if you need one.",
+      "coach_prompt": "Look for a capture on your own.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Capture a black pawn with your bishop.",
+        "hints": [
+          "Look along both diagonals from the bishop.",
+          "One capture is from f4 to c7."
+        ],
+        "tree": [
+          {
+            "uci": "f4c7",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Yes. Your bishop followed a clear diagonal and captured the pawn on c7."
+          },
+          {
+            "uci": "f4g5",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "That is a legal diagonal move, but it stops before a pawn. Look for a capture."
+          },
+          {
+            "uci": "f4h6",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "Yes. Your bishop followed the other clear diagonal and captured the pawn on h6."
+          }
+        ],
+        "other_legal_move_text": "That move is legal, but it does not make the capture in this exercise. Look for a capture with your bishop."
+      }
+    }
+  ],
+  "takeaway": "Bishops move diagonally and stay on the same square colour. Their path must be clear."
+}

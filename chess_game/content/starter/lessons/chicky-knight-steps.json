@@ -1,0 +1,70 @@
+{
+  "schema_version": 3,
+  "lesson_id": "chicky-knight-steps",
+  "content_revision": 1,
+  "title": "Knight steps",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Select a knight and move it in an L shape, then repeat without a source cue.",
+  "prerequisites": [],
+  "concepts": ["piece-selection", "knight-movement"],
+  "game_id": "chicky-knight-steps-position",
+  "coach_player_id": "chicky",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original beginner lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "select-and-move",
+      "node_path": [],
+      "expected_fen": "4k3/7p/8/8/8/8/8/4K1N1 w - - 0 1",
+      "explanation": "Click the white knight, then click a square it can reach. Knights move two squares in one direction and one square to the side.",
+      "detail": "The white knight starts beside your king on g1. Try making an L shape.",
+      "coach_prompt": "First select your knight. Then choose its landing square.",
+      "highlights": [{"square": "g1", "role": "focus"}],
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Select the knight on g1, then move it to f3.",
+        "hints": ["Click the white horse-shaped piece beside your king.", "From g1, click f3."],
+        "tree": [
+          {"uci": "g1f3", "role": "learner", "outcome": "preferred", "feedback": "Yes. From g1 to f3 is an L shape: two squares up and one to the side."},
+          {"uci": "g1h3", "role": "learner", "outcome": "wrong", "feedback": "That is a legal L-shaped jump. This time, try the other landing square: f3."}
+        ],
+        "other_legal_move_text": "That move is legal, but this turn is for the knight. Return and try an L-shaped jump."
+      }
+    },
+    {
+      "step_id": "find-another-jump",
+      "practice_mode": "independent",
+      "node_path": ["g1f3", "e8f7"],
+      "expected_fen": "8/5k1p/8/8/8/5N2/8/4K3 w - - 2 2",
+      "explanation": "The knight has moved. Find another L-shaped jump without a glowing starting square.",
+      "detail": "You can ask for a hint if you need one.",
+      "coach_prompt": "Find another knight jump on your own.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Choose another L-shaped jump for your knight.",
+        "hints": ["Find the knight in the middle of the board.", "From f3, click e5."],
+        "tree": [
+          {"uci": "f3e5", "role": "learner", "outcome": "preferred", "feedback": "Well done. From f3 to e5 is another L-shaped knight jump."},
+          {"uci": "f3d2", "role": "learner", "outcome": "acceptable", "feedback": "Yes. From f3 to d2 is an L-shaped knight jump."},
+          {"uci": "f3d4", "role": "learner", "outcome": "acceptable", "feedback": "Yes. From f3 to d4 is an L-shaped knight jump."},
+          {"uci": "f3g1", "role": "learner", "outcome": "acceptable", "feedback": "Yes. From f3 to g1 is an L-shaped knight jump."},
+          {"uci": "f3g5", "role": "learner", "outcome": "acceptable", "feedback": "Yes. From f3 to g5 is an L-shaped knight jump."},
+          {"uci": "f3h2", "role": "learner", "outcome": "acceptable", "feedback": "Yes. From f3 to h2 is an L-shaped knight jump."},
+          {"uci": "f3h4", "role": "learner", "outcome": "acceptable", "feedback": "Yes. From f3 to h4 is an L-shaped knight jump."}
+        ],
+        "other_legal_move_text": "That move is legal. Return and try moving the knight in an L shape."
+      }
+    }
+  ],
+  "takeaway": "A knight moves in an L: two squares one way and one square across."
+}

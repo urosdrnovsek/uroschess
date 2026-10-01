@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "courses": [
     {
       "course_id": "bruno-scotch-first-ideas",
@@ -29,7 +29,15 @@
         "url": "",
         "license": "Historical move score with player identities omitted",
         "attribution": "Historical game shown for opening study; no player endorsement or coaching claimed"
-      }
+      },
+      "category": "opening",
+      "content_kind": "historical_opening",
+      "objective": "A short practice lesson about challenging the centre and bringing out a knight.",
+      "assumed_knowledge": [
+        "legal moves",
+        "opening basics"
+      ],
+      "completion_policy": "independent_final"
     },
     {
       "course_id": "olive-catalan-first-ideas",
@@ -60,6 +68,141 @@
         "url": "",
         "license": "Historical move score with player identities omitted",
         "attribution": "Historical game shown for opening study; no player endorsement or coaching claimed"
+      },
+      "category": "opening",
+      "content_kind": "historical_opening",
+      "objective": "Put a bishop on a long diagonal and make room to castle.",
+      "assumed_knowledge": [
+        "legal moves",
+        "opening basics"
+      ],
+      "completion_policy": "independent_final"
+    },
+    {
+      "course_id": "chicky-first-knight-steps",
+      "player_id": "chicky",
+      "title": "Your first piece moves",
+      "card_title": "Piece moves",
+      "description": "Learn piece moves, king safety, and a simple checkmate.",
+      "level": "beginner",
+      "category": "movement",
+      "content_kind": "original",
+      "objective": "Move the pieces, escape check, and give a simple checkmate.",
+      "assumed_knowledge": [],
+      "completion_policy": "independent_final",
+      "published": true,
+      "lesson_ids": [
+        "chicky-knight-steps",
+        "chicky-pawn-steps",
+        "chicky-rook-lines",
+        "chicky-bishop-diagonals",
+        "chicky-queen-routes",
+        "chicky-king-safety",
+        "chicky-simple-mate"
+      ]
+    },
+    {
+      "course_id": "pippa-develop-first-ideas",
+      "player_id": "pippa-pomeranian",
+      "title": "Develop with purpose",
+      "card_title": "Develop pieces",
+      "description": "Bring a bishop and knight toward useful squares.",
+      "level": "beginner",
+      "category": "opening",
+      "content_kind": "original",
+      "objective": "Choose developing moves and explain what each piece helps.",
+      "assumed_knowledge": ["legal moves", "piece movement"],
+      "completion_policy": "independent_final",
+      "published": true,
+      "lesson_ids": ["pippa-develop-pieces"]
+    },
+    {
+      "course_id": "tina-first-promotion",
+      "player_id": "tina-turtle",
+      "title": "Pawn and king endgames",
+      "card_title": "Pawn and king",
+      "description": "Promote a pawn, bring your king forward, and avoid stalemate.",
+      "level": "beginner",
+      "category": "endgame",
+      "content_kind": "original",
+      "objective": "Promote a pawn, support one with your king, and finish without stalemate.",
+      "assumed_knowledge": ["pawn movement", "king movement", "queen movement", "check"],
+      "completion_policy": "independent_final",
+      "published": true,
+      "lesson_ids": ["tina-first-promotion", "tina-active-king", "mate-or-stalemate"]
+    },
+    {
+      "course_id": "tom-answer-the-threat",
+      "player_id": "tom-rabbit",
+      "title": "Answer the threat",
+      "card_title": "Spot the threat",
+      "description": "Notice an attack on a pawn and choose a sound reply.",
+      "level": "beginner",
+      "category": "opening",
+      "content_kind": "original",
+      "objective": "Choose an opening reply that meets a concrete threat without weakening the king.",
+      "assumed_knowledge": ["legal moves", "opening basics", "knight movement"],
+      "completion_policy": "independent_final",
+      "published": true,
+      "lesson_ids": ["black-against-e4"]
+    },
+    {
+      "course_id": "bruno-find-a-plan",
+      "player_id": "bruno-bear",
+      "title": "Find a useful plan",
+      "card_title": "Piece activity",
+      "description": "Give a quiet bishop and rook useful jobs.",
+      "level": "intermediate",
+      "category": "middlegame",
+      "content_kind": "original",
+      "objective": "Improve an inactive piece and use an open file.",
+      "assumed_knowledge": ["legal moves", "development", "open files"],
+      "completion_policy": "independent_final",
+      "published": true,
+      "lesson_ids": ["bruno-activate-pieces"]
+    },
+    {
+      "course_id": "olivia-spot-a-fork",
+      "player_id": "olive-owl",
+      "title": "Spot a knight fork",
+      "card_title": "Knight fork",
+      "description": "Find a check that attacks two targets at once.",
+      "level": "intermediate",
+      "category": "tactics",
+      "content_kind": "original",
+      "objective": "Use a checking knight fork to win a queen.",
+      "assumed_knowledge": ["knight movement", "check", "rough piece values"],
+      "completion_policy": "independent_final",
+      "published": true,
+      "lesson_ids": ["olivia-knight-fork"]
+    },
+    {
+      "course_id": "monty-amsterdam-analysis",
+      "player_id": "monty-cat",
+      "title": "A favourite tournament game",
+      "card_title": "Tournament game",
+      "description": "Predict two moves from a recorded king attack.",
+      "level": "intermediate",
+      "category": "historical_analysis",
+      "content_kind": "historical_analysis",
+      "objective": "Predict a bishop sacrifice and a rook lift, then replay the complete score.",
+      "assumed_knowledge": ["legal moves", "check", "piece coordination"],
+      "completion_policy": "independent_final",
+      "published": true,
+      "lesson_ids": ["monty-amsterdam-analysis"],
+      "source_game_id": "monty-amsterdam-1889",
+      "entitlement_id": "monty-first-verified-win",
+      "association_source": {
+        "name": "Amsterdam 1889 tournament game",
+        "url": "https://en.wikipedia.org/wiki/Lasker_versus_Bauer,_Amsterdam,_1889",
+        "license": "Reference link only",
+        "attribution": "Recorded tournament game; no player endorsement or coaching claimed"
+      },
+      "source_game": {
+        "name": "Amsterdam 1889 tournament game score",
+        "url": "https://en.wikipedia.org/wiki/Lasker_versus_Bauer,_Amsterdam,_1889",
+        "license": "Historical move score",
+        "attribution": "Recorded tournament moves with player identities omitted in app"
       }
     }
   ]

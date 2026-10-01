@@ -1,0 +1,91 @@
+{
+  "schema_version": 3,
+  "lesson_id": "tina-active-king",
+  "content_revision": 1,
+  "title": "Bring your king closer",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Use your king to support a pawn and approach the opposing king safely.",
+  "prerequisites": ["king movement", "tina-first-promotion"],
+  "concepts": ["endgame", "king-activity", "pawn-support"],
+  "game_id": "tina-active-king-position",
+  "coach_player_id": "tina-turtle",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original beginner lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "support-the-pawn",
+      "practice_mode": "guided",
+      "node_path": [],
+      "expected_fen": "8/8/4k3/8/3P4/2K5/8/8 w - - 0 1",
+      "explanation": "Your pawn is on d4. In an endgame, your king can help it. Move the king beside the pawn so it protects the pawn's square.",
+      "detail": "A king protects each square next to it. The black king is still several squares away.",
+      "coach_prompt": "Even this sleepy king can help.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move your king from c3 to d3 to support the pawn.",
+        "hints": ["The pawn is on d4. Your king can stand one square below it.", "Click c3, then d3."],
+        "tree": [
+          {
+            "uci": "c3d3",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Yes. From d3 your king protects the pawn on d4."
+          },
+          {
+            "uci": "c3c4",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "c4 also protects the pawn. For this guided step, try d3."
+          }
+        ],
+        "other_legal_move_text": "That king move is legal. Try d3 to stand beside your pawn."
+      }
+    },
+    {
+      "step_id": "approach-safely",
+      "practice_mode": "independent",
+      "node_path": ["c3d3", "e6d6"],
+      "expected_fen": "8/8/3k4/8/3P4/3K4/8/8 w - - 2 2",
+      "explanation": "Black's king moved closer. Keep your king active while it protects the pawn. Your king may approach, but it cannot move next to the black king.",
+      "detail": "Look for a square beside your pawn and closer to the black king. Your pawn still needs support before it can travel far.",
+      "coach_prompt": "Let's stay close to the pawn.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move your king closer to the black king while keeping the pawn protected.",
+        "hints": ["Try a square on the fourth row beside the pawn.", "Move your king from d3 to c4 or e4."],
+        "tree": [
+          {
+            "uci": "d3c4",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Yes. From c4 your king protects d4 and stops the black king stepping onto d5."
+          },
+          {
+            "uci": "d3e4",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "Yes. e4 also protects your pawn and brings your king forward safely."
+          },
+          {
+            "uci": "d3e3",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "e3 protects the pawn, but it does not bring your king forward. Try a safe square on the fourth row."
+          }
+        ],
+        "other_legal_move_text": "That move is legal. Look for a fourth-row square that still protects d4."
+      }
+    }
+  ],
+  "takeaway": "In an endgame, your king can protect a pawn and move toward the action. Keep it out of the opposing king's reach."
+}

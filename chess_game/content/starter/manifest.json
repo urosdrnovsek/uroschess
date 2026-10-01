@@ -346,6 +346,204 @@
         "license": "MIT",
         "attribution": "Original synthetic endgame position and line; not a historical game"
       }
+    },
+    {
+      "game_id": "chicky-knight-steps-position",
+      "file": "chicky-knight-steps.pgn",
+      "title": "Chicky knight practice",
+      "category": "movement",
+      "level": "beginner",
+      "themes": [
+        "knight",
+        "piece movement"
+      ],
+      "description": "An original sparse board for learning knight movement.",
+      "source": {
+        "name": "Uroschess original beginner position",
+        "license": "MIT",
+        "attribution": "Original practice position; not a historical game"
+      }
+    },
+    {
+      "game_id": "chicky-pawn-steps-position",
+      "file": "chicky-pawn-steps.pgn",
+      "title": "Pawn steps practice",
+      "category": "movement",
+      "level": "beginner",
+      "themes": [
+        "pawn",
+        "piece movement",
+        "captures"
+      ],
+      "description": "Move a white pawn forward, then capture diagonally.",
+      "source": {
+        "name": "Uroschess original beginner position",
+        "license": "MIT",
+        "attribution": "Original practice position; not a historical game"
+      }
+    },
+    {
+      "game_id": "chicky-rook-lines-position",
+      "file": "chicky-rook-lines.pgn",
+      "title": "Rook lines practice",
+      "category": "movement",
+      "level": "beginner",
+      "themes": [
+        "rook",
+        "piece movement",
+        "captures"
+      ],
+      "description": "Move a rook along a column, then capture along a row.",
+      "source": {
+        "name": "Uroschess original beginner position",
+        "license": "MIT",
+        "attribution": "Original practice position; not a historical game"
+      }
+    },
+    {
+      "game_id": "chicky-bishop-diagonals-position",
+      "file": "chicky-bishop-diagonals.pgn",
+      "title": "Bishop diagonals practice",
+      "category": "movement",
+      "level": "beginner",
+      "themes": [
+        "bishop",
+        "piece movement",
+        "captures"
+      ],
+      "description": "Move a bishop diagonally, then capture on a clear diagonal.",
+      "source": {
+        "name": "Uroschess original beginner position",
+        "license": "MIT",
+        "attribution": "Original practice position; not a historical game"
+      }
+    },
+    {
+      "game_id": "chicky-queen-routes-position",
+      "file": "chicky-queen-routes.pgn",
+      "title": "Queen routes practice",
+      "category": "movement",
+      "level": "beginner",
+      "themes": ["queen", "piece movement", "captures"],
+      "description": "Move a queen straight, then capture diagonally.",
+      "source": {
+        "name": "Uroschess original beginner position",
+        "license": "MIT",
+        "attribution": "Original practice position; not a historical game"
+      }
+    },
+    {
+      "game_id": "chicky-king-safety-position",
+      "file": "chicky-king-safety.pgn",
+      "title": "King safety practice",
+      "category": "movement",
+      "level": "beginner",
+      "themes": ["king", "king safety", "check"],
+      "description": "Move the king one square, then escape a rook's check.",
+      "source": {
+        "name": "Uroschess original beginner position",
+        "license": "MIT",
+        "attribution": "Original practice position; not a historical game"
+      }
+    },
+    {
+      "game_id": "chicky-simple-mate-position",
+      "file": "chicky-simple-mate.pgn",
+      "title": "Simple checkmate practice",
+      "category": "movement",
+      "level": "beginner",
+      "themes": ["queen", "king", "checkmate"],
+      "description": "Set up a queen move, then give checkmate with help from the king.",
+      "source": {
+        "name": "Uroschess original beginner position",
+        "license": "MIT",
+        "attribution": "Original practice position; not a historical game"
+      }
+    },
+    {
+      "game_id": "pippa-develop-pieces-position",
+      "file": "pippa-develop-pieces.pgn",
+      "title": "Pippa developing moves practice",
+      "category": "opening",
+      "level": "beginner",
+      "themes": ["development", "centre", "opening"],
+      "description": "Develop a bishop and knight with a clear purpose.",
+      "source": {
+        "name": "Uroschess original beginner position",
+        "license": "MIT",
+        "attribution": "Original practice position; not a historical game"
+      }
+    },
+    {
+      "game_id": "tina-first-promotion-position",
+      "file": "tina-first-promotion.pgn",
+      "title": "Tina promotion practice",
+      "category": "endgame",
+      "level": "beginner",
+      "themes": ["endgame", "pawn", "promotion"],
+      "description": "Advance a safe pawn and promote it to a queen.",
+      "source": {
+        "name": "Uroschess original beginner position",
+        "license": "MIT",
+        "attribution": "Original practice position; not a historical game"
+      }
+    },
+    {
+      "game_id": "tina-active-king-position",
+      "file": "tina-active-king.pgn",
+      "title": "Tina active king practice",
+      "category": "endgame",
+      "level": "beginner",
+      "themes": ["endgame", "king activity", "pawn support"],
+      "description": "Use the king to protect a pawn and approach safely.",
+      "source": {
+        "name": "Uroschess original beginner position",
+        "license": "MIT",
+        "attribution": "Original practice position; not a historical game"
+      }
+    },
+    {
+      "game_id": "bruno-activate-pieces-position",
+      "file": "bruno-activate-pieces.pgn",
+      "title": "Bruno's piece activity practice",
+      "category": "middlegame",
+      "level": "intermediate",
+      "themes": ["middlegame", "piece activity", "open file"],
+      "description": "An original planning exercise about an inactive bishop and an open file.",
+      "source": {
+        "name": "Uroschess original planning position",
+        "license": "MIT",
+        "attribution": "Original practice position; not a historical game"
+      }
+    },
+    {
+      "game_id": "olivia-knight-fork-position",
+      "file": "olivia-knight-fork.pgn",
+      "title": "Olivia's knight fork practice",
+      "category": "tactics",
+      "level": "intermediate",
+      "themes": ["tactics", "fork", "check"],
+      "description": "An original knight fork puzzle with a checked queen-winning continuation.",
+      "source": {
+        "name": "Uroschess original tactics position",
+        "license": "MIT",
+        "attribution": "Original practice position; not a historical game"
+      }
+    },
+    {
+      "game_id": "monty-amsterdam-1889",
+      "file": "monty-amsterdam-1889.pgn",
+      "title": "Amsterdam 1889 tournament score",
+      "category": "source_game",
+      "level": "intermediate",
+      "themes": ["historical analysis", "king attack", "rook lift"],
+      "description": "An anonymized historical score from the 1889 Amsterdam tournament.",
+      "source": {
+        "name": "Amsterdam 1889 tournament game score",
+        "url": "https://en.wikipedia.org/wiki/Lasker_versus_Bauer,_Amsterdam,_1889",
+        "license": "Historical move score; original Uroschess notes are MIT",
+        "attribution": "Recorded tournament moves; player identities deliberately omitted in app"
+      }
     }
   ],
   "lessons": [
@@ -438,6 +636,71 @@
       "lesson_id": "opposition-and-king-activity",
       "game_id": "opposition-and-king-activity-position",
       "file": "opposition-and-king-activity.json"
+    },
+    {
+      "lesson_id": "chicky-knight-steps",
+      "game_id": "chicky-knight-steps-position",
+      "file": "chicky-knight-steps.json"
+    },
+    {
+      "lesson_id": "chicky-pawn-steps",
+      "game_id": "chicky-pawn-steps-position",
+      "file": "chicky-pawn-steps.json"
+    },
+    {
+      "lesson_id": "chicky-rook-lines",
+      "game_id": "chicky-rook-lines-position",
+      "file": "chicky-rook-lines.json"
+    },
+    {
+      "lesson_id": "chicky-bishop-diagonals",
+      "game_id": "chicky-bishop-diagonals-position",
+      "file": "chicky-bishop-diagonals.json"
+    },
+    {
+      "lesson_id": "chicky-queen-routes",
+      "game_id": "chicky-queen-routes-position",
+      "file": "chicky-queen-routes.json"
+    },
+    {
+      "lesson_id": "chicky-king-safety",
+      "game_id": "chicky-king-safety-position",
+      "file": "chicky-king-safety.json"
+    },
+    {
+      "lesson_id": "chicky-simple-mate",
+      "game_id": "chicky-simple-mate-position",
+      "file": "chicky-simple-mate.json"
+    },
+    {
+      "lesson_id": "pippa-develop-pieces",
+      "game_id": "pippa-develop-pieces-position",
+      "file": "pippa-develop-pieces.json"
+    },
+    {
+      "lesson_id": "tina-first-promotion",
+      "game_id": "tina-first-promotion-position",
+      "file": "tina-first-promotion.json"
+    },
+    {
+      "lesson_id": "tina-active-king",
+      "game_id": "tina-active-king-position",
+      "file": "tina-active-king.json"
+    },
+    {
+      "lesson_id": "bruno-activate-pieces",
+      "game_id": "bruno-activate-pieces-position",
+      "file": "bruno-activate-pieces.json"
+    },
+    {
+      "lesson_id": "olivia-knight-fork",
+      "game_id": "olivia-knight-fork-position",
+      "file": "olivia-knight-fork.json"
+    },
+    {
+      "lesson_id": "monty-amsterdam-analysis",
+      "game_id": "monty-amsterdam-1889",
+      "file": "monty-amsterdam-analysis.json"
     }
   ]
 }

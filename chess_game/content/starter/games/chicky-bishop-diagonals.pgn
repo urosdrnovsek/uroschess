@@ -1,0 +1,12 @@
+[Event "Uroschess Bishop diagonals"]
+[Site "Synthetic lesson"]
+[Date "????.??.??"]
+[Round "-"]
+[White "Learner"]
+[Black "Practice position"]
+[Result "*"]
+[SetUp "1"]
+[FEN "7k/2p4p/8/8/8/8/8/K1B5 w - - 0 1"]
+[Annotator "Uroschess"]
+
+1. Bf4 h6 2. Bxc7 *

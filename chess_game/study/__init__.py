@@ -3,6 +3,7 @@
 from .chess_adapter import ChessAdapter, MoveResolutionError
 from .content import (
     ContentLoadError,
+    Course,
     GameLibrary,
     LibraryEntry,
     OpeningCourse,
@@ -48,6 +49,7 @@ __all__ = [
     "ChessAdapter",
     "COMPLETED",
     "ContentLoadError",
+    "Course",
     "EXPLORING",
     "FEEDBACK",
     "GameRecord",

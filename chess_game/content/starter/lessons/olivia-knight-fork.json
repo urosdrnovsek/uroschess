@@ -1,0 +1,66 @@
+{
+  "schema_version": 3,
+  "lesson_id": "olivia-knight-fork",
+  "content_revision": 1,
+  "title": "Spot a knight fork",
+  "level": "intermediate",
+  "estimated_minutes": 4,
+  "objective": "Find a knight check that attacks the queen, then take the queen after the king moves.",
+  "prerequisites": ["knight movement", "check", "rough piece values"],
+  "concepts": ["tactics", "fork", "check"],
+  "game_id": "olivia-knight-fork-position",
+  "coach_player_id": "olive-owl",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original tactics lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "find-the-fork",
+      "practice_mode": "independent",
+      "node_path": [],
+      "expected_fen": "r2q3k/ppp1b1pp/2n1p3/6N1/2B5/3P4/PPP2PPP/R2Q2K1 w - - 0 1",
+      "explanation": "Black's bishop on e7 attacks your knight on g5. Before you move it away, look for a knight jump that checks Black's king and also attacks the queen.",
+      "detail": "A fork is one piece attacking two targets at once. A check makes the king answer first.",
+      "coach_prompt": "Look at two targets from one square.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Find the knight fork of king and queen.",
+        "hints": ["The knight on g5 can jump toward Black's back row.", "Move the knight from g5 to f7 with check."],
+        "tree": [
+          {"uci": "g5f7", "role": "learner", "outcome": "preferred", "feedback": "Nf7+ checks the king on h8 and attacks the queen on d8. Black must answer the check first."},
+          {"uci": "g5h7", "role": "learner", "outcome": "wrong", "feedback": "Nxh7 takes a pawn, but Black's king can capture that knight. Look for a check that also attacks the queen."},
+          {"uci": "g5f3", "role": "learner", "outcome": "wrong", "feedback": "Nf3 saves the knight, but misses the chance to attack two valuable targets at once."}
+        ],
+        "other_legal_move_text": "That move may be useful, but look for a knight check that also attacks the queen."
+      }
+    },
+    {
+      "step_id": "take-the-queen",
+      "practice_mode": "independent",
+      "node_path": ["g5f7", "h8g8"],
+      "expected_fen": "r2q2k1/ppp1bNpp/2n1p3/8/2B5/3P4/PPP2PPP/R2Q2K1 w - - 2 2",
+      "explanation": "Black moved the king out of check. Your knight on f7 still attacks Black's queen. Finish the fork by taking it.",
+      "detail": "Black's rook may capture your knight afterward, but a queen is worth much more than a knight.",
+      "coach_prompt": "The king moved. What is still under attack?",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Capture the queen with your knight.",
+        "hints": ["The queen is on d8, one knight jump from f7.", "Move the knight from f7 to d8."],
+        "tree": [
+          {"uci": "f7d8", "role": "learner", "outcome": "preferred", "feedback": "Nxd8 wins the queen. Black can recapture your knight with the rook, but you traded a knight for a queen."},
+          {"uci": "f7h8", "role": "learner", "outcome": "wrong", "feedback": "Nh8 moves the knight away from the queen. The queen on d8 is still yours to take."}
+        ],
+        "other_legal_move_text": "The king has moved, so you can take the queen on d8 now."
+      }
+    }
+  ],
+  "takeaway": "A knight fork can attack two targets. When one target is the king, the opponent must answer the check before saving the other."
+}

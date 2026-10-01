@@ -43,6 +43,8 @@ class MenuLayoutMixin:
             self._build_menu_library()
         elif self.menu_view == "opening_hub":
             self._build_opening_hub()
+        elif self.menu_view == "guided_hub":
+            self._build_guided_hub()
         elif self.menu_view == "course":
             self._build_course_menu()
         elif self.menu_view == "course_about":
@@ -220,15 +222,38 @@ class MenuLayoutMixin:
         self._menu_heads.append((
             "MEET THE CHARACTERS · {} / {}".format(
                 self.character_index + 1, len(ROSTER)), x, top + 14))
-        half = (inner - 8) // 2
-        self._menu_buttons.extend((
-            Button((x, card.bottom - 47, half, 36), "‹ Previous",
-                   lambda: self._change_character(-1), kind="step"),
-            Button((x + half + 8, card.bottom - 47, inner - half - 8, 36),
-                   "Next ›", lambda: self._change_character(1), kind="step"),
-            Button((x, card.bottom + 8, inner, 38), "‹ Back to menu",
-                   lambda: self._open_menu_section("main"), kind="cta"),
-        ))
+        player_id = ROSTER[self.character_index].ident
+        available_courses = ([item for item in self.game_library.courses
+                              if item.published
+                              and item.player_id == player_id]
+                             if self.game_library else [])
+        course = next((item for item in available_courses
+                       if item.category in ("middlegame", "tactics")),
+                      available_courses[0] if available_courses else None)
+        if course:
+            side = (inner - 16) // 3
+            unlocked = self._course_unlocked(course)
+            self._menu_buttons.extend((
+                Button((x, card.bottom - 47, side, 36), "‹ Prev",
+                       lambda: self._change_character(-1), kind="step"),
+                Button((x + side + 8, card.bottom - 47, side, 36),
+                       "Learn" if unlocked else "Locked",
+                       lambda: self._open_course(course.course_id),
+                       kind="cta"),
+                Button((x + 2 * (side + 8), card.bottom - 47,
+                        inner - 2 * (side + 8), 36), "Next ›",
+                       lambda: self._change_character(1), kind="step")))
+        else:
+            half = (inner - 8) // 2
+            self._menu_buttons.extend((
+                Button((x, card.bottom - 47, half, 36), "‹ Previous",
+                       lambda: self._change_character(-1), kind="step"),
+                Button((x + half + 8, card.bottom - 47, inner - half - 8, 36),
+                       "Next ›", lambda: self._change_character(1),
+                       kind="step")))
+        self._menu_buttons.append(Button(
+            (x, card.bottom + 8, inner, 38), "‹ Back to menu",
+            lambda: self._open_menu_section("main"), kind="cta"))
 
     def _open_menu_section(self, section):
         self._reset_button_focus()
@@ -245,21 +270,33 @@ class MenuLayoutMixin:
         gap, half = 8, (w - 8) // 2
         if self.menu_view == "learn":
             self._menu_heads.append(("LEARN CHESS", x, top + 16))
-            items = (
+            items = [
                 ("Continue lesson" if self._resume_entry() else "Start learning",
                  self._continue_learning),
                 ("Your lesson path", lambda: self._open_library("path")),
                 ("Openings", self._open_openings),
                 ("Endgames", lambda: self._open_library("endgame")),
-                ("Guided games", lambda: self._open_library("guided_game")),
-            )
+                ("Guided games", lambda: self._open_menu_section("guided_hub")),
+            ]
+            chicky = (self.game_library.course("chicky-first-knight-steps")
+                      if self.game_library else None)
+            if chicky and chicky.published:
+                items.insert(1, ("Learn with Chicky", lambda:
+                                  self._open_course(chicky.course_id)))
+            tina = (self.game_library.course("tina-first-promotion")
+                    if self.game_library else None)
+            if tina and tina.published:
+                items.insert(2, ("Learn with Tina", lambda:
+                                  self._open_course(tina.course_id)))
             for i, (label, action) in enumerate(items):
+                step = 39 if len(items) > 6 else 46 if len(items) > 5 else 55
+                height = 36 if len(items) > 6 else 40 if len(items) > 5 else 45
                 self._menu_buttons.append(Button(
-                    (x, top + 43 + i * 55, w, 45), label, action,
+                    (x, top + 42 + i * step, w, height), label, action,
                     kind="cta" if i == 0 else "step"))
             if self._has_learn_browse():
                 self._menu_buttons.append(Button(
-                    (x, top + 318, w, 45), "Return to last course or list",
+                    (x, top + 318, w, 45), "Return to last page",
                     self._restore_learn_browse, kind="step"))
         elif self.menu_view == "play":
             self._menu_heads.append(("PLAY CHESS", x, top + 16))
@@ -471,6 +508,49 @@ class MenuLayoutMixin:
                 (x, card.bottom + 8, inner, 38), "‹  Back",
                 lambda: self._open_menu_section("learn"), kind="cta"))
 
+    def _build_guided_hub(self):
+        width = min(660, self.win_w - 24)
+        top = self._study_menu_top()
+        card = pygame.Rect((self.win_w - width) // 2, top, width, 420)
+        self._menu_card = card
+        x, inner = card.x + 22, card.w - 44
+        self._menu_heads.append(("GUIDED GAMES AND PLANS", x, top + 16))
+        courses = self._guided_courses()
+        page_count = max(1, (len(courses) + 1) // 2)
+        self.guided_course_page = max(0, min(self.guided_course_page,
+                                             page_count - 1))
+        visible = courses[self.guided_course_page * 2:
+                          (self.guided_course_page + 1) * 2]
+        for index, course in enumerate(visible):
+            unlocked = self._course_unlocked(course)
+            self._menu_buttons.append(Button(
+                (x, top + 55 + index * 119, inner, 106),
+                course.title if unlocked else "Monty's game",
+                lambda ident=course.course_id: self._open_course(ident),
+                kind="player" if unlocked else "library",
+                detail=("Locked: beat Monty once\neither colour"
+                        if not unlocked else ""),
+                value=course.course_id))
+        self._menu_buttons.append(
+            Button((x, top + 300, inner, 55), "All guided games",
+                   lambda: self._open_library("guided_game"), kind="step"))
+        if page_count > 1:
+            gap = 8
+            side = (inner - 2 * gap) // 3
+            center = inner - 2 * side - 2 * gap
+            self._menu_buttons.extend((
+                Button((x, card.bottom + 8, side, 38), "‹ Prev",
+                       lambda: self._change_guided_course_page(-1), kind="step"),
+                Button((x + side + gap, card.bottom + 8, center, 38), "Back",
+                       lambda: self._open_menu_section("learn"), kind="cta"),
+                Button((x + side + center + 2 * gap, card.bottom + 8,
+                        side, 38), "Next ›",
+                       lambda: self._change_guided_course_page(1), kind="step")))
+        else:
+            self._menu_buttons.append(Button(
+                (x, card.bottom + 8, inner, 38), "‹  Back",
+                lambda: self._open_menu_section("learn"), kind="cta"))
+
     def _build_course_menu(self):
         course = (self.game_library.course(self.active_course_id)
                   if self.game_library else None)
@@ -482,32 +562,55 @@ class MenuLayoutMixin:
         card = pygame.Rect((self.win_w - width) // 2, top, width, 430)
         self._menu_card = card
         x, inner = card.x + 22, card.w - 44
-        self._menu_heads.append((course.opening_name.upper() + " WITH " +
+        heading = ((course.opening_name + " WITH ") if course.opening_name
+                   else "LEARN WITH ")
+        self._menu_heads.append((heading.upper() +
                                  self.game_library.player(course.player_id).short_name.upper(),
                                  x, top + 16))
         self._course_profile_rect = pygame.Rect(x, top + 42, inner, 100)
         entries = self.game_library.course_lessons(course)
         missing_basics = self._course_missing_prerequisites(course)
         complete = bool(entries) and all(
-            self._course_entry_status(entry) in ("DONE", "REVISIT")
+            self._course_entry_status(entry, course) in ("DONE", "REVISIT")
             for entry in entries)
         self._menu_heads.append(("PRACTISE BASICS FIRST · OR TRY A LESSON"
                                  if missing_basics else
                                  "COURSE COMPLETE · PRACTISE AGAIN"
                                  if complete else "LESSONS BY UROSCHESS",
                                  x, top + 151))
-        for index, entry in enumerate(entries[:3]):
-            status = self._course_entry_status(entry)
+        page_size = 2 if len(entries) > 3 else 3
+        page_count = max(1, (len(entries) + page_size - 1) // page_size)
+        self.course_lesson_page = max(0, min(self.course_lesson_page,
+                                             page_count - 1))
+        visible = entries[self.course_lesson_page * page_size:
+                          (self.course_lesson_page + 1) * page_size]
+        for index, entry in enumerate(visible):
+            status = self._course_entry_status(entry, course)
             detail = ("LATER · Try earlier lesson first" if status == "LATER"
-                      else "{}  ·  {} min  ·  Practice position".format(
-                          status, entry.lesson.estimated_minutes))
+                      else "{}  ·  {} min  ·  {}".format(
+                          status, entry.lesson.estimated_minutes,
+                          "Recorded game" if course.content_kind ==
+                          "historical_analysis" else "Practice position"))
             self._menu_buttons.append(Button(
                 (x, top + 175 + index * 70, inner, 62),
                 entry.lesson.title,
                 lambda item=entry: self.start_lesson(
                     item, course_id=course.course_id),
                 kind="library", detail=detail))
-        started = any(self._course_entry_status(entry) in
+        if page_count > 1:
+            half = (inner - 8) // 2
+            compact = inner < 380 or self.text_scale >= 1.2
+            if self.course_lesson_page > 0:
+                self._menu_buttons.append(Button(
+                    (x, top + 319, half, 36),
+                    "‹ Prev" if compact else "‹ Previous lessons",
+                    lambda: self._change_course_lesson_page(-1), kind="step"))
+            if self.course_lesson_page < page_count - 1:
+                self._menu_buttons.append(Button(
+                    (x + half + 8, top + 319, inner - half - 8, 36),
+                    "Next ›" if compact else "More lessons ›",
+                    lambda: self._change_course_lesson_page(1), kind="step"))
+        started = any(self._course_entry_status(entry, course) in
                       ("IN PROGRESS", "DONE", "REVISIT") for entry in entries)
         if started and missing_basics:
             half = (inner - 8) // 2
@@ -532,10 +635,11 @@ class MenuLayoutMixin:
         half = (inner - 8) // 2
         self._menu_buttons.append(Button(
             (x, card.bottom + 8, half, 38), "‹  Back",
-            lambda: self._open_menu_section("opening_hub"), kind="cta"))
-        self._menu_buttons.append(Button(
-            (x + half + 8, card.bottom + 8, inner - half - 8, 38),
-            "Sources", self._open_course_about, kind="step"))
+            lambda: self._open_menu_section(self.course_return_view), kind="cta"))
+        if course.source_game_id and course.association_source:
+            self._menu_buttons.append(Button(
+                (x + half + 8, card.bottom + 8, inner - half - 8, 38),
+                "Sources", self._open_course_about, kind="step"))
 
     def _build_course_about(self):
         course = self.game_library.course(self.active_course_id)
@@ -551,13 +655,16 @@ class MenuLayoutMixin:
         self._menu_heads.extend((
             ("ABOUT THIS COURSE", x, top + 16),
             ("LESSONS BY UROSCHESS", x, top + 49),
-            ("OPENING BACKGROUND", x, top + 116),
+            ("GAME BACKGROUND" if course.content_kind == "historical_analysis"
+             else "OPENING BACKGROUND", x, top + 116),
             ("ARCHIVAL GAME", x, top + 172),
             ("PORTRAIT CREDIT", x, top + 237),
         ))
         self._course_about_rect = pygame.Rect(x, top + 35, inner, 225)
         self._menu_buttons.extend((
-            Button((x, top + 297, inner, 36), "Read opening source",
+            Button((x, top + 297, inner, 36),
+                   "Read game source" if course.content_kind == "historical_analysis"
+                   else "Read opening source",
                    lambda: self._open_source_link(course.association_source.url),
                    kind="step"),
             Button((x, top + 343, inner, 36), "Watch a game",

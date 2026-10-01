@@ -1,0 +1,99 @@
+{
+  "schema_version": 3,
+  "lesson_id": "chicky-pawn-steps",
+  "content_revision": 1,
+  "title": "Pawn steps",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Move a white pawn forward, then capture diagonally.",
+  "prerequisites": [
+    "chicky-knight-steps"
+  ],
+  "concepts": [
+    "pawn-movement",
+    "captures"
+  ],
+  "game_id": "chicky-pawn-steps-position",
+  "coach_player_id": "chicky",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original beginner lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "first-move",
+      "practice_mode": "guided",
+      "node_path": [],
+      "expected_fen": "7k/8/8/3p4/8/8/4P3/K7 w - - 0 1",
+      "explanation": "A white pawn moves toward the top of this board. Move into an empty square straight ahead.",
+      "detail": "You can ask for a hint or an answer if you need one.",
+      "coach_prompt": "Take one step at a time.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move the white pawn from e2 to e3.",
+        "hints": [
+          "Find the white pawn above your king.",
+          "Click e2, then e3."
+        ],
+        "tree": [
+          {
+            "uci": "e2e3",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Yes. Your pawn moved one square straight forward into an empty square."
+          },
+          {
+            "uci": "e2e4",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "Two squares is legal from the starting square when both squares are clear. This time, take just one step to e3."
+          }
+        ],
+        "other_legal_move_text": "That move is legal. Try the destination named in the question."
+      }
+    },
+    {
+      "step_id": "try-a-capture",
+      "practice_mode": "independent",
+      "node_path": [
+        "e2e3",
+        "d5d4"
+      ],
+      "expected_fen": "7k/8/8/8/3p4/4P3/8/K7 w - - 0 2",
+      "explanation": "The black pawn moved closer. Pawns capture one square diagonally forward, by landing on the other piece.",
+      "detail": "You can ask for a hint or an answer if you need one.",
+      "coach_prompt": "Look for a capture on your own.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Capture the black pawn with your pawn.",
+        "hints": [
+          "Look one square diagonally ahead of your pawn.",
+          "Move from e3 to d4."
+        ],
+        "tree": [
+          {
+            "uci": "e3d4",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Yes. Your pawn captured diagonally. The black pawn is gone and your pawn is on d4."
+          },
+          {
+            "uci": "e3e4",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "Moving straight forward is legal here, but it does not capture the black pawn. Look diagonally."
+          }
+        ],
+        "other_legal_move_text": "That move is legal, but it does not make the capture in this exercise. Look for a capture with your pawn."
+      }
+    }
+  ],
+  "takeaway": "Pawns move straight forward into empty squares and capture one square diagonally forward."
+}

@@ -1,0 +1,12 @@
+[Event "Uroschess Develop pieces"]
+[Site "Synthetic lesson"]
+[Date "????.??.??"]
+[Round "-"]
+[White "Learner"]
+[Black "Practice position"]
+[Result "*"]
+[SetUp "1"]
+[FEN "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3"]
+[Annotator "Uroschess"]
+
+3. Bc4 Bc5 4. Nc3 *

@@ -270,7 +270,7 @@ class StudyView:
                           scroll=0, transient_message="", focused_button=None,
                           thought=None, thought_previous=None,
                           thought_progress=1.0, show_move_hint=False,
-                          coach_label=""):
+                          coach_label="", transient_label="HINT"):
         """Draw a scrollable guided-lesson panel and return max scroll."""
         p = self.palette
         rect = pygame.Rect(rect)
@@ -348,7 +348,7 @@ class StudyView:
 
         if lesson.state in ("READING", "QUESTION"):
             if transient_message:
-                add("HINT", self.tag_font, p.accent, 5)
+                add(transient_label, self.tag_font, p.accent, 5)
                 add(transient_message, self.text_font, p.text, 6)
             else:
                 add(step.explanation, self.text_font, p.text, 6)

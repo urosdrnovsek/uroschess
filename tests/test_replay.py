@@ -84,7 +84,7 @@ def test_custom_black_to_move_start():
 def test_packaged_library_game_is_complete_and_sourced():
     library = load_game_library()
     assert not library.errors
-    assert len(library.entries) == 18
+    assert len(library.entries) == 31
     entry = next(entry for entry in library.entries
                  if entry.game.game_id == "coordination-study")
     assert entry.game.game_id == "coordination-study"
@@ -99,7 +99,9 @@ def test_packaged_library_game_is_complete_and_sourced():
 def test_player_course_source_games_are_bundled_and_replayable():
     library = load_game_library()
     assert not library.errors
-    for course, expected_plies in zip(library.courses, (80, 116)):
+    for course, expected_plies in zip(
+            (course for course in library.courses_for_category("opening")
+             if course.source_game_id), (80, 116)):
         entry = next(item for item in library.entries
                      if item.game.game_id == course.source_game_id)
         assert entry.category == "source_game"
@@ -173,7 +175,9 @@ def test_completed_player_lessons_watch_source_and_return_to_same_lesson():
     from chess_game.study import COMPLETED
 
     ui = ChessUI(":memory:")
-    for course in ui.game_library.courses:
+    for course in ui.game_library.courses_for_category("opening"):
+        if not course.source_game_id:
+            continue
         for entry in ui.game_library.course_lessons(course):
             ui.start_lesson(entry, course_id=course.course_id)
             ui._lesson_reveal()

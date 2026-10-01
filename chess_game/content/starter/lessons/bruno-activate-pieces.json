@@ -1,0 +1,65 @@
+{
+  "schema_version": 3,
+  "lesson_id": "bruno-activate-pieces",
+  "content_revision": 1,
+  "title": "Find the quiet piece",
+  "level": "intermediate",
+  "estimated_minutes": 5,
+  "objective": "Improve an undeveloped bishop, then put an idle rook on an open file.",
+  "prerequisites": ["legal moves", "development", "open files"],
+  "concepts": ["middlegame", "piece activity", "open file"],
+  "game_id": "bruno-activate-pieces-position",
+  "coach_player_id": "bruno-bear",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original planning lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "wake-the-bishop",
+      "practice_mode": "guided",
+      "node_path": [],
+      "expected_fen": "r1bq1rk1/p3bppp/1pn1pn2/8/2BP4/2N2N2/PP3PPP/R1BQR1K1 w - - 0 11",
+      "explanation": "Both kings are safe and most pieces have jobs. White's bishop on c1 is still at home. The e-pawn has moved away, leaving a clear diagonal to e3.",
+      "detail": "A quiet move can improve a piece before you look for a capture.",
+      "coach_prompt": "Let's give the waiting bishop a job.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move the bishop from c1 to e3.",
+        "hints": ["Look at the bishop beside the queen.", "Click c1, then e3."],
+        "tree": [
+          {"uci": "c1e3", "role": "learner", "outcome": "preferred", "feedback": "Yes. Be3 brings out the bishop and protects the pawn on d4."},
+          {"uci": "c1f4", "role": "learner", "outcome": "wrong", "feedback": "Bf4 develops too. For this guided line, try e3, where the bishop protects d4."}
+        ],
+        "other_legal_move_text": "That move may be useful. For this guided step, bring the c1 bishop to e3."
+      }
+    },
+    {
+      "step_id": "use-the-open-file",
+      "practice_mode": "independent",
+      "node_path": ["c1e3", "c8b7"],
+      "expected_fen": "r2q1rk1/pb2bppp/1pn1pn2/8/2BP4/2N1BN2/PP3PPP/R2QR1K1 w - - 2 12",
+      "explanation": "Black developed a bishop too. White's c-pawn has gone, so the c-file has no white pawn in front of a rook. One rook still sits on its starting square.",
+      "detail": "An open file gives a rook a clear route up the board. Which rook can reach the c-file?",
+      "coach_prompt": "Now find a useful road for the rook.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Put your idle rook on the open c-file.",
+        "hints": ["Look at the rook on a1 and the empty c1 square.", "Move the rook from a1 to c1."],
+        "tree": [
+          {"uci": "a1c1", "role": "learner", "outcome": "preferred", "feedback": "Good. Rc1 puts the rook on the open c-file, where it looks toward Black's knight on c6."},
+          {"uci": "a1b1", "role": "learner", "outcome": "wrong", "feedback": "Rb1 is legal, but the b2 pawn blocks that file. Look for the file without a white pawn."}
+        ],
+        "other_legal_move_text": "That move may have a purpose. Here, give the a1 rook a clear file to work on."
+      }
+    }
+  ],
+  "takeaway": "When you need a plan, look for a piece still waiting for work. Develop it or give a rook an open file."
+}

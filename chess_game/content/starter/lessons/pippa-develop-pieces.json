@@ -1,0 +1,91 @@
+{
+  "schema_version": 3,
+  "lesson_id": "pippa-develop-pieces",
+  "content_revision": 1,
+  "title": "Bring out a piece",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Develop two pieces toward useful central squares.",
+  "prerequisites": ["legal moves", "piece movement"],
+  "concepts": ["opening", "development", "centre"],
+  "game_id": "pippa-develop-pieces-position",
+  "coach_player_id": "pippa-pomeranian",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original beginner lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "bishop-with-purpose",
+      "practice_mode": "guided",
+      "node_path": [],
+      "expected_fen": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+      "explanation": "Developing means bringing a piece off its starting square to do a job. White's bishop can move from f1 to c4, where it watches the centre and helps make room for castling later.",
+      "detail": "Both sides have moved central pawns and knights. Try one bishop move before planning the next piece.",
+      "coach_prompt": "Give your bishop a useful job.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move your bishop from f1 to c4.",
+        "hints": ["Follow the clear diagonal up and left from f1.", "Click f1, then c4."],
+        "tree": [
+          {
+            "uci": "f1c4",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Yes. Bc4 brings out a new piece, watches the centre, and clears a path for White to castle later."
+          },
+          {
+            "uci": "f1b5",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "Bb5 develops well too. For this guided setup, try c4 so we can compare the next move."
+          },
+          {
+            "uci": "f1e2",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "Be2 is a safe developing move. Here, try the more active square c4 for this setup."
+          }
+        ],
+        "other_legal_move_text": "That may be a useful move. For this guided setup, bring the bishop from f1 to c4."
+      }
+    },
+    {
+      "step_id": "independent-knight",
+      "practice_mode": "independent",
+      "node_path": ["f1c4", "f8c5"],
+      "expected_fen": "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+      "explanation": "Black developed a bishop too. White still has one knight on its starting square. Bring it toward the centre, where it can support the pawn on e4.",
+      "detail": "A move can be useful because it improves a piece and helps another part of the position.",
+      "coach_prompt": "Which piece is still waiting?",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Develop your remaining knight toward the centre.",
+        "hints": ["Find White's knight that has not moved yet.", "Move the knight from b1 to c3."],
+        "tree": [
+          {
+            "uci": "b1c3",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Yes. Nc3 brings out the knight, supports e4, and watches the central square d5."
+          },
+          {
+            "uci": "b1a3",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "Na3 develops the knight, but from the edge it reaches fewer central squares. Try c3 here."
+          }
+        ],
+        "other_legal_move_text": "That move may be useful, but this exercise asks for the undeveloped knight to head toward the centre."
+      }
+    }
+  ],
+  "takeaway": "Develop a new piece to a useful square. Ask what it attacks, protects, or prepares."
+}

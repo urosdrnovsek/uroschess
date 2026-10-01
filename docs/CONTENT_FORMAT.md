@@ -6,19 +6,45 @@ beginner `learning_path`. A game is a PGN record; a lesson refers to a game by
 game. Replays use the game list, while lesson libraries and saved progress use
 the lesson list.
 
-`players.json` lists the fictional coach identities. `courses.json` orders
-three lessons for each opening course, names its player, records prerequisites,
-and carries two separate sources: `association_source` provides background on the opening; `source_game` identifies an anonymized historical score.
+`players.json` lists the fictional coach identities. `courses.json` uses schema
+version 2 for general courses. Each course has a stable `course_id`, `player_id`,
+`category`, `content_kind`, ordered unique `lesson_ids`, `objective`,
+`assumed_knowledge`, and `completion_policy`. The current policies are
+`all_lessons` and `independent_final`; the latter requires the final lesson's
+last step to use `practice_mode: "independent"`. Published courses need at least
+one valid lesson. Drafts stay out of published lists. Schema-1 opening courses
+still load with their old IDs and are converted to the general model at the
+loader boundary.
+
+Original middlegame and puzzle courses may use `category: "middlegame"` or
+`category: "tactics"`. Their games use the same category so the lessons are
+identifiable in the content library. Bruno's planning course and Olivia's
+knight fork course are linked from Learn's Guided games page and their character
+pages.
+
+Historical opening courses retain `association_source` for background on the
+opening and `source_game` for an anonymized historical score. Original courses,
+such as Chicky's first movement lesson, use original lesson/game attribution
+and have no opening association or historical source game.
 Course lessons refer to that game with `related_source_game_id`. A synthetic
 lesson's board is labelled as a practice position and does not claim to show
 the archival game's exact moves. `commentary_source` identifies Uroschess teaching
 authorship. Portrait attribution stays with the player record.
-Published courses require a packaged `source_game` PGN entry with the same
+Published historical courses require a packaged `source_game` PGN entry with the same
 stable ID and source URL. Source games have category `source_game`; they appear
 once in **Watch games** and never in lesson lists. The course's **Sources**
 screen shows attribution, opens the reference links, and replays the
-packaged score offline. Learn remembers the last course or lesson list in app
+packaged score offline. Original courses do not show a Sources button. Learn remembers the last course or lesson list in app
 settings and offers a return button after restart.
+
+Monty's historical analysis course uses `entitlement_id:
+"monty-first-verified-win"`. The lesson uses the same complete recorded score
+as its source game and has original commentary. Access is derived from at least
+one verified `monty-cat` win in `challenge_win_events`, regardless of human
+colour. Schema 10 already backfills eligible retained matches, so this lock
+needs no additional progress table or migration. A badge or Master award alone
+does not grant access; unfinished, resigned, and invalid matches have no win
+event. The lesson can be revisited after access is earned.
 
 Lesson schemas 1 and 2 still load. Schema 3 adds `coach_player_id`,
 `content_kind`, `related_source_game_id`, and `initial_help`. A step may specify

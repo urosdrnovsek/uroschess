@@ -134,13 +134,16 @@ def test_packaged_starter_collection_categories_and_endgame_claims():
 
     library = load_game_library()
     assert not library.errors
-    assert len(library.entries) == 18
-    assert len(library.lessons) == 18
-    assert len(library.lesson_entries) == 18
+    assert len(library.entries) == 31
+    assert len(library.lessons) == 31
+    assert len(library.lesson_entries) == 31
     assert [entry.category for entry in library.entries].count("guided_game") == 1
-    assert [entry.category for entry in library.entries].count("opening") == 9
-    assert [entry.category for entry in library.entries].count("endgame") == 6
-    assert [entry.category for entry in library.entries].count("source_game") == 2
+    assert [entry.category for entry in library.entries].count("opening") == 10
+    assert [entry.category for entry in library.entries].count("endgame") == 8
+    assert [entry.category for entry in library.entries].count("source_game") == 3
+    assert [entry.category for entry in library.entries].count("movement") == 7
+    assert [entry.category for entry in library.entries].count("middlegame") == 1
+    assert [entry.category for entry in library.entries].count("tactics") == 1
     assert all(resolve_lesson(entry.game, entry.lesson)
                for entry in library.lesson_entries)
     assert all(entry.game.source.name and entry.game.source.license
@@ -204,11 +207,14 @@ def test_bruno_scotch_lesson_changes_prompt_and_hint_after_reply():
 def test_player_courses_have_distinct_transfer_positions_and_shared_games():
     library = load_game_library()
     assert not library.errors
-    assert tuple(course.player_id for course in library.courses) == (
+    opening_courses = tuple(course for course in
+                            library.courses_for_category("opening")
+                            if course.content_kind == "historical_opening")
+    assert tuple(course.player_id for course in opening_courses) == (
         "bruno-bear", "olive-owl")
     assert all(len(library.course_lessons(course)) == 3
-               for course in library.courses)
-    for course in library.courses:
+               for course in opening_courses)
+    for course in opening_courses:
         entries = library.course_lessons(course)
         assert entries[0].game is entries[1].game
         assert entries[2].game is not entries[0].game
@@ -233,7 +239,9 @@ def test_player_courses_acknowledge_good_moves_that_miss_the_question():
         result = lesson.attempt_uci(move)
         assert result.outcome == "wrong"
         assert not lesson.step_solved
-        assert result.feedback == "Hmm, that is not what I had in mind. Try another move."
+        assert result.feedback == next(
+            answer.feedback for answer in entry.lesson.steps[0].question.tree
+            if answer.uci == move)
         assert lesson.adapter.fen(lesson.board) == question_fen
 
 
@@ -284,8 +292,8 @@ def test_catalog_keeps_multiple_lessons_for_one_game(monkeypatch):
     monkeypatch.setattr(content, "_read_text", extra_resource)
     library = load_game_library()
     assert not library.errors
-    assert len(library.entries) == 18
-    assert len(library.lesson_entries) == 19
+    assert len(library.entries) == 31
+    assert len(library.lesson_entries) == 32
     first = library.lesson_entry("bruno-scotch-make-room")
     second = library.lesson_entry("shared-scotch-copy")
     assert first.game is second.game
@@ -468,7 +476,7 @@ def test_multi_move_tree_applies_reply_and_completes_only_at_terminal_move():
 
     uncovered = lesson.attempt_uci("c7c5", view_state={"scroll": 24})
     assert uncovered.outcome == "not_covered"
-    assert uncovered.feedback == "Hmm, that is not what I had in mind. Try another move."
+    assert uncovered.feedback == lesson.current_step.question.other_legal_move_text
     assert lesson.state == QUESTION
     assert lesson.adapter.fen(lesson.board) == after_reply
 
@@ -621,7 +629,8 @@ def test_lesson_ui_plays_a_question_and_keeps_panel_on_narrow_windows():
                          if str(move) == "b6b5")
         assert ui._apply_lesson_move(uncovered)
         assert ui.lesson.state == QUESTION
-        assert ui.lesson_message == "Hmm, that is not what I had in mind. Try another move."
+        assert ui.lesson_message == (
+            ui.lesson.current_step.question.other_legal_move_text)
         assert ui.lesson.adapter.fen(ui.board) == source_fen
         ui._lesson_hint()
         ui._lesson_reveal()

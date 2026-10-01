@@ -4,7 +4,14 @@ from ..chess_thoughts import ChessThought
 from .lessons import COMPLETED, EXPLORING, FEEDBACK
 
 
+BEGINNER_RETRY_MESSAGE = "Hmm, let's try again!"
+BEGINNER_COACH_IDS = ("chicky", "pippa-pomeranian", "tina-turtle")
+
+
 def coach_advice(lesson, transient_message=""):
+    if (lesson.lesson.coach_player_id in BEGINNER_COACH_IDS
+            and transient_message == BEGINNER_RETRY_MESSAGE):
+        return BEGINNER_RETRY_MESSAGE
     if lesson.state == EXPLORING:
         return "You can try a different move here."
     if lesson.state == COMPLETED:

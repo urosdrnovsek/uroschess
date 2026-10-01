@@ -6,7 +6,7 @@
       "name": "Bruno the Bear",
       "short_name": "Bruno",
       "portrait": "bruno.bmp",
-      "intro": "Explore a Scotch Game idea with Bruno.",
+      "intro": "Find useful middlegame plans and explore a Scotch Game idea with Bruno.",
       "portrait_attribution": "Original animal illustration for Uroschess"
     },
     {
@@ -14,7 +14,47 @@
       "name": "Olivia the Owl",
       "short_name": "Olivia",
       "portrait": "olive.bmp",
-      "intro": "Explore a Catalan bishop idea with Olivia.",
+      "intro": "Spot a knight fork and explore a Catalan bishop idea with Olivia.",
+      "portrait_attribution": "Original animal illustration for Uroschess"
+    },
+    {
+      "player_id": "chicky",
+      "name": "Chicky",
+      "short_name": "Chicky",
+      "portrait": "chicky.bmp",
+      "intro": "Learn piece moves, king safety, and a simple checkmate with Chicky.",
+      "portrait_attribution": "Original animal illustration for Uroschess"
+    },
+    {
+      "player_id": "pippa-pomeranian",
+      "name": "Pippa the Pomeranian",
+      "short_name": "Pippa",
+      "portrait": "pomeranian.bmp",
+      "intro": "Find useful opening moves with Pippa.",
+      "portrait_attribution": "Original animal illustration for Uroschess"
+    },
+    {
+      "player_id": "tina-turtle",
+      "name": "Tina the Turtle",
+      "short_name": "Tina",
+      "portrait": "tina.bmp",
+      "intro": "Help a pawn become a queen with Tina.",
+      "portrait_attribution": "Original animal illustration for Uroschess"
+    },
+    {
+      "player_id": "tom-rabbit",
+      "name": "Tom the Rabbit",
+      "short_name": "Tom",
+      "portrait": "tom.bmp",
+      "intro": "Spot an opening threat and reply with Tom.",
+      "portrait_attribution": "Original animal illustration for Uroschess"
+    },
+    {
+      "player_id": "monty-cat",
+      "name": "Monty the Cat",
+      "short_name": "Monty",
+      "portrait": "monty.bmp",
+      "intro": "Study one of Monty's favourite recorded tournament games.",
       "portrait_attribution": "Original animal illustration for Uroschess"
     }
   ]

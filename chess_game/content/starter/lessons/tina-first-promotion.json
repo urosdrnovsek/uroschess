@@ -1,0 +1,97 @@
+{
+  "schema_version": 3,
+  "lesson_id": "tina-first-promotion",
+  "content_revision": 1,
+  "title": "Help a pawn promote",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Advance a safe pawn, then promote it to a queen.",
+  "prerequisites": ["pawn movement", "king movement"],
+  "concepts": ["endgame", "promotion"],
+  "game_id": "tina-first-promotion-position",
+  "coach_player_id": "tina-turtle",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original beginner lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "one-step-away",
+      "practice_mode": "guided",
+      "node_path": [],
+      "expected_fen": "7k/8/P7/1K6/8/8/8/8 w - - 0 1",
+      "explanation": "Your white pawn is safe on a6. It moves straight ahead, one square at a time. Help it reach the far edge of the board.",
+      "detail": "Your king is close to the pawn. Black's king is far away.",
+      "coach_prompt": "One careful step closer.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move the pawn from a6 to a7.",
+        "hints": ["The white pawn is on the left edge of the board.", "Click a6, then a7."],
+        "tree": [
+          {
+            "uci": "a6a7",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Yes. The pawn is now one square from the far edge."
+          },
+          {
+            "uci": "b5b6",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "Your king can move there, but the pawn is ready to advance. Try a7."
+          }
+        ],
+        "other_legal_move_text": "That is a legal move. For this step, move the pawn to a7."
+      }
+    },
+    {
+      "step_id": "make-a-queen",
+      "practice_mode": "independent",
+      "node_path": ["a6a7", "h8h7"],
+      "expected_fen": "8/P6k/8/1K6/8/8/8/8 w - - 1 2",
+      "explanation": "When a pawn reaches the far edge, it becomes another piece. A queen is a strong, simple choice here.",
+      "detail": "Move the pawn to a8, then choose Queen from the piece choices.",
+      "coach_prompt": "Our little pawn can become a queen.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Promote the pawn on a8 to a queen.",
+        "hints": ["Move the pawn one square forward to the far edge.", "Click a7, then a8, and choose Queen."],
+        "tree": [
+          {
+            "uci": "a7a8q",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Yes. Your pawn reached a8 and became a queen. That is promotion."
+          },
+          {
+            "uci": "a7a8r",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "A rook is a legal promotion too. In this first exercise, choose a queen."
+          },
+          {
+            "uci": "a7a8b",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "A bishop is a legal promotion too. In this first exercise, choose a queen."
+          },
+          {
+            "uci": "a7a8n",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "A knight is a legal promotion too. In this first exercise, choose a queen."
+          }
+        ],
+        "other_legal_move_text": "That move is legal, but this exercise asks you to promote the pawn to a queen."
+      }
+    }
+  ],
+  "takeaway": "A pawn that reaches the far edge promotes. Choosing a queen gives you a powerful new piece."
+}

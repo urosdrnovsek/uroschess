@@ -45,20 +45,30 @@ class PlayerProfile:
 
 
 @dataclass(frozen=True)
-class OpeningCourse:
+class Course:
     course_id: str
     player_id: str
     title: str
     opening_name: str
     description: str
     lesson_ids: tuple
-    association_source: SourceInfo
+    association_source: SourceInfo = None
     level: str = "beginner"
     prerequisite_lesson_ids: tuple = ()
     published: bool = True
     source_game: SourceInfo = None
     source_game_id: str = ""
     card_title: str = ""
+    category: str = "opening"
+    content_kind: str = "historical_opening"
+    objective: str = ""
+    assumed_knowledge: tuple = ()
+    completion_policy: str = "independent_final"
+    entitlement_id: str = ""
+
+
+# Kept for callers that imported the old model name.
+OpeningCourse = Course
 
 
 @dataclass(frozen=True)
@@ -90,9 +100,8 @@ class GameLibrary:
         return {course.course_id: course for course in self.courses}
 
     def courses_for_category(self, category):
-        if category != "opening":
-            return ()
-        return tuple(course for course in self.courses if course.published)
+        return tuple(course for course in self.courses
+                     if course.published and course.category == category)
 
     def lesson_entry(self, lesson_id):
         return next((entry for entry in self.lesson_entries
@@ -325,7 +334,9 @@ def load_game_library(pack_package="chess_game.content.starter"):
             attribution=str(source_data.get("attribution", "")),
         )
         category = str(item.get("category", "guided_game"))
-        if category not in ("guided_game", "opening", "endgame", "source_game"):
+        if category not in ("guided_game", "opening", "endgame",
+                            "movement", "middlegame", "tactics",
+                            "source_game"):
             errors.append("{}: unsupported category {!r}".format(
                 game_id, category))
             continue
@@ -432,7 +443,7 @@ def _load_player_courses(pack_package, lesson_entries, game_entries, errors):
             player_data.get("schema_version") != 1 or
             not isinstance(player_data.get("players"), list) or
             not isinstance(course_data, dict) or
-            course_data.get("schema_version") != 1 or
+            course_data.get("schema_version") not in (1, 2) or
             not isinstance(course_data.get("courses"), list)):
         errors.append("invalid player course schema")
         return (), ()
@@ -469,16 +480,23 @@ def _load_player_courses(pack_package, lesson_entries, game_entries, errors):
             errors.append("lesson {} has unknown coach {}".format(
                 entry.lesson.lesson_id, coach_id))
     courses = []
+    schema_version = course_data["schema_version"]
     for item in course_data["courses"]:
         try:
+            if not isinstance(item, dict):
+                raise ValueError("course must be an object")
             lesson_ids = tuple(str(value) for value in item["lesson_ids"])
-            source = _source_info(item["association_source"],
+            source = _source_info(item.get("association_source"),
                                   "association_source")
-            course = OpeningCourse(
+            category = ("opening" if schema_version == 1 else
+                        str(item["category"]))
+            content_kind = ("historical_opening" if schema_version == 1 else
+                            str(item["content_kind"]))
+            course = Course(
                 course_id=str(item["course_id"]),
                 player_id=str(item["player_id"]),
                 title=str(item["title"]),
-                opening_name=str(item["opening_name"]),
+                opening_name=str(item.get("opening_name", "")),
                 description=str(item["description"]),
                 lesson_ids=lesson_ids, association_source=source,
                 level=str(item.get("level", "beginner")),
@@ -489,9 +507,16 @@ def _load_player_courses(pack_package, lesson_entries, game_entries, errors):
                 source_game=_source_info(item.get("source_game"),
                                          "source_game"),
                 source_game_id=str(item.get("source_game_id", "")),
-                card_title=str(item.get("card_title", "")))
+                card_title=str(item.get("card_title", "")),
+                category=category, content_kind=content_kind,
+                objective=(str(item.get("objective", item["description"]))),
+                assumed_knowledge=_string_tuple(
+                    item.get("assumed_knowledge"), "assumed_knowledge"),
+                completion_policy=("independent_final" if schema_version == 1
+                                   else str(item["completion_policy"])),
+                entitlement_id=str(item.get("entitlement_id", "")))
             if (not course.course_id or not course.title or
-                    not course.opening_name or not course.description or
+                    not course.description or not course.objective or
                     not lesson_ids or
                     len(lesson_ids) != len(set(lesson_ids)) or
                     any(old.course_id == course.course_id for old in courses) or
@@ -502,25 +527,51 @@ def _load_player_courses(pack_package, lesson_entries, game_entries, errors):
                         course.player_id or
                         by_lesson[lesson_id].lesson.related_source_game_id !=
                         course.source_game_id for lesson_id in lesson_ids) or
-                    not source or not all((source.name, source.url,
-                                           source.license, source.attribution)) or
                     course.level not in ("beginner", "intermediate") or
+                    course.category not in ("movement", "opening", "endgame",
+                                            "middlegame", "tactics",
+                                            "historical_analysis") or
+                    course.content_kind not in ("original", "historical_opening",
+                                                "historical_analysis") or
+                    course.completion_policy not in ("all_lessons",
+                                                     "independent_final") or
+                    course.entitlement_id not in ("", "monty-first-verified-win") or
+                    (course.entitlement_id and
+                     (course.player_id != "monty-cat" or
+                      course.content_kind != "historical_analysis")) or
                     any(lesson_id not in by_lesson for lesson_id in
                         course.prerequisite_lesson_ids)):
-                raise ValueError("missing player, lesson, or association source")
+                raise ValueError("invalid course identity, lesson, or policy")
+            historical = course.content_kind != "original"
+            if historical:
+                if (not course.opening_name and
+                        course.content_kind == "historical_opening"):
+                    raise ValueError("historical opening needs an opening name")
+                if (not source or not all((source.name, source.url,
+                                           source.license, source.attribution))):
+                    raise ValueError("historical course needs an association source")
+            elif (source or course.source_game or course.source_game_id or
+                  course.entitlement_id):
+                # Entitlement checks are introduced with the Monty feature.
+                raise ValueError("original course has unsupported source or lock")
             if course.published:
-                if (len(lesson_ids) != 3 or not course.source_game or
+                if schema_version == 1 and len(lesson_ids) != 3:
+                    raise ValueError("published legacy opening needs three lessons")
+                if (historical and (not course.source_game or
                         not course.source_game_id or
                         course.source_game_id not in by_game or
                         by_game[course.source_game_id].category != "source_game" or
+                        (course.content_kind == "historical_analysis" and
+                         not course.source_game.url) or
                         not all((course.source_game.name,
                                  course.source_game.license,
-                                 course.source_game.attribution)) or
+                                 course.source_game.attribution)))):
+                    raise ValueError("published historical course needs a source game")
+                if (course.completion_policy == "independent_final" and
                         by_lesson[lesson_ids[-1]].lesson.steps[-1].practice_mode
                         != "independent"):
-                    raise ValueError("published course needs three lessons, a "
-                                     "source game, and a final independent try")
+                    raise ValueError("published course needs a final independent try")
             courses.append(course)
         except (KeyError, TypeError, ValueError, ContentLoadError) as error:
-            errors.append("invalid opening course: " + str(error))
+            errors.append("invalid course: " + str(error))
     return tuple(players), tuple(courses)

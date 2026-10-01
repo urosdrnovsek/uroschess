@@ -8,7 +8,7 @@ os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 
 import pytest
 
-from chess_game.challenge import ChallengeStore, medal_summary
+from chess_game.challenge import ChallengeStore, ROSTER, medal_summary
 from chess_game.moves import legal_moves
 from chess_game.pieces import WHITE, BLACK
 from chess_game.study.progress import ProgressStore, ProgressStoreError, SCHEMA_VERSION
@@ -37,6 +37,28 @@ def _unlock_pippa(store):
         store.connection.executemany(
             "INSERT INTO challenge_victories VALUES ('chicky', ?, ?, 'seed')",
             ((WHITE, seed.match_id), (BLACK, seed.match_id)))
+
+
+def _unlock_monty_stage(store):
+    seed = store.start(WHITE)
+    store.discard(seed.match_id)
+    with store.connection:
+        store.connection.executemany(
+            "INSERT INTO challenge_victories VALUES (?, ?, ?, 'seed')",
+            ((opponent.ident, color, seed.match_id)
+             for opponent in ROSTER[:-1] for color in (WHITE, BLACK)))
+
+
+def _monty_win(store):
+    session = store.start(WHITE, "monty-cat")
+    for uci in ("e2e4", "f7f6", "d2d4", "g7g5", "d1h5"):
+        actor = session.board.side_to_move
+        chosen = _move(session.board, uci)
+        if actor != session.color:
+            session.authorize_search_move(chosen)
+        session.accept(chosen, actor)
+    assert session.status == "checkmate"
+    return session
 
 
 @pytest.mark.parametrize("count,small,gold,label", [
@@ -153,6 +175,129 @@ def test_upgrade_backfills_only_verified_retained_wins(tmp_path):
         assert store.reward_for_match(valid.match_id)["medal"]
         assert store.reward_for_match("invalid-copy") is None
         assert ("pippa-pomeranian", WHITE) in store.victories()
+
+
+def test_monty_lesson_unlocks_from_verified_win_and_migrated_event(tmp_path):
+    from chess_game.ui import ChessUI
+    from chess_game.study import ChessAdapter, COMPLETED
+    import pygame
+
+    path = tmp_path / "progress.sqlite3"
+    with ProgressStore(path) as progress:
+        store = ChallengeStore(progress)
+        _unlock_monty_stage(store)
+        unfinished = store.start(WHITE, "monty-cat")
+        store.discard(unfinished.match_id)
+        resigned = store.start(WHITE, "monty-cat")
+        resigned.resign()
+        assert store.medal_counts()["monty-cat"] == 0
+
+    locked_ui = ChessUI(path)
+    try:
+        course = locked_ui.game_library.course("monty-amsterdam-analysis")
+        assert not locked_ui._course_unlocked(course)
+        locked_ui._open_menu_section("guided_hub")
+        locked_ui._on_key(pygame.K_PAGEDOWN)
+        assert locked_ui.guided_course_page == 1
+        locked_ui._build_menu_buttons()
+        locked = next(button for button in locked_ui._menu_buttons
+                      if button.value == course.course_id)
+        assert "either colour" in locked.detail
+        locked.action()
+        assert locked_ui.menu_view == "guided_hub"
+        assert "Beat Monty once" in locked_ui.toast
+        locked_ui._on_key(pygame.K_ESCAPE)
+        assert locked_ui.menu_view == "learn"
+        locked_ui.start_lesson(locked_ui.game_library.lesson_entry(
+            "monty-amsterdam-analysis"))
+        assert locked_ui.scene == "menu"
+    finally:
+        locked_ui.progress_store.close()
+        pygame.quit()
+
+    with ProgressStore(path) as progress:
+        store = ChallengeStore(progress)
+        valid = _monty_win(store)
+        assert store.medal_counts()["monty-cat"] == 1
+        assert store.award() is None
+        with progress.connection:
+            progress.connection.execute(
+                """INSERT INTO challenge_matches
+                   SELECT 'invalid-monty-copy', opponent_id, human_color,
+                          policy_revision, state, moves_json, 'wrong fen',
+                          move_seed, comment_seed, comment_id, result, updated_at
+                   FROM challenge_matches WHERE match_id = ?""",
+                (valid.match_id,))
+            progress.connection.execute(
+                """INSERT INTO challenge_policies
+                   SELECT 'invalid-monty-copy', parameters_json
+                   FROM challenge_policies WHERE match_id = ?""",
+                (valid.match_id,))
+            progress.connection.execute("DROP TABLE challenge_win_events")
+            progress.connection.execute("UPDATE schema_info SET version = 9")
+
+    with ProgressStore(path) as upgraded:
+        store = ChallengeStore(upgraded)
+        assert store.medal_counts()["monty-cat"] == 1
+        assert store.reward_for_match(valid.match_id)["medal"]
+        assert store.reward_for_match("invalid-monty-copy") is None
+        assert store.award() is None
+
+    unlocked_ui = ChessUI(path)
+    try:
+        course = unlocked_ui.game_library.course("monty-amsterdam-analysis")
+        assert unlocked_ui._course_unlocked(course)
+        unlocked_ui._open_menu_section("guided_hub")
+        unlocked_ui._change_guided_course_page(1)
+        unlocked_ui._build_menu_buttons()
+        next(button for button in unlocked_ui._menu_buttons
+             if button.value == course.course_id).action()
+        assert unlocked_ui.menu_view == "course"
+        assert unlocked_ui.course_return_view == "guided_hub"
+        unlocked_ui._build_menu_buttons()
+        next(button for button in unlocked_ui._menu_buttons
+             if button.label == "Sources").action()
+        unlocked_ui._build_menu_buttons()
+        next(button for button in unlocked_ui._menu_buttons
+             if button.value == "source_game").action()
+        assert unlocked_ui.scene == "replay"
+        unlocked_ui._leave_replay()
+        assert unlocked_ui.menu_view == "course_about"
+        unlocked_ui._open_menu_section("characters")
+        unlocked_ui.character_index = len(ROSTER) - 1
+        unlocked_ui._build_menu_buttons()
+        next(button for button in unlocked_ui._menu_buttons
+             if button.label == "Learn").action()
+        assert unlocked_ui.active_course_id == course.course_id
+        unlocked_ui._build_menu_buttons()
+        next(button for button in unlocked_ui._menu_buttons
+             if button.label == "Two bishops and a rook").action()
+        unlocked_ui._apply_lesson_move(ChessAdapter.resolve_uci(
+            unlocked_ui.board, "d3h7"))
+        unlocked_ui._lesson_continue()
+        unlocked_ui._apply_lesson_move(ChessAdapter.resolve_uci(
+            unlocked_ui.board, "f1f3"))
+        unlocked_ui._lesson_continue()
+        assert unlocked_ui.lesson.state == COMPLETED
+        unlocked_ui._watch_lesson_record()
+        assert unlocked_ui.scene == "replay"
+        unlocked_ui._leave_replay()
+        assert unlocked_ui.scene == "lesson"
+        assert unlocked_ui.lesson.state == COMPLETED
+        unlocked_ui._leave_lesson()
+        assert unlocked_ui.menu_view == "course"
+    finally:
+        unlocked_ui.progress_store.close()
+        pygame.quit()
+
+    revisited_ui = ChessUI(path)
+    try:
+        course = revisited_ui.game_library.course("monty-amsterdam-analysis")
+        assert revisited_ui._course_unlocked(course)
+        assert revisited_ui._course_progress(course) == "1 of 1 lesson done"
+    finally:
+        revisited_ui.progress_store.close()
+        pygame.quit()
 
 
 def test_upgrade_failure_rolls_back_events_and_version(tmp_path):

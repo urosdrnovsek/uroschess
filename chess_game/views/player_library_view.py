@@ -35,7 +35,8 @@ def draw_player_card(surface, rect, player, course, palette, title_font,
     name = _fit(name_font, player.name, width)
     surface.blit(name_font.render(name, True, palette.text),
                  (x, rect.y + 11))
-    topic = (course.card_title or course.title) + " · " + course.opening_name
+    topic = ((course.card_title or course.title) + " · " +
+             (course.opening_name or course.category.replace("_", " ").title()))
     if small_font.size(topic)[0] > width:
         topic = course.card_title or course.title
     topic_font = (small_font if small_font.size(topic)[0] <= width

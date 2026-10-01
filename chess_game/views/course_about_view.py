@@ -16,8 +16,11 @@ def draw_course_about(surface, card, course, player, game, small_font,
     black = game.headers.get("Black", "Black").split(",")[0]
     compact = card.w < 400
     labels = (
-        ("Practice boards by Uroschess" if compact else
-         "Practice boards; advice by Uroschess.", 68),
+        (("Recorded game; Uroschess advice" if compact else
+          "Recorded game; advice by Uroschess.")
+         if course.content_kind == "historical_analysis" else
+         ("Practice boards by Uroschess" if compact else
+          "Practice boards; advice by Uroschess."), 68),
         (course.association_source.name.split(":")[0], 137),
         ("{} vs {}".format(white, black), 193),
         ("Generated portrait · Uroschess" if compact

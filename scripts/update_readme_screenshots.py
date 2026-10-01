@@ -100,6 +100,17 @@ def main():
         ui.character_index = 2
         ui._on_resize(980, 760)
         capture(ui, "meet-characters.png")
+        ui.character_index = 0
+        ui._on_resize(420, 720)
+        capture(ui, "chicky-character.png")
+        ui._open_course("chicky-first-knight-steps")
+        capture(ui, "chicky-course.png")
+        ui.start_lesson(ui.game_library.lesson_entry("chicky-knight-steps"),
+                        course_id="chicky-first-knight-steps")
+        capture(ui, "chicky-lesson.png")
+        ui.start_lesson(ui.game_library.lesson_entry("chicky-pawn-steps"),
+                        course_id="chicky-first-knight-steps")
+        capture(ui, "chicky-pawn-lesson.png")
     finally:
         if ui.progress_store is not None:
             ui.progress_store.close()
