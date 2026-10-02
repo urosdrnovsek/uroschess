@@ -104,7 +104,10 @@ def test_home_routes_to_categorized_lesson_libraries():
     assert "Guided games" in labels
     assert "Openings" in labels
     assert "Endgames" in labels
-    assert "Your lesson path" in labels
+    assert "View lesson path" in labels
+    assert "Start next lesson" in labels
+    assert "Chicky's beginner course" in labels
+    assert "Tina's endgame course" in labels
     assert not any("difficulty" in label.lower() for label in labels)
 
     ui._open_menu_section("play")
@@ -323,7 +326,7 @@ def test_chicky_course_opens_from_learn_and_character_page():
     ui._open_menu_section("learn")
     ui._build_menu_buttons()
     button = next(button for button in ui._menu_buttons
-                  if button.label == "Learn with Chicky")
+                  if button.label == "Chicky's beginner course")
     button.action()
     assert ui.active_course_id == "chicky-first-knight-steps"
     ui._draw()
@@ -456,7 +459,7 @@ def test_tina_course_and_promotion_picker_retry_at_narrow_size():
     assert all(ui.screen.get_rect().contains(button.rect)
                for button in ui._menu_buttons)
     next(button for button in ui._menu_buttons
-         if button.label == "Learn with Tina").action()
+         if button.label == "Tina's endgame course").action()
     assert ui.active_course_id == "tina-first-promotion"
     assert ui.course_return_view == "learn"
     ui._build_menu_buttons()
@@ -947,6 +950,26 @@ def test_narrow_screens_keep_appearance_replay_and_question_visible():
             assert all(ui.screen.get_rect().contains(button.rect)
                        for button in ui._game_buttons)
             ui._to_menu()
+    ui.progress_store.close()
+    pygame.quit()
+
+
+def test_narrow_ordinary_game_keeps_controls_visible_and_clickable():
+    ui = ChessUI(":memory:")
+    for width, height in ((420, 720), (360, 420), (360, 320)):
+        ui._on_resize(width, height)
+        ui.start_game({"w"})
+        ui._build_game_buttons()
+        ui._draw()
+        assert [button.label for button in ui._game_buttons] == [
+            "New", "Takeback", "Flip", "Save PGN", "Load PGN", "Menu"]
+        assert all(ui.screen.get_rect().contains(button.rect)
+                   for button in ui._game_buttons)
+        assert all(button.rect.top > ui.status_y + ui.status_h
+                   for button in ui._game_buttons)
+        menu = ui._game_buttons[-1]
+        ui._on_mouse_down(menu.rect.center)
+        assert (ui.scene, ui.menu_view) == ("menu", "main")
     ui.progress_store.close()
     pygame.quit()
 

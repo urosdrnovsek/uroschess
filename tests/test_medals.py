@@ -339,10 +339,16 @@ def test_result_snapshot_shows_new_badge_then_rematch_medal(tmp_path):
                 "medal": True, "new_badge": expected_badge}
             assert snapshot["counts"]["pippa-pomeranian"] == expected_count
             assert snapshot["states"][1] == "black_required"
-            assert ui.shelf_character_index == 1
             ui._build_menu_buttons()
             assert ui.menu_view == "challenge_result"
+            assert any(button.label == "Play Pippa as Black"
+                       for button in ui._menu_buttons)
             ui._draw_menu()
+            ui._open_challenge_menu()
+            ui._build_menu_buttons()
+            headings = [text for text, _x, _y in ui._menu_heads]
+            assert "3/14 colour badges" in headings
+            assert "Next: Pippa as Black" in headings
     finally:
         ui.progress_store.close()
         pygame.quit()
@@ -383,7 +389,7 @@ def test_collection_draws_one_circle_per_win_then_one_gold(tmp_path, monkeypatch
         pygame.quit()
 
 
-def test_main_menu_shelf_displays_medals_and_cycles_characters(tmp_path, monkeypatch):
+def test_main_menu_medals_opens_all_characters_on_one_page(tmp_path):
     import pygame
     from chess_game.ui import ChessUI
 
@@ -391,31 +397,16 @@ def test_main_menu_shelf_displays_medals_and_cycles_characters(tmp_path, monkeyp
     try:
         ui.collection_counts.update({"chicky": 3, "pippa-pomeranian": 10})
         ui._build_menu_buttons()
-        assert {button.label for button in ui._menu_buttons} >= {
-            "Medal collection", "‹", "›"}
-        drawn = []
-        original = ui._draw_medal_portrait
-
-        def record(filename, center, size, gold=False):
-            drawn.append((filename, size, gold))
-            return original(filename, center, size, gold)
-
-        monkeypatch.setattr(ui, "_draw_medal_portrait", record)
-        ui._draw_menu()
-        assert len(drawn) == 3
-        assert all(item[0] == "chicky.bmp" and not item[2] for item in drawn)
-        ui._change_shelf_character(1)
-        drawn.clear()
-        ui._draw_menu()
-        assert len(drawn) == 1
-        assert drawn[0][0] == "pomeranian.bmp" and drawn[0][2]
-        assert drawn[0][1] > 24
-        ui.shelf_character_index = 6
-        ui._open_collection()
+        assert [button.label for button in ui._menu_buttons
+                if button.label == "Medals"] == ["Medals"]
+        next(button for button in ui._menu_buttons
+             if button.label == "Medals").action()
         ui._build_menu_buttons()
-        assert ui.collection_page == 1
+        assert len(ui._collection_cards) == 7
         assert any(button.label.startswith("Monty · ")
                    for button in ui._collection_cards)
+        assert not any("medals" in button.label.lower()
+                       for button in ui._menu_buttons)
     finally:
         ui.progress_store.close()
         pygame.quit()
@@ -429,13 +420,11 @@ def test_collection_and_master_acknowledgement_ui(tmp_path):
     try:
         for width, height in ((360, 320), (360, 400), (360, 600),
                               (600, 600), (980, 760)):
-            ui.win_w, ui.win_h = width, height
-            ui._layout()
-            ui._ensure_fonts()
+            ui._on_resize(width, height)
             ui._open_menu_section("main")
             ui._build_menu_buttons()
             collection = next(button for button in ui._menu_buttons
-                              if button.label == "Medal collection")
+                              if button.label == "Medals")
             exit_button = next(button for button in ui._menu_buttons
                                if button.label == "Exit")
             assert collection.rect.top >= exit_button.rect.bottom
@@ -444,23 +433,20 @@ def test_collection_and_master_acknowledgement_ui(tmp_path):
             ui._open_collection()
             ui._build_menu_buttons()
             assert ui.menu_view == "collection"
+            assert len(ui._collection_cards) == 7
             assert all(button.rect.bottom <= height for button in
+                       ui._menu_buttons + ui._collection_cards)
+            assert all(button.rect.right <= width for button in
                        ui._menu_buttons + ui._collection_cards)
             ui._draw_menu()
             ui.collection_counts.update({
                 "chicky": 1, "pippa-pomeranian": 9,
                 "tina-turtle": 10, "tom-rabbit": 11})
             ui._draw_menu()
-            while True:
-                ui._build_menu_buttons()
-                ui._draw_menu()
-                if not any(button.label == "More medals ›"
-                           for button in ui._menu_buttons):
-                    break
-                ui._change_collection_page(1)
             assert any(button.label.startswith("Monty · ")
                        for button in ui._collection_cards)
-            ui.collection_page = 0
+            assert [button.label for button in ui._menu_buttons] == [
+                "‹ Back to menu"]
         seed = ui.challenge_store.start(WHITE)
         ui.challenge_store.discard(seed.match_id)
         ui.win_w, ui.win_h = 360, 320

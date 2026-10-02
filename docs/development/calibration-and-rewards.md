@@ -37,13 +37,20 @@ needed before any strength tuning.
   --output docs/development/calibration-diagnostic.json
 ```
 
+The 2 October 2026 follow-up used three adjacent pairs (Chicky–Pippa,
+Pippa–Tina, and Bruno–Olivia), start and endgame positions, both colours,
+seed 11, and an 80-ply cap. Its [recorded output](calibration-2026-10-02.json)
+contains 12 games: three stronger-side wins, three draws, six truncations,
+and zero search failures. An earlier run exposed a search timeout escaping
+before the first completed iteration; the engine now returns a legal fallback
+move, and the recorded rerun had no such failures. This sample does not
+establish ratings or the full seven-opponent strength order.
+
 Schema 10 and the medal UI are described in [ADR 0003](../architecture/0003-challenge-win-events.md).
 The result card reports this match's medal and whether its colour badge is
-new, plus the next unlocked opponent. In Collection, each character has a
-ten-circle row: each win fills one circular portrait; at ten wins the row is
-replaced by one larger gold portrait circle, while the lifetime count keeps
-increasing. The main menu shelf displays the same medal row, with arrows to
-switch characters; after a win it selects that character automatically. Its
-Collection button opens the corresponding collection page.
+new, plus the next unlocked opponent. Medals opens all seven characters on one
+page. Each character has a ten-circle row: each win fills one circular portrait;
+at ten wins the row is replaced by one larger gold portrait circle, while the
+lifetime count keeps increasing.
 The Master title is durable and its celebration is acknowledged only by an
 explicit action.

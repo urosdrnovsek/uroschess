@@ -42,11 +42,11 @@ def draw_player_card(surface, rect, player, course, palette, title_font,
     topic_font = (small_font if small_font.size(topic)[0] <= width
                   else tag_font)
     subtitle = _fit(topic_font, topic, width)
-    surface.blit(topic_font.render(subtitle, True, palette.accent),
+    surface.blit(topic_font.render(subtitle, True, palette.text),
                  (x, rect.y + 15 + name_font.get_linesize()))
     if progress:
         label = _fit(tag_font, progress, width)
-        surface.blit(tag_font.render(label, True, palette.text_dim),
+        surface.blit(tag_font.render(label, True, palette.text),
                      (x, rect.bottom - tag_font.get_linesize() - 9))
     if focused:
         draw_focus_ring(surface, rect, palette.accent, 8)

@@ -56,6 +56,12 @@ def test_ai_finds_mate_in_one():
     print("ok  AI finds mate in one")
 
 
+def test_ai_returns_legal_move_when_budget_expires_before_first_iteration():
+    board = Board()
+    move = ai.best_move(board, time_limit=0.0)
+    assert move in legal_moves(board)
+
+
 def test_ai_no_hanging_capture():
     # White queen on d1, Black pawn d7->d5 offered; a naive depth search that
     # stops mid-capture-sequence might grab it. Quiescence should see it's bad.

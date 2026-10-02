@@ -131,6 +131,8 @@ fundamentals, then add Tom's first threat exercise. Monty's access
 service, all seven complete paths, wider
 accessibility work, and the advertised Python-support mismatch remain planned.
 No learner observations or educational-effectiveness claims were made here.
+The Python minimum was aligned with the tested CI baseline at 3.9 on
+2 October 2026.
 
 ## Beginner expansion
 

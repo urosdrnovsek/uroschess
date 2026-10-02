@@ -111,6 +111,9 @@ def main():
         ui.start_lesson(ui.game_library.lesson_entry("chicky-pawn-steps"),
                         course_id="chicky-first-knight-steps")
         capture(ui, "chicky-pawn-lesson.png")
+        ui._to_menu()
+        ui._open_collection()
+        capture(ui, "medals.png")
     finally:
         if ui.progress_store is not None:
             ui.progress_store.close()

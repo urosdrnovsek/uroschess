@@ -23,7 +23,7 @@ king, coordinating an attack, and simple endgames.
 
 ## Run
 
-On Linux with Python 3.8 or newer:
+On Linux with Python 3.9 or newer:
 
 ```bash
 ./run.sh
@@ -53,10 +53,10 @@ Omarchy colours when available and otherwise uses a built-in dark theme.
   Saved match archive so diagnostic copies can be exported later. Exports are
   written beside the local progress database; the recovery screen shows the
   filename and folder. Every verified checkmate win also earns a character
-  medal, including rematches. Under **Medal collection** on the main menu,
-  arrows show each character's row of ten circular slots. Each win fills one
-  portrait circle; the tenth replaces the row with one larger gold circle.
-  The Collection screen also shows lifetime counts. The result screen
+  medal, including rematches. **Medals** on the main menu opens all seven
+  characters' collections on one page. Each win fills one portrait circle;
+  the tenth replaces that character's row with a larger gold circle. The
+  collection also shows lifetime counts. The result screen
   distinguishes a new colour badge from a previously earned one. The Master
   celebration is dismissed explicitly and its title remains earned.
 - **Learn:** start with Chicky's seven beginner lessons, each with a guided move
@@ -92,6 +92,8 @@ quote.
 | ![Menu with Learn, Play, Watch games, and Meet the characters](docs/menu.png) | ![Opening courses with the two animal coaches](docs/openings.png) |
 
 ![Tina's story in Meet the characters](docs/meet-characters.png)
+
+![All seven medal collections on one page](docs/medals.png)
 
 In a lesson, read the question beside or below the board and make a move.
 **Hint** gives a clue; **Show answer** reveals a move. After a move, the panel

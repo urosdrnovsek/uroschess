@@ -116,7 +116,9 @@ Prioritize these Character Challenge improvements before expanding the mode:
    diagnostic games, 35 were truncated and one ended from an imbalanced tactical
    position, so run a longer batch before deciding
    whether Pippa, Bruno, or Olivia need tuning. Retain Monty's Max policy.
-   Do not advertise Elo ratings without evidence.
+   A 12-game, 80-ply follow-up on three adjacent pairs had no search failures
+   after a timeout fix, but six games were truncated. Do not advertise Elo
+   ratings without evidence.
 2. **Saved-match recovery: implemented and verified in test batches.**
    Invalid active saves now have a dedicated explanation, retry, export, and
    transactional archive path. The archive remains exportable after restart.
@@ -129,8 +131,8 @@ Prioritize these Character Challenge improvements before expanding the mode:
 3. **Reward screens and repeat-win medals: implemented.** The result view
    distinguishes a new colour badge from a prior badge, shows the medal count
    and next opponent, and requires explicit Master celebration dismissal.
-   Schema 10 stores verified repeat wins; the beginning screen and Collection
-   view show the seven medal counts. See `docs/development/calibration-and-rewards.md`.
+   Schema 10 stores verified repeat wins; Medals opens all seven character
+   counts on one page. See `docs/development/calibration-and-rewards.md`.
 4. **Add a short post-game review.** Replay the saved match and highlight one or
    two checked moments that help the learner understand a choice. Keep review
    separate from live challenge play; do not present an unreviewed engine guess
@@ -165,13 +167,12 @@ resignations, abandoned games, and unverified records earn nothing. During
 migration, credit past wins only when their stored match result can be
 verified. Never invent extra wins from the two colour badges.
 
-Design a compact, accessible medal shelf below the opening menu, grouped and
-labelled by character. It must not cover Appearance, Exit, or other controls;
-at narrow or short sizes, let the collection scroll or open into a separate
-view while keeping it reachable from the beginning screen. Show a text count
-and an accessible name as well as the medal art. Check that the small portraits
-remain recognisable and the gold medal is visibly distinct without relying
-only on colour. Keep the reward optional and local, without streak pressure.
+The opening menu has a Medals button. Its collection shows all seven
+characters on one page, using two columns for short or wide windows and one
+column for taller narrow windows. Each card shows a text count and medal art.
+The smallest window uses tiny circles, so check their recognisability with
+players; the count and gold label remain visible. Keep the reward optional and
+local, without streak pressure.
 
 ### Character-led lessons: first slice implemented, expansion pending
 
@@ -376,11 +377,11 @@ direction and remaining work; replace obsolete status instead of appending
 another handoff log. Record actual checks and remaining limitations, and follow
 the owner's current commit/push instructions.
 
-## Start here next session (2 October 2026)
+## Start here after the 2 October 2026 release audit
 
-1. Read `git status --short` before editing. The 1 October lesson work and this
-   handbook are intended to be committed together; confirm that commit is
-   present and keep any later user edits. Read the last section of
+1. Read `git status --short` before editing and keep any user edits. The
+   1 October lesson work is in commit `5330131`; the 2 October release audit
+   remains in the working tree. Read the last section of
    `docs/development/upgrade-preparation.md` for the exact Bruno, Olivia, and
    Monty implementation and verification notes. The source of truth for course
    metadata is `chess_game/content/starter/courses.json`; Monty's access check
@@ -407,10 +408,10 @@ the owner's current commit/push instructions.
    lesson loading or packaging. Update the status here and in
    `docs/development/upgrade-preparation.md`.
 
-The current pack has 31 games, 31 lessons, and nine courses. Content validation,
-smoke, an installed offline wheel, and visual checks passed for the Monty slice;
-157 tests passed in the full run, followed by focused checks for its final
-provenance and keyboard assertions. None of the seven teaching paths has a
-recorded learner observation. The first 36-game, four-ply opponent calibration
-was inconclusive; expand it before tuning Pippa, Bruno, or Olivia. The
-post-game review remains a separate Challenge follow-up.
+The current pack has 31 games, 31 lessons, and nine courses. The
+[release audit](../docs/development/release-audit-2026-10-02.md) records a
+successful offline wheel check, content validation, smoke, responsive screen
+review, and 160 passing tests. None of the seven teaching paths has a recorded
+learner observation. The 12-game, 80-ply calibration follow-up had no search
+failures but six truncations; opponent strength remains unproven. The post-game
+review remains a separate Challenge follow-up.

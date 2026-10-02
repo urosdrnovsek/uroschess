@@ -482,7 +482,8 @@ class ChessUI(MenuLayoutMixin):
         self.challenge_generation = 0
         self.challenge_cancel_event = None
         self.challenge_snapshot = {
-            "states": stage_states(set()), "saved": False, "master": False}
+            "states": stage_states(set()), "victories": set(),
+            "saved": False, "master": False}
         self.recovery_result = None
         self.recovery_note = ""
         self.archive_entries = ()
@@ -490,8 +491,6 @@ class ChessUI(MenuLayoutMixin):
         self.challenge_save_error = None
         self.challenge_progress_snapshot = None
         self.collection_counts = {opponent.ident: 0 for opponent in ROSTER}
-        self.collection_page = 0
-        self.shelf_character_index = 0
         self._medal_portraits = {}
         self._course_summary_cache = {}
         self.progress_error = ""
@@ -712,6 +711,7 @@ class ChessUI(MenuLayoutMixin):
             award = self.challenge_store.award()
             self.challenge_snapshot = {
                 "states": self.challenge_store.stages(),
+                "victories": self.challenge_store.victories(),
                 "saved": verification is not None,
                 "master": award is not None,
             }
@@ -736,23 +736,8 @@ class ChessUI(MenuLayoutMixin):
         if self.challenge is not None and self.challenge.status != "ongoing":
             self._to_menu()
         self._refresh_collection()
-        page_size = 2 if self.win_h < 520 else 4
-        self.collection_page = self.shelf_character_index // page_size
         self.scene = "menu"
         self._open_menu_section("collection")
-
-    def _change_collection_page(self, delta):
-        page_size = 2 if self.win_h < 520 else 4
-        last = (len(ROSTER) - 1) // page_size
-        self.collection_page = max(0, min(last, self.collection_page + delta))
-        self._reset_button_focus()
-        self._menu_buttons = []
-        self._dirty = True
-
-    def _change_shelf_character(self, delta):
-        self.shelf_character_index = (
-            self.shelf_character_index + delta) % len(ROSTER)
-        self._dirty = True
 
     def _acknowledge_master(self):
         try:
@@ -953,8 +938,6 @@ class ChessUI(MenuLayoutMixin):
             return
         self.challenge_progress_snapshot = snapshot
         self.collection_counts = snapshot["counts"]
-        if snapshot["reward"] is not None:
-            self.shelf_character_index = ROSTER.index(self.challenge.opponent)
 
     def _cancel_challenge_search(self):
         self.challenge_generation += 1
@@ -2134,6 +2117,17 @@ class ChessUI(MenuLayoutMixin):
             ("Menu", self._to_menu),
         ]
         if not self.show_panel:
+            gap = 6
+            width = (self.status_w - 2 * gap) // 3
+            height = 30 if self.win_h < 360 else 36
+            row_gap = 4 if self.win_h < 360 else 6
+            y = self.status_y + self.status_h + (8 if self.win_h < 360 else 10)
+            for index, (label, action) in enumerate(specs):
+                col, row = index % 3, index // 3
+                x = self.status_x + col * (width + gap)
+                self._game_buttons.append(Button(
+                    (x, y + row * (height + row_gap), width, height),
+                    label, action))
             return
         bw, bh, gap = (self.panel_w - 20) // 2, 30, 8
         x0 = self.panel_x + 8
@@ -2463,8 +2457,8 @@ class ChessUI(MenuLayoutMixin):
                     self._draw_challenge_panel()
                 else:
                     self._draw_panel(thought_progress)
-            elif self.challenge is not None:
-                self._draw_challenge_buttons()
+            elif self.scene == "game":
+                self._draw_game_buttons()
             self._draw_status()
             if self.scene in ("game", "lesson") and self.pending_promo is not None:
                 self._draw_promo()
@@ -2497,7 +2491,7 @@ class ChessUI(MenuLayoutMixin):
         for text, hx, hy in self._menu_heads:
             heading = _fit_text(self.small_font, text,
                                 max(30, card.right - hx - 12))
-            self.screen.blit(self.small_font.render(heading, True, p.accent),
+            self.screen.blit(self.small_font.render(heading, True, p.text),
                              (hx, hy))
         if self.menu_view in ("challenge_recovery", "challenge_unavailable",
                               "challenge_archive"):
@@ -2505,8 +2499,6 @@ class ChessUI(MenuLayoutMixin):
             for index, line in enumerate(lines[:4]):
                 self.screen.blit(self.small_font.render(line, True, p.text),
                                  (card.x + 20, card.y + 43 + index * 19))
-        if self.menu_view == "main":
-            self._draw_collection_shelf()
         if self.menu_view == "collection":
             for card_button in self._collection_cards:
                 self._draw_menu_button(card_button, False, rad)
@@ -2623,37 +2615,6 @@ class ChessUI(MenuLayoutMixin):
         pygame.draw.circle(self.screen, (222, 178, 63) if gold else p.accent,
                            center, size // 2, width=3 if gold else 2)
 
-    def _draw_collection_shelf(self):
-        rect = self._collection_shelf_rect
-        if rect.h < 95:
-            return
-        p = self.pal
-        _round_rect_alpha(self.screen, rect, (*p.panel, 235),
-                          min(p.rounding, 12))
-        _hairline(self.screen, rect, p.panel_line, min(p.rounding, 12))
-        opponent = ROSTER[self.shelf_character_index]
-        summary = medal_summary(self.collection_counts[opponent.ident])
-        rendered = self.small_font.render(opponent.name, True, p.text)
-        self.screen.blit(rendered, rendered.get_rect(
-            centerx=rect.centerx, y=rect.y + 42))
-        center_y = rect.y + 84
-        if summary.gold_portrait:
-            self._draw_medal_portrait(opponent.portrait,
-                                     (rect.centerx, center_y), 42, gold=True)
-        else:
-            inner_x, inner_width = rect.x + 45, rect.w - 90
-            diameter = min(24, (inner_width - 27) // 10)
-            gap = (inner_width - 10 * diameter) // 9
-            for index in range(10):
-                center = (inner_x + diameter // 2 +
-                          index * (diameter + gap), center_y)
-                if index < summary.small_portraits:
-                    self._draw_medal_portrait(
-                        opponent.portrait, center, diameter)
-                else:
-                    pygame.draw.circle(self.screen, p.panel_line, center,
-                                       diameter // 2, width=1)
-
     def _draw_challenge_result(self):
         if self.challenge is None:
             return
@@ -2664,13 +2625,20 @@ class ChessUI(MenuLayoutMixin):
         reward = snapshot.get("reward")
         count = snapshot.get("counts", {}).get(opponent.ident, 0)
         won = reward is not None
+        narrow_large = card.w < 400 and self.text_scale > 1.2
         if won:
-            title = "You beat {} with {}".format(
-                opponent.name, "White" if self.challenge.color == WHITE else "Black")
-            badge = ("New {} badge" if reward["new_badge"] else
-                     "{} badge already earned").format(
-                         "White" if self.challenge.color == WHITE else "Black")
-            lines = (title, "Medal earned · {} lifetime wins".format(count), badge)
+            color = "White" if self.challenge.color == WHITE else "Black"
+            if narrow_large:
+                lines = ("Beat {}!".format(opponent.name),
+                         ("{} badge earned!" if reward["new_badge"] else
+                          "{} badge held").format(color),
+                         "{} {} total".format(
+                             count, "medal" if count == 1 else "medals"))
+            else:
+                lines = ("You beat {}!".format(opponent.name),
+                         ("New {} badge earned!" if reward["new_badge"] else
+                          "{} badge already earned").format(color),
+                         "Medal earned · {} total".format(count))
         elif self.status == "resignation":
             lines = ("You resigned", "No medal earned", "Try again when ready")
         elif self.status == "checkmate":
@@ -2681,19 +2649,43 @@ class ChessUI(MenuLayoutMixin):
         states = snapshot.get("states")
         index = ROSTER.index(opponent)
         if won and states and states[index] == "black_required":
-            next_line = "Next: play {} with Black".format(opponent.name)
+            next_line = "Next: {} as Black".format(opponent.name)
         elif won and states and states[index] == "complete" and index < len(ROSTER) - 1:
-            next_line = "Unlocked: {}".format(ROSTER[index + 1].name)
+            next_line = "Next: {} as White".format(
+                ROSTER[index + 1].name)
+        elif states and states[index] in ("white_required", "black_required"):
+            color = "White" if states[index] == "white_required" else "Black"
+            next_line = "Next: {} as {}".format(opponent.name, color)
         else:
-            next_line = "Next: play another match"
+            next_line = "Next: choose another challenge"
         award = snapshot.get("award")
         if award is not None and award["match_id"] == self.challenge.match_id:
-            next_line = "Uroschess Master · " + (
-                "celebration ready" if award["celebration_seen_at"] is None
-                else "title earned")
+            next_line = ("Uroschess Master earned!" if narrow_large else
+                         "Uroschess Master · " + (
+                             "celebration ready" if
+                             award["celebration_seen_at"] is None
+                             else "title earned"))
+        if won:
+            size = 62 if self.win_h < 420 or narrow_large else 72
+            center = (card.right - 20 - size // 2,
+                      card.y + (86 if self.win_h < 420 else 103))
+            if reward["new_badge"]:
+                for angle in range(0, 360, 45):
+                    radians = math.radians(angle)
+                    start = (int(center[0] + (size // 2 + 5) * math.cos(radians)),
+                             int(center[1] + (size // 2 + 5) * math.sin(radians)))
+                    end = (int(center[0] + (size // 2 + 12) * math.cos(radians)),
+                           int(center[1] + (size // 2 + 12) * math.sin(radians)))
+                    pygame.draw.line(self.screen, (222, 178, 63), start, end, 2)
+            self._draw_medal_portrait(opponent.portrait, center, size,
+                                     gold=reward["new_badge"])
         for row, line in enumerate((*lines, next_line)):
-            font = self.status_font if row == 0 else self.small_font
-            rendered = font.render(_fit_text(font, line, card.w - 40), True, p.text)
+            font = ((self.small_font if row == 0 else self.tag_font)
+                    if narrow_large else
+                    (self.status_font if row == 0 else self.small_font))
+            width = card.w - ((110 if narrow_large else 130)
+                              if won and row < 3 else 40)
+            rendered = font.render(_fit_text(font, line, width), True, p.text)
             self.screen.blit(rendered, (card.x + 20,
                                         card.y + (39 if self.win_h < 420 else 51) +
                                         row * (28 if self.win_h < 420 else 36)))
@@ -2750,6 +2742,39 @@ class ChessUI(MenuLayoutMixin):
                             if item.portrait == b.value)
             summary = medal_summary(self.collection_counts[opponent.ident])
             name, strength = b.label.split(" · ", 1)
+            if b.rect.h < 72:
+                name_font = self.small_font
+                name_width = b.rect.w - 62
+                name_text = _fit_text(name_font, name, name_width)
+                self.screen.blit(name_font.render(name_text, True, p.text),
+                                 (b.rect.x + 6, b.rect.y + 4))
+                count_text = "{} wins".format(summary.win_count)
+                count = self.tag_font.render(count_text, True, p.text)
+                self.screen.blit(count, (b.rect.right - count.get_width() - 6,
+                                         b.rect.y + 7))
+                if summary.gold_portrait:
+                    diameter = min(24, b.rect.h - 21)
+                    center = (b.rect.x + 7 + diameter // 2,
+                              b.rect.bottom - 4 - diameter // 2)
+                    self._draw_medal_portrait(b.value, center, diameter,
+                                             gold=True)
+                    label = self.tag_font.render("Gold medal", True, p.text)
+                    self.screen.blit(label, (b.rect.x + diameter + 13,
+                                             b.rect.bottom - 5 - label.get_height()))
+                else:
+                    available = b.rect.w - 12
+                    diameter = min(18, max(6, (available - 18) // 10))
+                    gap = (available - 10 * diameter) // 9
+                    center_y = b.rect.bottom - 5 - diameter // 2
+                    for index in range(10):
+                        center = (b.rect.x + 6 + diameter // 2 +
+                                  index * (diameter + gap), center_y)
+                        if index < summary.small_portraits:
+                            self._draw_medal_portrait(b.value, center, diameter)
+                        else:
+                            pygame.draw.circle(self.screen, p.panel_line,
+                                               center, diameter // 2, width=1)
+                return
             self.screen.blit(self.text_font.render(name, True, p.text),
                              (b.rect.x + 8, b.rect.y + 5))
             strength_text = self.tag_font.render(strength, True, p.text)
@@ -2792,11 +2817,13 @@ class ChessUI(MenuLayoutMixin):
             self.screen.blit(strength_text,
                              (b.rect.right - 8 - strength_text.get_width(),
                               b.rect.y + 12))
-            detail_lines = _wrap_text(self.small_font, b.detail, width)
+            detail_font = (self.tag_font if self.text_scale > 1.2 and
+                           b.rect.w < 360 else self.small_font)
+            detail_lines = _wrap_text(detail_font, b.detail, width)
             for line_index, detail in enumerate(detail_lines[:2]):
-                self.screen.blit(self.small_font.render(detail, True, p.text),
+                self.screen.blit(detail_font.render(detail, True, p.text),
                                  (x, b.rect.y + 36 +
-                                  line_index * self.small_font.get_linesize()))
+                                  line_index * detail_font.get_linesize()))
             if focused:
                 draw_focus_ring(self.screen, b.rect, p.accent, rad)
             return
@@ -2964,7 +2991,7 @@ class ChessUI(MenuLayoutMixin):
             piece, (cx, cy), self.white_col, self.black_col)
 
     # ---- panel --------------------------------------------------------
-    def _draw_challenge_buttons(self):
+    def _draw_game_buttons(self):
         p = self.pal
         mx, my = pygame.mouse.get_pos()
         for index, button in enumerate(self._game_buttons):
@@ -3001,12 +3028,15 @@ class ChessUI(MenuLayoutMixin):
         if (award is not None and award["match_id"] == self.challenge.match_id and
                 award["celebration_seen_at"] is None):
             lines.append("You are a Uroschess Master!")
+        y = card.y + 20
         for index, line in enumerate(lines):
             font = self.status_font if index == 0 else self.small_font
-            line = _fit_text(font, line, card.w - 24)
-            self.screen.blit(font.render(line, True, p.text),
-                             (card.x + 12, card.y + 20 + index * 32))
-        self._draw_challenge_buttons()
+            for wrapped in _wrap_text(font, line, card.w - 24):
+                self.screen.blit(font.render(wrapped, True, p.text),
+                                 (card.x + 12, y))
+                y += font.get_linesize() + 4
+            y += 8
+        self._draw_game_buttons()
 
     def _draw_panel(self, thought_progress=1.0):
         p = self.pal

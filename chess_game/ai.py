@@ -277,7 +277,8 @@ class Engine:
     # -- driver --------------------------------------------------------
     def search(self, board, on_progress=None):
         self.deadline = time.monotonic() + self.time_limit
-        self._checkpoint()
+        if self.cancel_event is not None and self.cancel_event.is_set():
+            raise SearchCancelled
         root_moves = legal_moves(board)
         if not root_moves:
             return None, 0, []
@@ -286,8 +287,8 @@ class Engine:
         pv = [best_move]
 
         for depth in range(1, self.max_depth + 1):
-            self._checkpoint()
             try:
+                self._checkpoint()
                 score, move, line = self._root(board, depth)
             except _Timeout:
                 break

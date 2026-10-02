@@ -7,7 +7,7 @@ name = "uroschess"
 version = "0.1.0"
 description = "A small offline chess game with short practice lessons"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [{ name = "Uroš Drnovšek" }]
 keywords = ["chess", "pygame", "education", "game", "board-game", "ai"]
