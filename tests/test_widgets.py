@@ -101,13 +101,9 @@ def test_home_routes_to_categorized_lesson_libraries():
          if button.label == "Learn").action()
     ui._build_menu_buttons()
     labels = [button.label for button in ui._menu_buttons]
-    assert "Guided games" in labels
-    assert "Openings" in labels
-    assert "Endgames" in labels
-    assert "View lesson path" in labels
-    assert "Start next lesson" in labels
-    assert "Chicky's beginner course" in labels
-    assert "Tina's endgame course" in labels
+    assert labels[:3] == ["Chicky", "Pippa", "Tina"]
+    assert all(button.kind == "guide" for button in ui._menu_buttons
+               if button.value in ("chicky", "pippa-pomeranian", "tina-turtle"))
     assert not any("difficulty" in label.lower() for label in labels)
 
     ui._open_menu_section("play")
@@ -157,6 +153,51 @@ def test_home_routes_to_categorized_lesson_libraries():
     assert "Italian Game: develop, castle, break" in [
         button.label for button in ui._menu_buttons]
     assert "Finish without stalemate" not in opening_labels
+    ui.progress_store.close()
+    pygame.quit()
+
+
+def test_character_gallery_covers_every_lesson_and_preserves_return_route():
+    from chess_game.challenge import ROSTER
+
+    ui = ChessUI(":memory:")
+    reachable = set()
+    for opponent in ROSTER:
+        entries = ui._guide_entries(opponent.ident)
+        assert entries
+        for entry in entries:
+            if hasattr(entry, "course_id"):
+                reachable.update(entry.lesson_ids)
+            else:
+                reachable.add(entry.lesson.lesson_id)
+    assert reachable == {entry.lesson.lesson_id
+                         for entry in ui.game_library.lesson_entries}
+
+    ui._open_menu_section("learn")
+    guide_ids = set()
+    for page in range(2):
+        ui.guide_page = page
+        ui._build_menu_buttons()
+        guide_ids.update(button.value for button in ui._menu_buttons
+                         if button.kind == "guide")
+    assert guide_ids == {opponent.ident for opponent in ROSTER}
+    ui._open_guide_lessons("pippa-pomeranian")
+    entry = ui.game_library.lesson_entry("italian-development")
+    ui.start_lesson(entry)
+    assert ui.coach_profile.player_id == "pippa-pomeranian"
+    assert ui._next_path_entry() is None
+    ui._leave_lesson()
+    assert ui.menu_view == "guide_lessons"
+    ui._build_menu_buttons()
+    assert any(button.label == entry.lesson.title
+               for button in ui._menu_buttons)
+    ui._open_guide_lessons("monty-cat")
+    ui._build_menu_buttons()
+    locked = next(button for button in ui._menu_buttons
+                  if button.label == "Monty's recorded game")
+    assert "Locked" in locked.detail
+    locked.action()
+    assert ui.menu_view == "guide_lessons"
     ui.progress_store.close()
     pygame.quit()
 
@@ -232,8 +273,7 @@ def test_course_source_replay_returns_to_about_and_browse_restores(tmp_path):
     reopened = ChessUI(path)
     reopened._open_menu_section("learn")
     reopened._build_menu_buttons()
-    assert any(button.label == "Return to last page"
-               for button in reopened._menu_buttons)
+    assert any(button.label == "Chicky" for button in reopened._menu_buttons)
     reopened._restore_learn_browse()
     assert reopened.menu_view == "course"
     assert reopened.active_course_id == course.course_id
@@ -325,9 +365,11 @@ def test_chicky_course_opens_from_learn_and_character_page():
     ui._set_text_scale(1.4)
     ui._open_menu_section("learn")
     ui._build_menu_buttons()
-    button = next(button for button in ui._menu_buttons
-                  if button.label == "Chicky's beginner course")
-    button.action()
+    next(button for button in ui._menu_buttons
+         if button.label == "Chicky").action()
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons
+         if button.label == "Your first piece moves").action()
     assert ui.active_course_id == "chicky-first-knight-steps"
     ui._draw()
     assert not any(button.label == "Sources" for button in ui._menu_buttons)
@@ -459,9 +501,12 @@ def test_tina_course_and_promotion_picker_retry_at_narrow_size():
     assert all(ui.screen.get_rect().contains(button.rect)
                for button in ui._menu_buttons)
     next(button for button in ui._menu_buttons
-         if button.label == "Tina's endgame course").action()
+         if button.label == "Tina").action()
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons
+         if button.label == "Pawn and king endgames").action()
     assert ui.active_course_id == "tina-first-promotion"
-    assert ui.course_return_view == "learn"
+    assert ui.course_return_view == "guide_lessons"
     ui._build_menu_buttons()
     assert not any(button.label == "Sources" for button in ui._menu_buttons)
     next(button for button in ui._menu_buttons
@@ -494,9 +539,7 @@ def test_tina_course_and_promotion_picker_retry_at_narrow_size():
     ui._build_menu_buttons()
     assert all(ui.screen.get_rect().contains(button.rect)
                for button in ui._menu_buttons)
-    return_button = next(button for button in ui._menu_buttons
-                         if button.label == "Return to last page")
-    assert ui.small_font.size(return_button.label)[0] <= return_button.rect.w - 16
+    assert any(button.label == "Tina" for button in ui._menu_buttons)
     ui._open_menu_section("characters")
     ui.character_index = 2
     ui._build_menu_buttons()
@@ -574,16 +617,18 @@ def test_bruno_plan_opens_from_learn_and_character_page():
     ui._set_text_scale(1.4)
     ui._open_menu_section("learn")
     ui._build_menu_buttons()
+    ui._change_guide_page(1)
+    ui._build_menu_buttons()
     next(button for button in ui._menu_buttons
-         if button.label == "Guided games").action()
-    assert ui.menu_view == "guided_hub"
+         if button.label == "Bruno").action()
+    assert ui.menu_view == "guide_lessons"
     ui._build_menu_buttons()
     assert all(ui.screen.get_rect().contains(button.rect)
                for button in ui._menu_buttons)
     next(button for button in ui._menu_buttons
-         if button.value == "bruno-find-a-plan").action()
+         if button.label == "Find a useful plan").action()
     assert ui.active_course_id == "bruno-find-a-plan"
-    assert ui.course_return_view == "guided_hub"
+    assert ui.course_return_view == "guide_lessons"
     ui._build_menu_buttons()
     next(button for button in ui._menu_buttons
          if button.label == "Find the quiet piece").action()
@@ -711,7 +756,10 @@ def test_lesson_question_and_feedback_have_clear_controls():
                     course_id="bruno-scotch-first-ideas")
     ui._build_lesson_buttons()
     assert [button.label for button in ui._game_buttons] == [
-        "Hint", "Show answer", "Lessons", "Main menu"]
+        "Hint", "Show answer", "Lessons", "Main menu",
+        "‹ Back", "Next ›"]
+    assert ui._game_buttons[-2].kind == "lesson_nav_disabled"
+    assert ui._game_buttons[-1].kind == "lesson_nav"
     ui._draw()
     assert ui.study_view.lesson_content_rect.h < 150
     assert ui.study_view.question_rect.bottom <= ui.study_view.lesson_content_rect.top
@@ -721,10 +769,108 @@ def test_lesson_question_and_feedback_have_clear_controls():
     ui._lesson_reveal()
     ui._build_lesson_buttons()
     assert [button.label for button in ui._game_buttons] == [
-        "Finish lesson", "Try other move", "Lessons", "Main menu"]
+        "Finish lesson", "Try other move", "Lessons", "Main menu",
+        "‹ Back", "Next ›"]
     assert ui._game_buttons[0].kind == "cta"
     ui._draw()
     assert ui.study_view.lesson_content_rect.bottom <= ui._game_buttons[0].rect.top
+    ui.progress_store.close()
+    pygame.quit()
+
+
+def test_lesson_arrows_move_within_a_character_and_keep_the_return_page():
+    ui = ChessUI(":memory:")
+    ui._on_resize(420, 720)
+    ui._open_guide_lessons("bruno-bear")
+    course = ui.game_library.course("bruno-scotch-first-ideas")
+    last = ui.game_library.lesson_entry(course.lesson_ids[-1])
+    ui.active_course_id = course.course_id
+    ui.start_lesson(last, course_id=course.course_id)
+    ui._lesson_hint()
+    ui._build_lesson_buttons()
+    assert all(ui.screen.get_rect().contains(button.rect)
+               for button in ui._game_buttons)
+    assert ui._game_buttons[-1].kind == "lesson_nav"
+    ui._game_buttons[-1].action()
+    assert ui.lesson_entry.lesson.lesson_id == "bruno-activate-pieces"
+    assert ui.lesson_course_id == "bruno-find-a-plan"
+    assert ui.course_return_view == "guide_lessons"
+    assert ui.progress_store.load(last.lesson.lesson_id).hints_used == 1
+    ui._lesson_previous()
+    assert ui.lesson_entry == last
+    assert ui.lesson_course_id == course.course_id
+    ui._lesson_next()
+    ui._lesson_next()
+    assert ui.lesson_entry.lesson.lesson_id == "coordination-before-material"
+    assert ui.lesson_return_view == "guide_lessons"
+    ui._build_lesson_buttons()
+    assert ui._game_buttons[-1].kind == "lesson_nav_disabled"
+    ui._on_mouse_down(ui._game_buttons[-1].rect.center)
+    assert ui.lesson_entry.lesson.lesson_id == "coordination-before-material"
+    ui._button_focus = len(ui._game_buttons) - 2
+    ui._move_button_focus()
+    assert ui._button_focus != len(ui._game_buttons) - 1
+    ui._leave_lesson()
+    assert ui.menu_view == "guide_lessons"
+    ui._build_menu_buttons()
+    assert any(button.label == "Make your pieces work together"
+               for button in ui._menu_buttons)
+    ui.progress_store.close()
+    pygame.quit()
+
+
+def test_lesson_arrows_fit_beside_step_label_at_narrow_and_wide_sizes():
+    ui = ChessUI(":memory:")
+    ui.start_lesson(ui.game_library.lesson_entry("chicky-pawn-steps"),
+                    course_id="chicky-first-knight-steps")
+    for width, height, scale in ((360, 320, 1.4), (420, 720, 1.0),
+                                 (1100, 760, 1.0)):
+        ui._on_resize(width, height)
+        ui._set_text_scale(scale)
+        ui._build_lesson_buttons()
+        arrows = ui._game_buttons[-2:]
+        assert [button.label for button in arrows] == ["‹ Back", "Next ›"]
+        assert all(ui.screen.get_rect().contains(button.rect)
+                   for button in arrows)
+        assert arrows[0].rect.right < arrows[1].rect.left
+        ui._draw()
+        assert ui.study_view.question_rect is not None
+        assert arrows[0].rect.bottom <= ui.study_view.question_rect.top
+    ui.progress_store.close()
+    pygame.quit()
+
+
+def test_lesson_arrows_cover_every_character_path_without_crossing_guides():
+    from chess_game.challenge import ROSTER
+
+    ui = ChessUI(":memory:")
+    ui.collection_counts["monty-cat"] = 1
+    visited = set()
+    for opponent in ROSTER:
+        guide_items = ui._guide_entries(opponent.ident)
+        expected = []
+        for item in guide_items:
+            if hasattr(item, "course_id"):
+                expected.extend((lesson_id, item.course_id)
+                                for lesson_id in item.lesson_ids)
+            else:
+                expected.append((item.lesson.lesson_id, None))
+        ui._open_guide_lessons(opponent.ident)
+        first_id, first_course = expected[0]
+        ui.active_course_id = first_course
+        ui.start_lesson(ui.game_library.lesson_entry(first_id),
+                        course_id=first_course)
+        assert ui._lesson_neighbor(-1) is None
+        for index, (lesson_id, course_id) in enumerate(expected):
+            assert (ui.lesson_entry.lesson.lesson_id,
+                    ui.lesson_course_id) == (lesson_id, course_id)
+            visited.add(lesson_id)
+            if index + 1 < len(expected):
+                ui._lesson_next()
+        assert ui._lesson_neighbor(1) is None
+        ui._leave_lesson()
+    assert visited == {entry.lesson.lesson_id
+                       for entry in ui.game_library.lesson_entries}
     ui.progress_store.close()
     pygame.quit()
 
@@ -763,7 +909,8 @@ def test_portrait_click_changes_player_and_completes_animation():
     assert ui._portrait_hit_rect.left >= ui.panel_x
     first = ui.chess_thought
     ui._on_mouse_down(ui._portrait_hit_rect.center)
-    assert ui.chess_thought != first
+    assert ui.chess_thought == first
+    assert ui.coach_profile.player_id == "bruno-bear"
 
     ui._on_resize(700, 700)
     ui._build_lesson_buttons()
@@ -772,7 +919,7 @@ def test_portrait_click_changes_player_and_completes_animation():
     assert ui._portrait_hit_rect.bottom < ui.board_y
     first = ui.chess_thought
     ui._on_mouse_down(ui._portrait_hit_rect.center)
-    assert ui.chess_thought != first
+    assert ui.chess_thought == first
     ui.progress_store.close()
     pygame.quit()
 
@@ -795,13 +942,18 @@ def test_portrait_is_present_on_every_menu_and_play_layout():
     ui._build_menu_buttons()
 
     ui.active_course_id = ui.game_library.courses[0].course_id
-    for view in ("learn", "play", "ai_play", "opening_hub", "course",
+    for view in ("play", "ai_play", "opening_hub", "course",
                  "course_about", "challenge", "challenge_color"):
         ui.menu_view = view
         ui._build_menu_buttons()
         assert ui._feature_rect.h == 140
         assert ui._feature_rect.top >= 0
         assert ui._feature_rect.bottom < ui._menu_card.top
+
+    ui.menu_view = "learn"
+    ui._build_menu_buttons()
+    assert ui._feature_rect.h == 0
+    assert any(button.kind == "guide" for button in ui._menu_buttons)
 
     for open_view in (lambda: ui._open_library("opening"), ui._open_colors):
         open_view()
@@ -862,7 +1014,8 @@ def test_portrait_changes_on_navigation_and_lesson_has_main_menu_shortcut():
                  if entry.game.game_id == "coordination-study")
     first = ui.chess_thought
     ui.start_lesson(entry)
-    assert ui.chess_thought != first
+    assert ui.chess_thought == first
+    assert ui.coach_profile.player_id == "bruno-bear"
     ui._build_lesson_buttons()
     assert "Menu" in [button.label for button in ui._game_buttons]
     first = ui.chess_thought
@@ -941,7 +1094,9 @@ def test_narrow_screens_keep_appearance_replay_and_question_visible():
             question = ui.study_view.question_rect
             content = ui.study_view.lesson_content_rect
             provenance = ui.study_view.provenance_rect
-            button_top = min(button.rect.y for button in ui._game_buttons)
+            button_top = min(button.rect.y for button in ui._game_buttons
+                             if button.kind not in ("lesson_nav",
+                                                    "lesson_nav_disabled"))
             assert question is not None
             assert panel.contains(provenance)
             assert provenance.bottom <= question.top
@@ -1065,13 +1220,14 @@ def test_player_opening_route_keeps_coach_and_question_visible(tmp_path):
     ui = ChessUI(path)
     ui._open_menu_section("learn")
     ui._build_menu_buttons()
-    next(button for button in ui._menu_buttons
-         if button.label == "Openings").action()
+    ui._change_guide_page(1)
     ui._build_menu_buttons()
-    assert ui.menu_view == "opening_hub"
-    player_card = next(button for button in ui._menu_buttons
-                       if button.kind == "player")
-    ui._on_mouse_down(player_card.rect.center)
+    next(button for button in ui._menu_buttons
+         if button.label == "Bruno").action()
+    ui._build_menu_buttons()
+    course_card = next(button for button in ui._menu_buttons
+                       if button.label == "Open the centre")
+    ui._on_mouse_down(course_card.rect.center)
     ui._build_menu_buttons()
     assert ui.menu_view == "course"
     while ui._button_focus is None or ui._menu_buttons[ui._button_focus].kind != "library":
@@ -1098,7 +1254,9 @@ def test_player_opening_route_keeps_coach_and_question_visible(tmp_path):
             question = ui.study_view.question_rect
             assert question is not None
             assert question.bottom <= min(button.rect.y
-                                          for button in ui._game_buttons)
+                                          for button in ui._game_buttons
+                                          if button.kind not in
+                                          ("lesson_nav", "lesson_nav_disabled"))
             assert ui.study_view.lesson_content_rect.height >= 20
             assert ui._portrait_hit_rect is not None
     ui._on_mouse_down(ui._portrait_hit_rect.center)

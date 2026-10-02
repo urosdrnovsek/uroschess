@@ -23,6 +23,48 @@ TEXT_SIZES = [
     ("Extra large", 1.4),
 ]
 
+# Older standalone lessons keep their stable IDs and saved progress. This
+# navigation map gives each one a home in the character-led Learn flow.
+GUIDE_LESSONS = {
+    "pippa-pomeranian": ("opening-essentials", "italian-development",
+                           "queens-gambit-plan"),
+    "tina-turtle": ("promote-the-pawn", "queen-and-king-mate",
+                    "rook-and-king-mate", "square-of-the-pawn",
+                    "opposition-and-king-activity"),
+    "tom-rabbit": ("black-against-d4",),
+    "bruno-bear": ("coordination-before-material",),
+}
+
+GUIDE_TOPICS = {
+    "chicky": "Piece moves, captures, king safety and checkmate",
+    "pippa-pomeranian": "Opening basics and useful developing moves",
+    "tina-turtle": "Promotion, active kings and endgame practice",
+    "tom-rabbit": "Spot opening threats and choose a reply",
+    "bruno-bear": "Make a middlegame plan and coordinate pieces",
+    "olive-owl": "Tactics, knight forks and active bishops",
+    "monty-cat": "Study a recorded game after beating Monty",
+}
+
+GUIDE_SHORT_TOPICS = {
+    "chicky": "Moves, captures and checkmate",
+    "pippa-pomeranian": "Opening moves and development",
+    "tina-turtle": "Promote pawns and finish games",
+    "tom-rabbit": "Spot and answer opening threats",
+    "bruno-bear": "Plan with bishops and rooks",
+    "olive-owl": "Find forks and active squares",
+    "monty-cat": "Study a game after beating Monty",
+}
+
+GUIDE_PROFILE_TOPICS = {
+    "chicky": "Piece moves",
+    "pippa-pomeranian": "Opening ideas",
+    "tina-turtle": "Pawn endgames",
+    "tom-rabbit": "Opening defence",
+    "bruno-bear": "Middlegame plans",
+    "olive-owl": "Chess tactics",
+    "monty-cat": "Recorded game study",
+}
+
 class MenuLayoutMixin:
     """Build menu controls while the UI owns their actions and state."""
 
@@ -64,11 +106,13 @@ class MenuLayoutMixin:
             self._build_challenge_issue_menu()
         elif self.menu_view == "characters":
             self._build_character_menu()
+        elif self.menu_view == "guide_lessons":
+            self._build_guide_lessons()
         elif self.menu_view in ("learn", "play", "ai_play"):
             self._build_menu_section()
         else:
             self._build_menu_main()
-        if self.menu_view == "characters":
+        if self.menu_view in ("characters", "learn", "guide_lessons"):
             self._feature_rect = pygame.Rect(0, 0, 0, 0)
             return
         card = self._menu_card
@@ -256,45 +300,135 @@ class MenuLayoutMixin:
         self._menu_buttons = []
         self._change_chess_thought(play_sound=False)
 
+    def _guide_entries(self, player_id):
+        if not self.game_library:
+            return ()
+        courses = tuple(course for course in self.game_library.courses
+                        if course.published and course.player_id == player_id)
+        lessons = tuple(self.game_library.lesson_entry(lesson_id)
+                        for lesson_id in GUIDE_LESSONS.get(player_id, ()))
+        return courses + tuple(entry for entry in lessons if entry is not None)
+
+    def _build_learn_guides(self):
+        from .challenge import ROSTER
+        width = min(660, self.win_w - 24)
+        height = min(430, self.win_h - 70)
+        top = max(12, min(164, self.win_h - height - 48))
+        card = pygame.Rect((self.win_w - width) // 2, top, width, height)
+        self._menu_card = card
+        x, inner = card.x + 16, card.w - 32
+        per_page = 4 if height >= 380 else 2
+        page_count = (len(ROSTER) + per_page - 1) // per_page
+        self.guide_page = max(0, min(self.guide_page, page_count - 1))
+        heading = ("CHOOSE A GUIDE" if width < 440 else
+                   "CHOOSE YOUR CHESS GUIDE")
+        self._menu_heads.append((
+            "{} · {}/{}".format(heading, self.guide_page + 1, page_count),
+            x, top + 13))
+        gap = 7
+        row_height = (height - 53 - gap * (per_page - 1)) // per_page
+        for index, opponent in enumerate(ROSTER[
+                self.guide_page * per_page:(self.guide_page + 1) * per_page]):
+            self._menu_buttons.append(Button(
+                (x, top + 39 + index * (row_height + gap), inner, row_height),
+                opponent.name,
+                lambda ident=opponent.ident: self._open_guide_lessons(ident),
+                kind="guide", detail=(GUIDE_SHORT_TOPICS[opponent.ident]
+                                      if width < 440 and self.text_scale > 1.0
+                                      else GUIDE_TOPICS[opponent.ident]),
+                value=opponent.ident))
+        self._build_guide_navigation(x, inner, card.bottom + 7,
+                                     self.guide_page, page_count,
+                                     self._change_guide_page,
+                                     lambda: self._open_menu_section("main"))
+
+    def _build_guide_lessons(self):
+        from .challenge import OPPONENTS
+        opponent = OPPONENTS.get(self.active_guide_id)
+        if opponent is None:
+            self._build_learn_guides()
+            return
+        width = min(660, self.win_w - 24)
+        height = min(430, self.win_h - 70)
+        top = max(12, min(164, self.win_h - height - 48))
+        card = pygame.Rect((self.win_w - width) // 2, top, width, height)
+        self._menu_card = card
+        x, inner = card.x + 16, card.w - 32
+        compact = height < 320
+        profile_height = 72 if compact else 96
+        self._guide_profile_rect = pygame.Rect(x, top + 11, inner,
+                                               profile_height)
+        entries = self._guide_entries(opponent.ident)
+        per_page = 2 if compact else 3
+        page_count = max(1, (len(entries) + per_page - 1) // per_page)
+        self.guide_lesson_page = max(0, min(self.guide_lesson_page,
+                                            page_count - 1))
+        start = self.guide_lesson_page * per_page
+        visible = entries[start:start + per_page]
+        gap = 7
+        row_top = self._guide_profile_rect.bottom + 10
+        row_height = (card.bottom - 10 - row_top - gap * (per_page - 1)) // per_page
+        for index, entry in enumerate(visible):
+            if hasattr(entry, "course_id"):
+                unlocked = self._course_unlocked(entry)
+                label = entry.title if unlocked else "Monty's recorded game"
+                detail = ("Locked · beat Monty once in Character Challenge"
+                          if not unlocked else entry.description)
+                action = lambda ident=entry.course_id: self._open_course(ident)
+            else:
+                label = entry.lesson.title
+                detail = "{} min · {}".format(
+                    entry.lesson.estimated_minutes,
+                    self._guide_lesson_status(entry))
+                action = lambda item=entry: self.start_lesson(item)
+            self._menu_buttons.append(Button(
+                (x, row_top + index * (row_height + gap), inner, row_height),
+                label, action, kind="library", detail=detail))
+        self._build_guide_navigation(x, inner, card.bottom + 7,
+                                     self.guide_lesson_page, page_count,
+                                     self._change_guide_lesson_page,
+                                     lambda: self._open_menu_section("learn"))
+
+    def _build_guide_navigation(self, x, width, y, page, page_count,
+                                change_page, back):
+        gap = 7
+        side = (width - 2 * gap) // 3
+        center = width - 2 * side - 2 * gap
+        if page > 0:
+            self._menu_buttons.append(Button(
+                (x, y, side, 36), "‹ Prev", lambda: change_page(-1),
+                kind="step"))
+        self._menu_buttons.append(Button(
+            (x + side + gap, y, center, 36), "Back", back, kind="cta"))
+        if page < page_count - 1:
+            self._menu_buttons.append(Button(
+                (x + side + center + 2 * gap, y, side, 36), "Next ›",
+                lambda: change_page(1), kind="step"))
+
+    def _guide_lesson_status(self, entry):
+        if self.progress_store is None:
+            return "Practice lesson"
+        try:
+            record = self.progress_store.load(
+                entry.lesson.lesson_id, entry.lesson.content_revision)
+        except Exception as error:
+            self.progress_error = str(error)
+            return "Practice lesson"
+        if record is None:
+            return "Practice lesson"
+        return "Done" if record.completed else "In progress"
+
     def _build_menu_section(self):
+        if self.menu_view == "learn":
+            self._build_learn_guides()
+            return
         width = min(472, self.win_w - 24)
         top = self._simple_menu_top()
         card = pygame.Rect((self.win_w - width) // 2, top, width, 390)
         self._menu_card = card
         x, w = card.x + 24, card.w - 48
         gap, half = 8, (w - 8) // 2
-        if self.menu_view == "learn":
-            self._menu_heads.append(("LEARN CHESS", x, top + 16))
-            items = [
-                ("Resume unfinished lesson" if self._resume_entry()
-                 else "Start next lesson",
-                 self._continue_learning),
-                ("View lesson path", lambda: self._open_library("path")),
-                ("Openings", self._open_openings),
-                ("Endgames", lambda: self._open_library("endgame")),
-                ("Guided games", lambda: self._open_menu_section("guided_hub")),
-            ]
-            chicky = (self.game_library.course("chicky-first-knight-steps")
-                      if self.game_library else None)
-            if chicky and chicky.published:
-                items.insert(1, ("Chicky's beginner course", lambda:
-                                  self._open_course(chicky.course_id)))
-            tina = (self.game_library.course("tina-first-promotion")
-                    if self.game_library else None)
-            if tina and tina.published:
-                items.insert(2, ("Tina's endgame course", lambda:
-                                  self._open_course(tina.course_id)))
-            for i, (label, action) in enumerate(items):
-                step = 39 if len(items) > 6 else 46 if len(items) > 5 else 55
-                height = 36 if len(items) > 6 else 40 if len(items) > 5 else 45
-                self._menu_buttons.append(Button(
-                    (x, top + 42 + i * step, w, height), label, action,
-                    kind="cta" if i == 0 else "step"))
-            if self._has_learn_browse():
-                self._menu_buttons.append(Button(
-                    (x, top + 318, w, 45), "Return to last page",
-                    self._restore_learn_browse, kind="step"))
-        elif self.menu_view == "play":
+        if self.menu_view == "play":
             self._menu_heads.append(("PLAY CHESS", x, top + 16))
             self._menu_buttons.append(Button(
                 (x, top + 45, w, 48), "Play against AI",
@@ -306,8 +440,8 @@ class MenuLayoutMixin:
                 (x, top + 161, w, 48), "Character Challenge",
                 self._open_challenge_menu, kind="step"))
             self._menu_buttons.append(Button(
-                (x, top + 219, w, 48), "Saved match archive",
-                self._open_challenge_archive, kind="step"))
+                    (x, top + 219, w, 48), "Saved match archive",
+                    self._open_challenge_archive, kind="step"))
         else:
             self._menu_heads.append(("PLAY AGAINST AI", x, top + 16))
             for i, (label, colors) in enumerate((
@@ -587,7 +721,8 @@ class MenuLayoutMixin:
         self._menu_heads.append(("PRACTISE BASICS FIRST · OR TRY A LESSON"
                                  if missing_basics else
                                  "COURSE COMPLETE · PRACTISE AGAIN"
-                                 if complete else "LESSONS BY UROSCHESS",
+                                 if complete else "LESSONS WITH " +
+                                 self.game_library.player(course.player_id).short_name.upper(),
                                  x, top + 151))
         page_size = 2 if len(entries) > 3 else 3
         page_count = max(1, (len(entries) + page_size - 1) // page_size)

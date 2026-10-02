@@ -59,10 +59,10 @@ Omarchy colours when available and otherwise uses a built-in dark theme.
   collection also shows lifetime counts. The result screen
   distinguishes a new colour badge from a previously earned one. The Master
   celebration is dismissed explicitly and its title remains earned.
-- **Learn:** start with Chicky's seven beginner lessons, each with a guided move
-  and an independent try, then try Pippa's opening exercise, Tina's endgame
-  course, Tom's opening threat exercise, Bruno's middlegame plan, Olivia's
-  knight fork puzzle, or other short lessons about openings and endgames.
+- **Learn:** choose one of seven character guides. Each portrait explains what
+  that character teaches and opens their courses and practice lessons. Chicky's
+  seven beginner lessons start with piece moves; Pippa and Tom teach openings,
+  Tina teaches endgames, Bruno teaches plans, and Olivia teaches tactics.
   Monty's analysis of a recorded tournament game unlocks after one verified
   Character Challenge win against him with either colour. This is separate
   from the Master title, which still needs both colours.
@@ -87,9 +87,9 @@ quote.
 
 ![Chicky's pawn movement and capture lesson](docs/chicky-pawn-lesson.png)
 
-| Main menu | Opening lessons |
+| Main menu | Choose a guide |
 | --- | --- |
-| ![Menu with Learn, Play, Watch games, and Meet the characters](docs/menu.png) | ![Opening courses with the two animal coaches](docs/openings.png) |
+| ![Menu with Learn, Play, Watch games, and Meet the characters](docs/menu.png) | ![Character portraits and their lesson topics](docs/learn.png) |
 
 ![Tina's story in Meet the characters](docs/meet-characters.png)
 
@@ -97,9 +97,10 @@ quote.
 
 In a lesson, read the question beside or below the board and make a move.
 **Hint** gives a clue; **Show answer** reveals a move. After a move, the panel
-shows feedback and a clear next step. The lesson buttons also let you return
-to the lesson list or main menu. On a small window, the board and lesson panel
-stack vertically.
+shows feedback and a clear next step. The back and next arrows beside the step
+label move between that character's lessons; the lesson buttons also let you
+return to the lesson list or main menu. On a small window, the board and lesson
+panel stack vertically.
 
 ## Controls
 

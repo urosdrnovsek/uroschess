@@ -61,14 +61,16 @@ from .study.course_progress import build_course_summary
 from .views import BoardView, Button, StudyView, draw_focus_ring
 from .views.chess_thought_view import draw_chess_thought, _portrait
 from .views.course_about_view import draw_course_about
-from .views.player_library_view import draw_player_card
+from .views.player_library_view import draw_player_card, draw_guide_card
 from .views.layout import layout_board
 from .menu import (MenuLayoutMixin, DIFFICULTIES, BOARD_STYLE_NAMES,
+                   GUIDE_LESSONS, GUIDE_TOPICS, GUIDE_SHORT_TOPICS,
+                   GUIDE_PROFILE_TOPICS,
                    WHITE_PRESETS, BLACK_PRESETS, TEXT_SIZES)
 
 # ------------------------------------------------------------------- static data
 # A short route through the starter pack, ordered by the ideas a new player
-# needs first. Other lessons remain available from the category libraries.
+# needs first. Learn groups these lessons under character guides.
 # material board styles — squares / frame / coords + which texture to paint
 MATERIALS = {
     "Wood": {
@@ -424,6 +426,9 @@ class ChessUI(MenuLayoutMixin):
         self.course_page = 0
         self.guided_course_page = 0
         self.course_lesson_page = 0
+        self.guide_page = 0
+        self.guide_lesson_page = 0
+        self.active_guide_id = "chicky"
         self.course_return_view = "opening_hub"
         self.last_learn_browse = None
         self.replay_return = None
@@ -1029,11 +1034,17 @@ class ChessUI(MenuLayoutMixin):
         self.lesson_course_id = course_id
         self.lesson_return_view = (
             "course" if self.lesson_course_id else
-            return_view if return_view in ("opening_hub", "library")
+            return_view if return_view in ("opening_hub", "library",
+                                           "guide_lessons")
             else "library")
         self.coach_profile = (self.game_library.player(
             entry.lesson.coach_player_id) if entry.lesson.coach_player_id
             and self.game_library else None)
+        if self.coach_profile is None and self.game_library:
+            guide_id = next((ident for ident, lesson_ids in GUIDE_LESSONS.items()
+                             if entry.lesson.lesson_id in lesson_ids), None)
+            if guide_id:
+                self.coach_profile = self.game_library.player(guide_id)
         self.replay_autoplay = False
         self.thinking = False
         self.flipped = False
@@ -1204,17 +1215,83 @@ class ChessUI(MenuLayoutMixin):
                     return self.game_library.lesson_entry(
                         ids[ids.index(lesson_id) + 1])
             return None
+        if self.lesson_return_view == "guide_lessons":
+            return None
         entries = self._path_entries()
         for index, entry in enumerate(entries[:-1]):
             if self.lesson_entry and entry.lesson.lesson_id == self.lesson_entry.lesson.lesson_id:
                 return entries[index + 1]
         return None
 
+    def _lesson_neighbor(self, delta):
+        if not self.game_library or self.lesson_entry is None:
+            return None
+        lesson_id = self.lesson_entry.lesson.lesson_id
+        guide_id = self.lesson_entry.lesson.coach_player_id or next(
+            (ident for ident, lesson_ids in GUIDE_LESSONS.items()
+             if lesson_id in lesson_ids), None)
+        if guide_id is None:
+            entries = tuple((entry, self._course_id_for_lesson(
+                entry.lesson.lesson_id)) for entry in self._path_entries())
+        else:
+            entries = []
+            for item in self._guide_entries(guide_id):
+                if hasattr(item, "course_id"):
+                    entries.extend((self.game_library.lesson_entry(item_id),
+                                    item.course_id) for item_id in item.lesson_ids)
+                else:
+                    entries.append((item, None))
+        current = next((index for index, (entry, course_id) in
+                        enumerate(entries) if entry is not None and
+                        entry.lesson.lesson_id == lesson_id and
+                        course_id == self.lesson_course_id), None)
+        if current is None:
+            current = next((index for index, (entry, _) in enumerate(entries)
+                            if entry is not None and
+                            entry.lesson.lesson_id == lesson_id), None)
+        if current is None or not 0 <= current + delta < len(entries):
+            return None
+        entry, course_id = entries[current + delta]
+        return (entry, course_id, guide_id) if entry is not None else None
+
+    def _lesson_switch(self, delta):
+        neighbor = self._lesson_neighbor(delta)
+        if neighbor is None:
+            return
+        entry, course_id, guide_id = neighbor
+        self._save_lesson_progress()
+        if guide_id is not None:
+            self.active_guide_id = guide_id
+            guide_items = self._guide_entries(guide_id)
+            guide_index = None
+            for index, item in enumerate(guide_items):
+                if course_id and getattr(item, "course_id", None) == course_id:
+                    guide_index = index
+                    break
+                if (not course_id and not hasattr(item, "course_id") and
+                        item.lesson.lesson_id == entry.lesson.lesson_id):
+                    guide_index = index
+                    break
+            if guide_index is not None:
+                per_page = 2 if min(430, self.win_h - 70) < 320 else 3
+                self.guide_lesson_page = guide_index // per_page
+        if course_id:
+            if course_id != self.active_course_id:
+                self.course_return_view = "guide_lessons"
+            self.active_course_id = course_id
+            course = self.game_library.course(course_id)
+            if course:
+                per_page = 2 if len(course.lesson_ids) > 3 else 3
+                self.course_lesson_page = (
+                    course.lesson_ids.index(entry.lesson.lesson_id) // per_page)
+        self.start_lesson(entry, course_id=course_id)
+        self.lesson_return_view = "course" if course_id else "guide_lessons"
+
+    def _lesson_previous(self):
+        self._lesson_switch(-1)
+
     def _lesson_next(self):
-        entry = self._next_path_entry()
-        if entry is not None:
-            self._save_lesson_progress()
-            self.start_lesson(entry, course_id=self.lesson_course_id)
+        self._lesson_switch(1)
 
     def _apply_lesson_move(self, move):
         uci = str(move)
@@ -1610,6 +1687,8 @@ class ChessUI(MenuLayoutMixin):
         buttons = self._menu_buttons if self.scene == "menu" else self._game_buttons
         for index, b in enumerate(buttons):
             if b.rect.collidepoint(pos):
+                if b.kind == "lesson_nav_disabled":
+                    return
                 self._button_focus = index
                 sound.play("click")
                 b.action()
@@ -1679,19 +1758,24 @@ class ChessUI(MenuLayoutMixin):
 
     def _move_button_focus(self, reverse=False):
         buttons = self._active_buttons()
-        if not buttons:
+        available = [index for index, button in enumerate(buttons)
+                     if button.kind != "lesson_nav_disabled"]
+        if not available:
             self._button_focus = None
             return
-        if self._button_focus is None:
-            self._button_focus = len(buttons) - 1 if reverse else 0
+        if self._button_focus not in available:
+            self._button_focus = available[-1] if reverse else available[0]
         else:
-            step = -1 if reverse else 1
-            self._button_focus = (self._button_focus + step) % len(buttons)
+            position = available.index(self._button_focus)
+            self._button_focus = available[(position + (-1 if reverse else 1))
+                                           % len(available)]
         self._dirty = True
 
     def _activate_button_focus(self):
         buttons = self._active_buttons()
         if self._button_focus is None or self._button_focus >= len(buttons):
+            return False
+        if buttons[self._button_focus].kind == "lesson_nav_disabled":
             return False
         sound.play("click")
         buttons[self._button_focus].action()
@@ -1760,7 +1844,7 @@ class ChessUI(MenuLayoutMixin):
             if course_id != self.active_course_id:
                 self.course_lesson_page = 0
             if self.menu_view in ("characters", "opening_hub", "guided_hub",
-                                  "learn"):
+                                  "learn", "guide_lessons"):
                 self.course_return_view = self.menu_view
             else:
                 self.course_return_view = (
@@ -1770,6 +1854,33 @@ class ChessUI(MenuLayoutMixin):
                 view="course", course_id=course_id, page=self.course_page)
             self._save_preferences(last_course_id=course_id)
             self._open_menu_section("course")
+
+    def _open_guide_lessons(self, player_id):
+        if not self._guide_entries(player_id):
+            return
+        self.active_guide_id = player_id
+        self.guide_lesson_page = 0
+        self._open_menu_section("guide_lessons")
+
+    def _change_guide_page(self, delta):
+        from .challenge import ROSTER
+        per_page = 4 if min(430, self.win_h - 70) >= 380 else 2
+        last = (len(ROSTER) - 1) // per_page
+        page = max(0, min(last, self.guide_page + delta))
+        if page != self.guide_page:
+            self.guide_page = page
+            self._reset_button_focus()
+            self._menu_buttons = []
+
+    def _change_guide_lesson_page(self, delta):
+        per_page = 2 if min(430, self.win_h - 70) < 320 else 3
+        last = max(0, (len(self._guide_entries(self.active_guide_id)) - 1)
+                   // per_page)
+        page = max(0, min(last, self.guide_lesson_page + delta))
+        if page != self.guide_lesson_page:
+            self.guide_lesson_page = page
+            self._reset_button_focus()
+            self._menu_buttons = []
 
     def _course_unlocked(self, course):
         return (not course.entitlement_id or
@@ -2235,8 +2346,6 @@ class ChessUI(MenuLayoutMixin):
                 ("Lessons", self._leave_lesson),
                 ("Main menu", self._to_menu),
             ]
-            if self._next_path_entry() is not None:
-                specs.insert(0, ("Next lesson", self._lesson_next))
         if compact or self.text_scale >= 1.4:
             short = {"Main menu": "Menu", "Show answer": "Answer",
                      "Try other move": "Other move",
@@ -2244,7 +2353,6 @@ class ChessUI(MenuLayoutMixin):
                      "Watch a game": "Watch game",
                      "Replay practice": "Replay",
                      "Finish lesson": "Finish"}
-            short["Next lesson"] = "Next"
             short["Next step"] = "Next step"
             specs = [(short.get(label, label), action)
                      for label, action in specs]
@@ -2256,6 +2364,27 @@ class ChessUI(MenuLayoutMixin):
                 (ix + column * (button_width + gap), button_y + row * 36,
                  button_width, 29), label, action,
                 kind="cta" if index == 0 and state != QUESTION else "step"))
+
+        title_lines = _wrap_text(
+            self.status_font, self.lesson.lesson.title, width)[:2]
+        title_y = (self.panel_y + 126 if self._portrait_in_panel
+                   else self.panel_y + 10)
+        progress_y = title_y + len(title_lines) * self.status_font.get_linesize() + 1
+        progress = "STEP {} OF {}".format(
+            self.lesson.step_index + 1, len(self.lesson.resolved_steps))
+        free_width = width - self.tag_font.size(progress)[0] - 14
+        arrow_width = min(96, max(52, (free_width - gap) // 2))
+        arrow_x = ix + width - 2 * arrow_width - gap
+        arrow_y = progress_y - 2
+        for label, action, available in (
+                ("‹ Back", self._lesson_previous,
+                 self._lesson_neighbor(-1) is not None),
+                ("Next ›", self._lesson_next,
+                 self._lesson_neighbor(1) is not None)):
+            self._game_buttons.append(Button(
+                (arrow_x, arrow_y, arrow_width, 22), label, action,
+                kind="lesson_nav" if available else "lesson_nav_disabled"))
+            arrow_x += arrow_width + gap
 
     def _build_promo_buttons(self, sq):
         self._promo_buttons = []
@@ -2521,6 +2650,18 @@ class ChessUI(MenuLayoutMixin):
         if self.menu_view == "characters":
             self._draw_character_profile()
 
+        if self.menu_view == "guide_lessons":
+            opponent = OPPONENTS[self.active_guide_id]
+            draw_guide_card(
+                self.screen, self._guide_profile_rect, opponent.name,
+                opponent.portrait,
+                (GUIDE_PROFILE_TOPICS[opponent.ident]
+                 if self.win_h < 400 and self.text_scale > 1.0
+                 else GUIDE_SHORT_TOPICS[opponent.ident]
+                 if self.win_w < 440 and self.text_scale > 1.0
+                 else GUIDE_TOPICS[opponent.ident]), p,
+                self.status_font, self.small_font, self.tag_font)
+
         if self.menu_view == "course_about" and self.game_library:
             course = self.game_library.course(self.active_course_id)
             if course:
@@ -2736,6 +2877,13 @@ class ChessUI(MenuLayoutMixin):
 
     def _draw_menu_button(self, b, hot, rad, focused=False):
         p = self.pal
+        if b.kind == "guide":
+            opponent = OPPONENTS[b.value]
+            draw_guide_card(self.screen, b.rect, opponent.name,
+                            opponent.portrait, b.detail, p,
+                            self.status_font, self.small_font, self.tag_font,
+                            hot=hot, focused=focused)
+            return
         if b.kind == "medal_row":
             _flat_button(self.screen, b.rect, p.btn, p.panel_line, rad)
             opponent = next(item for item in ROSTER
@@ -2865,10 +3013,17 @@ class ChessUI(MenuLayoutMixin):
             fill = p.btn_hot if hot else p.btn
             _flat_button(self.screen, b.rect, fill, p.panel_line, rad)
             inset = b.rect.inflate(-28, -8)
-            title = _fit_text(self.text_font, b.label, inset.w)
-            self.screen.blit(self.text_font.render(title, True, p.text),
+            title_font = self.text_font
+            if self.menu_view == "guide_lessons":
+                for candidate in (self.text_font, self.small_font,
+                                  self.tag_font):
+                    title_font = candidate
+                    if candidate.size(b.label)[0] <= inset.w:
+                        break
+            title = _fit_text(title_font, b.label, inset.w)
+            self.screen.blit(title_font.render(title, True, p.text),
                              (inset.x, b.rect.y + 7))
-            detail_y = b.rect.y + max(32, self.text_font.get_linesize() + 9)
+            detail_y = b.rect.y + max(32, title_font.get_linesize() + 9)
             line_height = self.small_font.get_linesize()
             max_lines = max(1, (b.rect.bottom - 4 - detail_y) // line_height)
             lines = _wrap_text(self.small_font, b.detail, inset.w)
@@ -3409,7 +3564,8 @@ class ChessUI(MenuLayoutMixin):
                 else:
                     self._leave_lesson()
                 return True
-            if self.menu_view in ("colors", "library", "learn", "play", "challenge",
+            if self.menu_view in ("colors", "library", "learn", "guide_lessons",
+                                  "play", "challenge",
                                   "characters",
                                   "challenge_color", "challenge_recovery",
                                   "challenge_unavailable", "challenge_archive",
@@ -3430,6 +3586,8 @@ class ChessUI(MenuLayoutMixin):
                     self._open_menu_section("play")
                 elif self.menu_view == "course":
                     self._open_menu_section(self.course_return_view)
+                elif self.menu_view == "guide_lessons":
+                    self._open_menu_section("learn")
                 elif self.menu_view == "course_about":
                     self._open_menu_section("course")
                 elif self.menu_view in ("opening_hub", "guided_hub"):

@@ -304,7 +304,9 @@ class StudyView:
         self.surface.blit(self.tag_font.render(progress, True, p.accent),
                           (x, progress_y))
 
-        button_top = min((button.rect.y for button in buttons),
+        button_top = min((button.rect.y for button in buttons
+                          if button.kind not in ("lesson_nav",
+                                                 "lesson_nav_disabled")),
                          default=rect.bottom - 12)
         content_top = progress_y + self.tag_font.get_linesize() + 5
         if lesson.lesson.content_kind == "historical":
@@ -400,13 +402,18 @@ class StudyView:
 
         for index, button in enumerate(buttons):
             hot = button.rect.collidepoint(pointer)
+            disabled = button.kind == "lesson_nav_disabled"
             fill = (p.accent if button.kind == "cta" else
-                    p.btn_hot if hot else p.btn)
+                    p.btn if disabled else p.btn_hot if hot else p.btn)
             _round_rect(self.surface, button.rect, (*fill, 255), 6)
             _outline(self.surface, button.rect, p.panel_line, 6)
-            label = self.small_font.render(
+            font = (self.tag_font if button.kind in ("lesson_nav",
+                                                     "lesson_nav_disabled")
+                    else self.small_font)
+            label = font.render(
                 button.label, True,
-                p.on_accent if button.kind == "cta" else p.text)
+                p.on_accent if button.kind == "cta" else
+                p.text_dim if disabled else p.text)
             self.surface.blit(label, label.get_rect(center=button.rect.center))
             if index == focused_button:
                 draw_focus_ring(self.surface, button.rect, p.accent, 6)

@@ -292,3 +292,24 @@ course, and source views were inspected. Replay return and saved completion
 were checked with a temporary progress database. Monty's analysis has not yet
 been observed with learners. The first teaching slice now exists for all seven
 characters; expanding their paths and learner review remain next work.
+
+## Learn menu redesign — 2 October 2026
+
+Learn now opens seven portrait cards with a short explanation of each guide's
+topics. Each character page lists their published courses and related older
+practice lessons. The ten standalone lessons are assigned in `GUIDE_LESSONS`
+in `chess_game/menu.py`; lesson IDs, revisions, and saved progress were not
+changed. Monty's existing one-win lock remains on his course. The category
+libraries remain in code for saved browse context and other routes, but the
+Learn screen no longer presents them as separate choices. Learner observation
+of the new labels and navigation is still pending. Content validation and
+rendering smoke passed; the full suite passed 161 tests, with six affected
+Learn tests rerun after the final layout adjustment. The gallery and character
+page were inspected at 360×320 with extra large text and at 420×720 and
+980×760 with standard text.
+
+Lesson screens now show back and next lesson arrows beside the step label in
+every lesson state. They follow each guide's courses and related practice
+lessons, save progress before switching, and keep the relevant character or
+course page as the return route. The first and last directions remain visible
+but inactive. Narrow and wide lesson screenshots were refreshed.

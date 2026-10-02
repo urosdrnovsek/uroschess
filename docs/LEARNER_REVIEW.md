@@ -15,6 +15,7 @@ hints if they want. Watch without directing them:
    expect?
 5. Can they leave and find their saved progress again?
 6. Can they tell that a practice position and a recorded game are different?
+7. Do the back and next arrows help them move between a character's lessons?
 
 Ask what they learned about the position, which words were unclear, and whether
 the text size and window layout helped. Keep feedback anonymous; the app does

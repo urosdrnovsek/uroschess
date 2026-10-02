@@ -1,6 +1,6 @@
 # Uroschess blueprint handbook
 
-Updated: 1 October 2026. Earlier baseline: `b078911`.
+Updated: 2 October 2026. Earlier baseline: `b078911`.
 This is the single local planning handbook. This file is tracked for handoffs;
 the other files in `Instructions/` remain ignored by Git. Update this document
 in place; keep technical contracts in the existing
@@ -42,11 +42,13 @@ The old milestone logs and already-fixed defect lists are deliberately omitted.
 - All seven characters have distinct general quotes and match comments.
   Meet the characters gives each one a portrait, story, and favourite piece;
   the changing menu portrait keeps the same size across standard menu views.
-- Learn / Play / Watch games navigation; opening and endgame practice, a guided
-  game, two fictional-coach opening courses, and first teaching paths for all
-  seven characters. The starter pack has 31 games, 31 lessons, and nine
-  published courses; some game records are practice lines. Fresh learners
-  start with Chicky; strategy lists remain directly available. Monty's
+- Learn / Play / Watch games navigation. Learn now opens a portrait gallery
+  for all seven character guides, with a short description of each guide's
+  topic. A character page holds their courses and related older practice
+  lessons; all 31 lessons remain reachable without a separate category menu.
+  The starter pack has 31 games, 31 lessons, and nine published courses; some
+  game records are practice lines. Fresh learners can start with Chicky, while
+  the other guides are directly available. Monty's
   historical analysis opens after one verified win against him with either
   colour; this is separate from the two-colour Master award.
 - Annotated replay, reviewed move sequences, hints, answer reveal, retry,
@@ -56,7 +58,7 @@ The old milestone logs and already-fixed defect lists are deliberately omitted.
   course prerequisites, paginated courses, and return-to-origin navigation.
 - Resizable layouts, three text sizes, keyboard focus, board styles and sound
   settings. The latest lesson panel has a compact coach, one visible question,
-  contextual feedback, and fewer buttons without the repeated turn sentence.
+  contextual feedback, and back/next lesson arrows beside the step label.
 - A shorter README and refreshed screenshots, including the character gallery.
   The first seven-character and menu work was committed as `8b0b355`.
   The latest lesson slice passed content validation, rendering smoke, an
@@ -388,8 +390,8 @@ the owner's current commit/push instructions.
    is in `chess_game/ui.py` and reads `collection_counts` from verified wins.
 2. Begin with **learner review, not another new lesson**. Use
    `docs/LEARNER_REVIEW.md` and a fresh temporary progress profile. Have a
-   learner try Chicky's first lesson without coaching, then Pippa's first
-   course; ask them to find the lesson, move, use help or retry, leave, and
+   learner choose Chicky's portrait and try his first lesson without coaching,
+   then find Pippa's first course; ask them to move, use help or retry, leave, and
    resume. Record exact words/actions and window/text size, without personal
    details. Do not claim this review happened until it actually does. After
    these two, observe Tina's promotion and Monty's locked card when practical.
@@ -415,3 +417,15 @@ review, and 160 passing tests. None of the seven teaching paths has a recorded
 learner observation. The 12-game, 80-ply calibration follow-up had no search
 failures but six truncations; opponent strength remains unproven. The post-game
 review remains a separate Challenge follow-up.
+
+The later Learn menu redesign routes through seven portrait cards. Course
+membership still comes from `chess_game/content/starter/courses.json`; the ten
+older lessons outside published courses are assigned to guides for navigation
+in `GUIDE_LESSONS` in `chess_game/menu.py`. Their IDs, revisions, and saved
+progress remain intact. Review the guide descriptions and the new route with
+learners; visual checks alone do not establish that the topics are clear.
+Content validation, rendering smoke, and all 161 tests passed for this menu
+change; the affected Learn tests also passed after the final layout adjustment.
+The later lesson navigation change adds back and next arrows to every lesson
+state. The arrows stay within one character's teaching path, preserve progress
+when switching, and show an inactive direction at the first or last lesson.
