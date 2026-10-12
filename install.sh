@@ -11,10 +11,10 @@ mkdir -p "$APPS"
 cat > "$DEST" <<EOF
 [Desktop Entry]
 Type=Application
-Name=Chess
+Name=Uroschess
 GenericName=Chess
-Comment=Play chess against a from-scratch search engine
-Exec=$REPO/run.sh
+Comment=Play chess and learn with seven animal guides
+Exec="$REPO/run.sh"
 Path=$REPO
 Icon=$REPO/assets/chess.svg
 Terminal=false

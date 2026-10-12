@@ -134,15 +134,15 @@ def test_packaged_starter_collection_categories_and_endgame_claims():
 
     library = load_game_library()
     assert not library.errors
-    assert len(library.entries) == 31
-    assert len(library.lessons) == 31
-    assert len(library.lesson_entries) == 31
+    assert len(library.entries) == 33
+    assert len(library.lessons) == 33
+    assert len(library.lesson_entries) == 33
     assert [entry.category for entry in library.entries].count("guided_game") == 1
     assert [entry.category for entry in library.entries].count("opening") == 10
     assert [entry.category for entry in library.entries].count("endgame") == 8
     assert [entry.category for entry in library.entries].count("source_game") == 3
-    assert [entry.category for entry in library.entries].count("movement") == 7
-    assert [entry.category for entry in library.entries].count("middlegame") == 1
+    assert [entry.category for entry in library.entries].count("movement") == 8
+    assert [entry.category for entry in library.entries].count("middlegame") == 2
     assert [entry.category for entry in library.entries].count("tactics") == 1
     assert all(resolve_lesson(entry.game, entry.lesson)
                for entry in library.lesson_entries)
@@ -237,7 +237,7 @@ def test_player_courses_acknowledge_good_moves_that_miss_the_question():
         lesson.begin_question()
         question_fen = lesson.adapter.fen(lesson.board)
         result = lesson.attempt_uci(move)
-        assert result.outcome == "wrong"
+        assert result.outcome == "off_goal"
         assert not lesson.step_solved
         assert result.feedback == next(
             answer.feedback for answer in entry.lesson.steps[0].question.tree
@@ -292,8 +292,8 @@ def test_catalog_keeps_multiple_lessons_for_one_game(monkeypatch):
     monkeypatch.setattr(content, "_read_text", extra_resource)
     library = load_game_library()
     assert not library.errors
-    assert len(library.entries) == 31
-    assert len(library.lesson_entries) == 32
+    assert len(library.entries) == 33
+    assert len(library.lesson_entries) == 34
     first = library.lesson_entry("bruno-scotch-make-room")
     second = library.lesson_entry("shared-scotch-copy")
     assert first.game is second.game
@@ -523,7 +523,7 @@ def test_question_outcomes_retry_hint_and_reveal():
     hint = lesson.request_hint()
     assert "bishop" in hint.lower()
     wrong = lesson.attempt_uci("f8h6")
-    assert wrong.outcome == "wrong" and lesson.state == FEEDBACK
+    assert wrong.outcome == "off_goal" and lesson.state == FEEDBACK
     assert not lesson.step_solved and not lesson.visible_arrows
 
     lesson.retry()
@@ -692,3 +692,18 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def test_bundled_game_cache_does_not_hide_changed_invalid_resources(monkeypatch):
+    from chess_game.study import content
+    library = load_game_library()
+    assert not library.errors
+    original = content._read_text
+    def replace_pgn(package, name):
+        if package.endswith('.games') and name == 'chicky-knight-steps.pgn':
+            return '1. Qh9 *'
+        return original(package, name)
+    monkeypatch.setattr(content, '_read_text', replace_pgn)
+    changed = load_game_library()
+    assert any('chicky-knight-steps-position' in error for error in changed.errors)
+    assert changed.lesson_entry('chicky-knight-steps') is None

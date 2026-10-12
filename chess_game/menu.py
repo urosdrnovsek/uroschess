@@ -26,13 +26,14 @@ TEXT_SIZES = [
 # Older standalone lessons keep their stable IDs and saved progress. This
 # navigation map gives each one a home in the character-led Learn flow.
 GUIDE_LESSONS = {
+    "chicky": ("chicky-knight-transfer",),
     "pippa-pomeranian": ("opening-essentials", "italian-development",
                            "queens-gambit-plan"),
     "tina-turtle": ("promote-the-pawn", "queen-and-king-mate",
                     "rook-and-king-mate", "square-of-the-pawn",
                     "opposition-and-king-activity"),
     "tom-rabbit": ("black-against-d4",),
-    "bruno-bear": ("coordination-before-material",),
+    "bruno-bear": ("coordination-before-material", "bruno-open-file-transfer"),
 }
 
 GUIDE_TOPICS = {
@@ -132,25 +133,29 @@ class MenuLayoutMixin:
         left = (self.win_w - card_width) // 2
         compact = self.win_h < 440
         top = 12 if compact else max(12, min(218, self.win_h - 540))
-        card = pygame.Rect(left, top, card_width, 200 if compact else 286)
+        card = pygame.Rect(left, top, card_width, 200 if compact else 330)
         self._menu_card = card
         x, w = card.x + 24, card.w - 48
         cx = card.centerx
+        resume = self._home_resume_entry
+        primary = ("Continue learning", self._continue_learning) if resume else (
+            "Start with Chicky", self._start_beginner_course)
         for index, (label, action) in enumerate((
+                primary,
                 ("Learn", lambda: self._open_menu_section("learn")),
                 ("Play", lambda: self._open_menu_section("play")),
                 ("Watch games", lambda: self._open_library("replay")),
                 ("Meet the characters", lambda: self._open_menu_section(
                     "characters")))):
             self._menu_buttons.append(Button(
-                (x, card.y + (9 + index * 47 if compact else
-                              18 + index * 64), w, 40 if compact else 54),
+                (x, card.y + (6 + index * 38 if compact else
+                              12 + index * 62), w, 34 if compact else 54),
                 label, action,
                 kind="cta" if index == 0 else "step"))
         self._menu_buttons.append(
             Button((cx - min(200, w // 2), card.bottom + (4 if compact else 8),
                     min(400, w), 32 if compact else 42), "Appearance",
-                   self._open_colors, kind="cta"))
+                   self._open_colors, kind="step"))
         self._menu_buttons.append(
             Button((cx - min(200, w // 2), card.bottom + (37 if compact else 50),
                     min(400, w), 28 if compact else 36), "Exit",
@@ -228,8 +233,13 @@ class MenuLayoutMixin:
                 (x, top + (160 if compact else 204), w,
                  32 if compact else 38), label,
                 self._next_challenge_from_result, kind="cta"))
+        half = (w - 8) // 2
         self._menu_buttons.append(Button(
-            (x, top + (198 if compact else 249), w,
+            (x, top + (198 if compact else 249), half,
+             32 if compact else 36), "Review match",
+            self._review_challenge, kind="step"))
+        self._menu_buttons.append(Button(
+            (x + half + 8, top + (198 if compact else 249), half,
              32 if compact else 36), "Medals",
             self._open_collection, kind="step"))
         self._menu_buttons.append(Button(
@@ -295,6 +305,8 @@ class MenuLayoutMixin:
             lambda: self._open_menu_section("main"), kind="cta"))
 
     def _open_menu_section(self, section):
+        if section == "main":
+            self._home_resume_entry = self._resume_entry()
         self._reset_button_focus()
         self.menu_view = section
         self._menu_buttons = []

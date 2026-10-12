@@ -1,0 +1,54 @@
+{
+  "schema_version": 3,
+  "lesson_id": "chicky-knight-transfer",
+  "content_revision": 1,
+  "title": "A knight on a new square",
+  "level": "beginner",
+  "estimated_minutes": 3,
+  "objective": "Use a knight jump to capture a pawn in an unfamiliar position.",
+  "prerequisites": [
+    "knight movement"
+  ],
+  "concepts": [
+    "knight-movement"
+  ],
+  "game_id": "chicky-knight-transfer-position",
+  "coach_player_id": "chicky",
+  "content_kind": "synthetic",
+  "initial_help": false,
+  "commentary_source": {
+    "name": "Uroschess original transfer exercise",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "try-a-new-position",
+      "practice_mode": "independent",
+      "node_path": [],
+      "expected_fen": "7k/7p/1p6/8/2N5/8/P7/K7 w - - 0 1",
+      "explanation": "Your knight starts on a different square this time. Look for a pawn it can capture with an L-shaped jump.",
+      "coach_prompt": "Take a moment to find your own move.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Capture a pawn with your knight.",
+        "hints": [
+          "Find the knight and look two squares away, then one square across.",
+          "The knight on c4 can capture the pawn on b6."
+        ],
+        "tree": [
+          {
+            "uci": "c4b6",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Yes. From c4 to b6 is two squares up and one across, and your knight captures the pawn."
+          }
+        ],
+        "other_legal_move_text": "That move is legal. Look again at the goal: Capture a pawn with your knight."
+      }
+    }
+  ],
+  "takeaway": "A knight uses the same L-shaped jump wherever it starts."
+}

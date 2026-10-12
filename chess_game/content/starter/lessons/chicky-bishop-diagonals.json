@@ -50,7 +50,7 @@
           {
             "uci": "c1e3",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "That is a legal diagonal move. For this first step, continue along the diagonal to f4."
           }
         ],
@@ -87,7 +87,7 @@
           {
             "uci": "f4g5",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "That is a legal diagonal move, but it stops before a pawn. Look for a capture."
           },
           {

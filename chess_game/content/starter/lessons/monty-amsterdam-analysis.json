@@ -40,7 +40,7 @@
         "hints": ["The bishop on d3 can capture the h7 pawn.", "Click d3, then h7."],
         "tree": [
           {"uci": "d3h7", "role": "learner", "outcome": "preferred", "feedback": "Bxh7+ offers the bishop, but it checks the king. White's queen can follow if Black accepts."},
-          {"uci": "e5g7", "role": "learner", "outcome": "wrong", "feedback": "Bxg7 attacks near the king, but the recorded move checks first with the other bishop."}
+          {"uci": "e5g7", "role": "learner", "outcome": "off_goal", "feedback": "Bxg7 attacks near the king, but the recorded move checks first with the other bishop."}
         ],
         "other_legal_move_text": "That may be a chess move, but the recorded attack begins with a bishop check from d3."
       }
@@ -67,7 +67,7 @@
         "hints": ["The rook on f1 can rise toward the queen's side of the board.", "Move the rook from f1 to f3."],
         "tree": [
           {"uci": "f1f3", "role": "learner", "outcome": "preferred", "feedback": "Rf3 prepares Rh3+, bringing the rook into the attack. Black soon had to give up the queen to avoid mate."},
-          {"uci": "f1f2", "role": "learner", "outcome": "wrong", "feedback": "Rf2 lifts the rook, but f3 gives it a direct route to h3 for the next check."}
+          {"uci": "f1f2", "role": "learner", "outcome": "off_goal", "feedback": "Rf2 lifts the rook, but f3 gives it a direct route to h3 for the next check."}
         ],
         "other_legal_move_text": "That may be useful, but the recorded move lifts the f1 rook to the third row."
       }

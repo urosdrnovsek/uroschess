@@ -72,7 +72,7 @@
           },
           {
             "uci": "f8h6",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "Bh6 brings the bishop out, but it is not very active there. Try to find a square where it can see across the board."
           }
         ],

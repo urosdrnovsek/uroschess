@@ -42,7 +42,7 @@
           {
             "uci": "d1d3",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "That is a legal straight move. For this first step, continue to d4."
           }
         ],
@@ -73,7 +73,7 @@
           {
             "uci": "d4f6",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "That is a legal diagonal move, but it stops before the pawn. Continue to g7 to capture."
           }
         ],

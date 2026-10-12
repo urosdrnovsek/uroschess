@@ -42,7 +42,7 @@
           {
             "uci": "e1f1",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "f1 is safe too. For this first step, move to d1 as the question asks."
           }
         ],

@@ -31,10 +31,21 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -e ".[dev]" build
 
       - name: Move-generation + engine tests
         run: pytest -q
 
       - name: Headless render smoke test
         run: python -m scripts.smoke
+
+      - name: Validate bundled lessons
+        run: python -m scripts.validate_content
+
+      - name: Build and test installed wheel offline
+        run: |
+          python -m build --wheel
+          python -m venv --system-site-packages /tmp/uroschess-wheel
+          /tmp/uroschess-wheel/bin/python -m pip install --no-deps --force-reinstall dist/*.whl
+          cd /tmp
+          /tmp/uroschess-wheel/bin/python "$GITHUB_WORKSPACE/scripts/check_installed.py"

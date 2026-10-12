@@ -42,13 +42,13 @@
           {
             "uci": "f1b5",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "Bb5 develops well too. For this guided setup, try c4 so we can compare the next move."
           },
           {
             "uci": "f1e2",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "Be2 is a safe developing move. Here, try the more active square c4 for this setup."
           }
         ],
@@ -79,7 +79,7 @@
           {
             "uci": "b1a3",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "Na3 develops the knight, but from the edge it reaches fewer central squares. Try c3 here."
           }
         ],

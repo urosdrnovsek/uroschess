@@ -45,7 +45,7 @@ def test_tab_focus_cycles_and_activates_menu_buttons():
     ui._on_key(pygame.K_RIGHT)
     assert ui._button_focus is None
 
-    ui._button_focus = 1
+    ui._button_focus = 2
     ui._on_key(pygame.K_RETURN)
     assert ui.menu_view == "play"
     assert ui._button_focus is None
@@ -95,7 +95,7 @@ def test_home_routes_to_categorized_lesson_libraries():
     ui = ChessUI(":memory:")
     ui._build_menu_buttons()
     labels = [button.label for button in ui._menu_buttons]
-    assert labels[:3] == ["Learn", "Play", "Watch games"]
+    assert labels[:4] == ["Start with Chicky", "Learn", "Play", "Watch games"]
     assert "Meet the characters" in labels
     next(button for button in ui._menu_buttons
          if button.label == "Learn").action()
@@ -448,7 +448,7 @@ def test_pippa_course_and_beginner_wrong_moves_retry_without_extra_click():
         assert ChessAdapter.fen(ui.board) == fen
         assert ui.selected is None
         assert ui.lesson_message == "Hmm, let's try again!"
-        assert ui.lesson_message_kind == "try_again"
+        assert ui.lesson_message_kind == "legal_move"
         assert coach_thought(ui.coach_profile, ui.lesson,
                             ui.lesson_message).quote == ui.lesson_message
         ui._build_lesson_buttons()
@@ -483,7 +483,7 @@ def test_pippa_course_and_beginner_wrong_moves_retry_without_extra_click():
     ui._apply_lesson_move(ChessAdapter.resolve_uci(ui.board, "g1h3"))
     assert ui.lesson.state == QUESTION
     assert ChessAdapter.fen(ui.board) == fen
-    assert ui.lesson_message_kind == "try_again"
+    assert ui.lesson_message_kind == "legal_move"
     ui._apply_lesson_move(ChessAdapter.resolve_uci(ui.board, "g1f3"))
     assert ui.lesson.step_solved
     ui.progress_store.close()
@@ -804,16 +804,21 @@ def test_lesson_arrows_move_within_a_character_and_keep_the_return_page():
     assert ui.lesson_entry.lesson.lesson_id == "coordination-before-material"
     assert ui.lesson_return_view == "guide_lessons"
     ui._build_lesson_buttons()
+    assert ui._game_buttons[-1].kind == "lesson_nav"
+    ui._game_buttons[-1].action()
+    assert ui.lesson_entry.lesson.lesson_id == "bruno-open-file-transfer"
+    assert ui.lesson_return_view == "guide_lessons"
+    ui._build_lesson_buttons()
     assert ui._game_buttons[-1].kind == "lesson_nav_disabled"
     ui._on_mouse_down(ui._game_buttons[-1].rect.center)
-    assert ui.lesson_entry.lesson.lesson_id == "coordination-before-material"
+    assert ui.lesson_entry.lesson.lesson_id == "bruno-open-file-transfer"
     ui._button_focus = len(ui._game_buttons) - 2
     ui._move_button_focus()
     assert ui._button_focus != len(ui._game_buttons) - 1
     ui._leave_lesson()
     assert ui.menu_view == "guide_lessons"
     ui._build_menu_buttons()
-    assert any(button.label == "Make your pieces work together"
+    assert any(button.label == "Find a file on your own"
                for button in ui._menu_buttons)
     ui.progress_store.close()
     pygame.quit()
@@ -1168,9 +1173,11 @@ def test_old_ai_search_cannot_move_in_a_new_game(monkeypatch):
     ui.start_game(set())
     assert started.wait(2)
     old_queue = ui.ai_queue
+    old_cancel = ui.challenge_cancel_event
     ui.start_game({"w"})
+    assert old_cancel.is_set()
     release.set()
-    assert old_queue.get(timeout=2)[2] is None
+    assert old_queue.empty()
     assert not ui._poll_ai()
     assert not ui.moves
     assert ui.board.side_to_move == "w"
@@ -1358,4 +1365,50 @@ def test_portrait_and_card_use_active_theme_colors():
                            previous=THOUGHTS[0], progress=progress)
         frames.append(pygame.image.tobytes(surface, "RGB"))
     assert len(set(frames)) == 3
+    pygame.quit()
+
+
+def test_home_shortcut_starts_chicky_and_resumes_after_restart(tmp_path):
+    path = tmp_path / 'resume.sqlite3'
+    ui = ChessUI(path)
+    ui._build_menu_buttons()
+    assert ui._menu_buttons[0].label == 'Start with Chicky'
+    ui._menu_buttons[0].action()
+    assert ui.active_course_id == 'chicky-first-knight-steps'
+    ui.start_lesson(ui.game_library.lesson_entry('chicky-knight-steps'),
+                    course_id=ui.active_course_id)
+    ui._lesson_hint()
+    ui._to_menu()
+    ui.progress_store.close()
+    reopened = ChessUI(path)
+    reopened._build_menu_buttons()
+    assert reopened._menu_buttons[0].label == 'Continue learning'
+    reopened._menu_buttons[0].action()
+    assert reopened.lesson.lesson.lesson_id == 'chicky-knight-steps'
+    assert reopened.lesson.assisted
+    reopened.progress_store.close()
+    pygame.quit()
+
+
+def test_finished_challenge_review_returns_and_opens_related_practice():
+    ui = ChessUI(':memory:')
+    ui._start_challenge('w', 'chicky')
+    ui._resign_challenge()
+    ui._resign_challenge()
+    match_id = ui.challenge.match_id
+    ui._build_menu_buttons()
+    next(button for button in ui._menu_buttons if button.label == 'Review match').action()
+    assert ui.scene == 'replay' and ui.match_review is not None
+    ui._build_replay_buttons()
+    assert 'Practise' in [button.label for button in ui._game_buttons]
+    ui._draw()
+    ui._leave_replay()
+    assert ui.menu_view == 'challenge_result'
+    assert ui.challenge.match_id == match_id and ui.status == 'resignation'
+    ui._review_challenge()
+    ui._practise_review()
+    assert ui.scene == 'lesson'
+    assert ui.lesson.lesson.lesson_id == 'chicky-king-safety'
+    assert ui.challenge is None
+    ui.progress_store.close()
     pygame.quit()

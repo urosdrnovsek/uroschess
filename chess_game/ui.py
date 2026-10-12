@@ -3,10 +3,10 @@ panel (move list / captured pieces / eval bar), and the AI-thread glue.
 
 The look follows the active Omarchy theme (``chess_game.theme.Palette`` reads
 ``~/.local/state/omarchy/current/theme/colors.toml``): flat theme-coloured chrome,
-a single accent, monospace UI type, corner radius matched to the compositor, and
-the window left as a plain rectangle so Hyprland owns the frame. The board itself
-stays richly textured and lit; four material board styles plus a "Theme" style
-derived from the palette are chosen in the Colour-options panel.
+a single accent, readable proportional UI type, corner radius matched to the compositor, and
+the window left as a plain rectangle so Hyprland owns the frame. The default
+Theme board uses flat squares; four optional material board styles keep their
+textures and lighting in the Appearance panel.
 
 The window is resizable. Replay and lesson panels stack under the board in a
 narrow window so their controls remain available.
@@ -18,7 +18,6 @@ import queue
 import random
 import sqlite3
 import tempfile
-import threading
 import time
 import uuid
 import webbrowser
@@ -48,23 +47,23 @@ from .study import (
     QUESTION,
     READING,
     ContentLoadError,
-    LessonController,
     ProgressStore,
     ProgressStoreError,
     ReplayController,
-    SquareHighlight,
     load_game_library,
 )
-from .study.coaching import (BEGINNER_COACH_IDS, BEGINNER_RETRY_MESSAGE,
-                             coach_advice, coach_thought)
+from .study.coaching import coach_thought
 from .study.course_progress import build_course_summary
 from .views import BoardView, Button, StudyView, draw_focus_ring
 from .views.chess_thought_view import draw_chess_thought, _portrait
 from .views.course_about_view import draw_course_about
 from .views.player_library_view import draw_player_card, draw_guide_card
 from .views.layout import layout_board
+from .review_actions import ReviewActionsMixin
+from .lesson_actions import LessonActionsMixin
+from .engine_actions import EngineActionsMixin
 from .menu import (MenuLayoutMixin, DIFFICULTIES, BOARD_STYLE_NAMES,
-                   GUIDE_LESSONS, GUIDE_TOPICS, GUIDE_SHORT_TOPICS,
+                   GUIDE_TOPICS, GUIDE_SHORT_TOPICS,
                    GUIDE_PROFILE_TOPICS,
                    WHITE_PRESETS, BLACK_PRESETS, TEXT_SIZES)
 
@@ -95,8 +94,7 @@ MATERIALS = {
     },
 }
 _UI_FONTS = [
-    "JetBrainsMono Nerd Font", "JetBrainsMono NF", "JetBrains Mono",
-    "CaskaydiaMono Nerd Font", "Cascadia Mono", "DejaVu Sans Mono",
+    "DejaVu Sans", "Noto Sans", "Liberation Sans", "Arial",
 ]
 _CHESS_FONT_CANDIDATES = [
     "Noto Sans Symbols 2", "notosanssymbols2", "Symbola", "DejaVu Sans",
@@ -282,9 +280,11 @@ def _paint_square(surf, x, y, size, base, texture, rng):
 def _paint_board(surf, ox, oy, px, sdef, rng, coord_font=None, flipped=False,
                  frame=0, radius=8):
     sq = px // 8
+    flat = sdef["texture"] == "flat"
     if frame:
         fr = pygame.Rect(ox - frame, oy - frame, px + 2 * frame, px + 2 * frame)
-        _draw_shadow(surf, fr, radius + 4, layers=9, base_alpha=20, grow=3, dy=10)
+        if not flat:
+            _draw_shadow(surf, fr, radius + 4, layers=9, base_alpha=20, grow=3, dy=10)
         fg = _vgradient(fr.w, fr.h, _lighten(sdef["frame"], 24),
                         _darken(sdef["frame"], 26))
         m = pygame.Surface(fr.size, pygame.SRCALPHA)
@@ -305,22 +305,26 @@ def _paint_board(surf, ox, oy, px, sdef, rng, coord_font=None, flipped=False,
         for c in range(8):
             rr, cc = (7 - r, 7 - c) if flipped else (r, c)
             base = sdef["light"] if (rr + cc) % 2 == 0 else sdef["dark"]
-            _paint_square(surf, ox + c * sq, oy + r * sq, sq, base,
-                          sdef["texture"], rng)
+            if flat:
+                pygame.draw.rect(surf, base, (ox + c * sq, oy + r * sq, sq, sq))
+            else:
+                _paint_square(surf, ox + c * sq, oy + r * sq, sq, base,
+                              sdef["texture"], rng)
 
-    inner = pygame.Surface((px, px), pygame.SRCALPHA)
-    d = max(8, px // 40)
-    for i in range(d):
-        pygame.draw.rect(inner, (0, 0, 0, int(66 * (1 - i / d) ** 2)),
-                         (i, i, px - 2 * i, px - 2 * i), 1)
-    surf.blit(inner, (ox, oy))
-    surf.blit(_radial_glow(px), (ox, oy))
-    surf.blit(_radial_shade(px), (ox, oy))
-    gloss = pygame.Surface((px, px), pygame.SRCALPHA)
-    for yy in range(px):
-        pygame.draw.line(gloss, (255, 255, 255, int(28 * (1 - yy / px) ** 1.7)),
-                         (0, yy), (px, yy))
-    surf.blit(gloss, (ox, oy))
+    if not flat:
+        inner = pygame.Surface((px, px), pygame.SRCALPHA)
+        d = max(8, px // 40)
+        for i in range(d):
+            pygame.draw.rect(inner, (0, 0, 0, int(66 * (1 - i / d) ** 2)),
+                             (i, i, px - 2 * i, px - 2 * i), 1)
+        surf.blit(inner, (ox, oy))
+        surf.blit(_radial_glow(px), (ox, oy))
+        surf.blit(_radial_shade(px), (ox, oy))
+        gloss = pygame.Surface((px, px), pygame.SRCALPHA)
+        for yy in range(px):
+            pygame.draw.line(gloss, (255, 255, 255, int(28 * (1 - yy / px) ** 1.7)),
+                             (0, yy), (px, yy))
+        surf.blit(gloss, (ox, oy))
 
     if coord_font is not None:
         files = "abcdefgh"
@@ -392,7 +396,7 @@ def _fit_text(font, text, max_width):
     return text.rstrip() + "…"
 
 
-class ChessUI(MenuLayoutMixin):
+class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewActionsMixin):
     def __init__(self, user_data_path=None):
         pygame.init()
         pygame.display.set_caption("Uroschess")
@@ -459,6 +463,7 @@ class ChessUI(MenuLayoutMixin):
         self.study_view = None
         self.replay = None
         self.replay_entry = None
+        self.match_review = None
         self.replay_autoplay = False
         self.replay_speeds = (0.6, 1.0, 1.6, 2.4)
         self.replay_speed_index = 1
@@ -520,6 +525,7 @@ class ChessUI(MenuLayoutMixin):
             self.game_library = None
             self.library_errors = (str(error),)
 
+        self._home_resume_entry = self._resume_entry()
         self._layout()
         self._ensure_fonts()
         self._new_game(human_colors={WHITE})
@@ -531,7 +537,7 @@ class ChessUI(MenuLayoutMixin):
         self.status_font = _ui_font(scaled(17), bold=True)
         self.text_font = _ui_font(scaled(16))
         self.small_font = _ui_font(scaled(13))
-        self.mono_font = _ui_font(scaled(13))
+        self.mono_font = pygame.font.SysFont("dejavusansmono", scaled(13))
         self.tag_font = _ui_font(scaled(11), bold=True)
         self.coord_font = _ui_font(scaled(11), bold=True)
 
@@ -671,6 +677,7 @@ class ChessUI(MenuLayoutMixin):
 
     # ================================================================= setup
     def _new_game(self, human_colors):
+        self._cancel_challenge_search()
         self.human_colors = human_colors
         self.board = Board()
         self.moves = []
@@ -987,6 +994,8 @@ class ChessUI(MenuLayoutMixin):
         self._dirty = True
 
     def start_replay(self, entry, return_to=None):
+        self.toast = ""
+        self._cancel_challenge_search()
         self._reset_button_focus()
         if return_to is None:
             if self.scene == "lesson":
@@ -1003,6 +1012,7 @@ class ChessUI(MenuLayoutMixin):
         self.replay_return = return_to
         self.scene = "replay"
         self.replay_entry = entry
+        self.match_review = None
         self.replay = ReplayController(entry.game)
         self.replay_autoplay = False
         self.replay_mainline = self._replay_move_labels()
@@ -1017,312 +1027,6 @@ class ChessUI(MenuLayoutMixin):
         self._game_bg = None
         self._sync_replay_position()
         self._change_chess_thought(play_sound=False)
-
-    def start_lesson(self, entry, course_id=None):
-        if self.game_library:
-            locked_course = next((course for course in self.game_library.courses
-                                  if course.entitlement_id and
-                                  entry.lesson.lesson_id in course.lesson_ids and
-                                  not self._course_unlocked(course)), None)
-            if locked_course is not None:
-                self._flash("Beat Monty once in Character Challenge to unlock his lesson.")
-                return
-        self._reset_button_focus()
-        return_view = self.menu_view if self.scene == "menu" else self.lesson_return_view
-        self.scene = "lesson"
-        self.lesson_entry = entry
-        self.lesson_course_id = course_id
-        self.lesson_return_view = (
-            "course" if self.lesson_course_id else
-            return_view if return_view in ("opening_hub", "library",
-                                           "guide_lessons")
-            else "library")
-        self.coach_profile = (self.game_library.player(
-            entry.lesson.coach_player_id) if entry.lesson.coach_player_id
-            and self.game_library else None)
-        if self.coach_profile is None and self.game_library:
-            guide_id = next((ident for ident, lesson_ids in GUIDE_LESSONS.items()
-                             if entry.lesson.lesson_id in lesson_ids), None)
-            if guide_id:
-                self.coach_profile = self.game_library.player(guide_id)
-        self.replay_autoplay = False
-        self.thinking = False
-        self.flipped = False
-        self.lesson_scroll = 0
-        self.lesson_message = ""
-        self.lesson_message_kind = "hint"
-        self.lesson_retry_feedback = ""
-        record = None
-        step_records = {}
-        if self.progress_store is None and not self.progress_error:
-            try:
-                self.progress_store = ProgressStore()
-            except ProgressStoreError as error:
-                self.progress_error = str(error)
-        if self.progress_store is not None:
-            try:
-                record = self.progress_store.load(entry.lesson.lesson_id)
-                step_records = self.progress_store.load_step_progress(
-                    entry.lesson.lesson_id, entry.lesson.content_revision)
-            except Exception as error:
-                self.progress_error = str(error)
-        same_revision = bool(
-            record and record.content_revision == entry.lesson.content_revision)
-        totals = ({
-            "attempts": record.attempts,
-            "hints_used": record.hints_used,
-            "reveals": record.reveals,
-            "successes": record.successes,
-        } if record else None)
-        self.lesson = LessonController(
-            entry.game, entry.lesson,
-            resume_step=record.step_index if same_revision else 0,
-            progress_totals=totals,
-            completed=bool(same_revision and record.completed),
-            step_progress=step_records,
-            resume_assisted=bool(same_revision and record.active_assisted),
-        )
-        if self.lesson.state == READING and self.lesson.current_step.question:
-            self.lesson.begin_question()
-        if self.progress_error:
-            self.lesson_message = "Progress is unavailable: " + self.progress_error
-        self._layout()
-        self._ensure_fonts()
-        self._game_bg = None
-        self._sync_lesson_position()
-        self._save_lesson_progress()
-        if self.coach_profile is None:
-            self._change_chess_thought(play_sound=False)
-        else:
-            self._thought_previous = None
-        if self.lesson_course_id:
-            self._save_preferences(last_course_id=self.lesson_course_id)
-
-    def _course_id_for_lesson(self, lesson_id):
-        if self.game_library:
-            candidates = [course.course_id for course in self.game_library.courses
-                          if course.published and lesson_id in course.lesson_ids]
-            if self.active_course_id in candidates:
-                return self.active_course_id
-            if len(candidates) == 1:
-                return candidates[0]
-        return None
-
-    def _repeat_coach_advice(self):
-        if self.coach_profile is None or self.lesson is None:
-            return
-        self.lesson_message = coach_advice(self.lesson, self.lesson_message)
-        if self.lesson_message_kind == "try_again":
-            self._show_latest_lesson_message()
-        else:
-            self._show_latest_lesson_message()
-        sound.play("click")
-        self._dirty = True
-
-    def _sync_lesson_position(self, last_move=None):
-        self.board = self.lesson.board
-        self.moves = []
-        self.sans = []
-        self.last_move = (last_move if last_move is not None
-                          else self.lesson.replay.current_move)
-        self.selected = None
-        self.legal_from_selected = []
-        self.pending_promo = None
-        self.cursor = None
-        self.dragging = None
-        self.drag_started = False
-        self.status = game_status(self.board)
-        self._dirty = True
-
-    def _save_lesson_progress(self):
-        if self.progress_store is None or self.lesson is None:
-            return
-        try:
-            self.progress_store.save(self.lesson)
-            self._course_summary_cache.clear()
-        except Exception as error:
-            self.progress_error = str(error)
-            self.lesson_message = "Progress could not be saved: " + str(error)
-
-    def _lesson_start_question(self):
-        if self.lesson.state == READING:
-            self.lesson.begin_question()
-        self.lesson_message = ""
-        self._sync_lesson_position()
-        self._save_lesson_progress()
-
-    def _show_latest_lesson_message(self):
-        # The panel clamps this to its new content height on the next draw.
-        self.lesson_scroll = 1_000_000
-
-    def _lesson_hint(self):
-        self.lesson_message = self.lesson.request_hint()
-        self.lesson_message_kind = "hint"
-        self._show_latest_lesson_message()
-        self._save_lesson_progress()
-        self._dirty = True
-
-    def _lesson_reveal(self):
-        result = self.lesson.reveal()
-        self.lesson_message = ""
-        self._show_latest_lesson_message()
-        self._sync_lesson_position(result.move)
-        self._save_lesson_progress()
-
-    def _lesson_retry(self):
-        self.lesson.retry()
-        self.lesson_message = ""
-        self.lesson_scroll = 0
-        self._sync_lesson_position()
-
-    def _lesson_continue(self):
-        self.lesson.continue_lesson()
-        if self.lesson.state == READING and self.lesson.current_step.question:
-            self.lesson.begin_question()
-        self.lesson_scroll = 0
-        self.lesson_message = ""
-        self._sync_lesson_position()
-        self._save_lesson_progress()
-
-    def _lesson_begin_exploration(self):
-        self.lesson.begin_exploration({"scroll": self.lesson_scroll})
-        self.lesson_message = "Try any move you are curious about."
-        self._sync_lesson_position()
-
-    def _lesson_return(self):
-        view_state = self.lesson.return_from_exploration()
-        if isinstance(view_state, dict):
-            self.lesson_scroll = int(view_state.get("scroll", 0))
-        self.lesson_message = ""
-        self._sync_lesson_position()
-
-    def _lesson_restart(self):
-        self.lesson.restart()
-        if self.lesson.current_step.question:
-            self.lesson.begin_question()
-        self.lesson_scroll = 0
-        self.lesson_message = ""
-        self._sync_lesson_position()
-        self._save_lesson_progress()
-
-    def _next_path_entry(self):
-        if self.lesson_course_id and self.game_library:
-            course = self.game_library.course(self.lesson_course_id)
-            if course:
-                ids = course.lesson_ids
-                lesson_id = self.lesson_entry.lesson.lesson_id
-                if lesson_id in ids and ids.index(lesson_id) + 1 < len(ids):
-                    return self.game_library.lesson_entry(
-                        ids[ids.index(lesson_id) + 1])
-            return None
-        if self.lesson_return_view == "guide_lessons":
-            return None
-        entries = self._path_entries()
-        for index, entry in enumerate(entries[:-1]):
-            if self.lesson_entry and entry.lesson.lesson_id == self.lesson_entry.lesson.lesson_id:
-                return entries[index + 1]
-        return None
-
-    def _lesson_neighbor(self, delta):
-        if not self.game_library or self.lesson_entry is None:
-            return None
-        lesson_id = self.lesson_entry.lesson.lesson_id
-        guide_id = self.lesson_entry.lesson.coach_player_id or next(
-            (ident for ident, lesson_ids in GUIDE_LESSONS.items()
-             if lesson_id in lesson_ids), None)
-        if guide_id is None:
-            entries = tuple((entry, self._course_id_for_lesson(
-                entry.lesson.lesson_id)) for entry in self._path_entries())
-        else:
-            entries = []
-            for item in self._guide_entries(guide_id):
-                if hasattr(item, "course_id"):
-                    entries.extend((self.game_library.lesson_entry(item_id),
-                                    item.course_id) for item_id in item.lesson_ids)
-                else:
-                    entries.append((item, None))
-        current = next((index for index, (entry, course_id) in
-                        enumerate(entries) if entry is not None and
-                        entry.lesson.lesson_id == lesson_id and
-                        course_id == self.lesson_course_id), None)
-        if current is None:
-            current = next((index for index, (entry, _) in enumerate(entries)
-                            if entry is not None and
-                            entry.lesson.lesson_id == lesson_id), None)
-        if current is None or not 0 <= current + delta < len(entries):
-            return None
-        entry, course_id = entries[current + delta]
-        return (entry, course_id, guide_id) if entry is not None else None
-
-    def _lesson_switch(self, delta):
-        neighbor = self._lesson_neighbor(delta)
-        if neighbor is None:
-            return
-        entry, course_id, guide_id = neighbor
-        self._save_lesson_progress()
-        if guide_id is not None:
-            self.active_guide_id = guide_id
-            guide_items = self._guide_entries(guide_id)
-            guide_index = None
-            for index, item in enumerate(guide_items):
-                if course_id and getattr(item, "course_id", None) == course_id:
-                    guide_index = index
-                    break
-                if (not course_id and not hasattr(item, "course_id") and
-                        item.lesson.lesson_id == entry.lesson.lesson_id):
-                    guide_index = index
-                    break
-            if guide_index is not None:
-                per_page = 2 if min(430, self.win_h - 70) < 320 else 3
-                self.guide_lesson_page = guide_index // per_page
-        if course_id:
-            if course_id != self.active_course_id:
-                self.course_return_view = "guide_lessons"
-            self.active_course_id = course_id
-            course = self.game_library.course(course_id)
-            if course:
-                per_page = 2 if len(course.lesson_ids) > 3 else 3
-                self.course_lesson_page = (
-                    course.lesson_ids.index(entry.lesson.lesson_id) // per_page)
-        self.start_lesson(entry, course_id=course_id)
-        self.lesson_return_view = "course" if course_id else "guide_lessons"
-
-    def _lesson_previous(self):
-        self._lesson_switch(-1)
-
-    def _lesson_next(self):
-        self._lesson_switch(1)
-
-    def _apply_lesson_move(self, move):
-        uci = str(move)
-        if self.lesson.state == QUESTION:
-            result = self.lesson.attempt_uci(
-                uci, view_state={"scroll": self.lesson_scroll})
-        elif self.lesson.state == EXPLORING:
-            result = self.lesson.explore_uci(uci)
-        else:
-            return False
-        beginner_coach = self.lesson.lesson.coach_player_id in BEGINNER_COACH_IDS
-        if beginner_coach and result.outcome in ("wrong", "not_covered"):
-            if result.outcome == "wrong":
-                self.lesson.retry()
-            self.lesson_message = BEGINNER_RETRY_MESSAGE
-            self.lesson_message_kind = "try_again"
-            self.lesson_retry_feedback = result.feedback
-        else:
-            self.lesson_message = (result.feedback
-                                   if result.outcome == "not_covered" else "")
-            self.lesson_message_kind = "hint"
-            self.lesson_retry_feedback = ""
-        if self.lesson_message_kind == "try_again":
-            self._show_latest_lesson_message()
-        elif result.outcome != "illegal":
-            self._show_latest_lesson_message()
-        last_move = (None if result.outcome in ("wrong", "not_covered")
-                     else result.move)
-        self._sync_lesson_position(last_move)
-        self._save_lesson_progress()
-        return result.outcome != "illegal"
 
     def _replay_move_labels(self):
         board = (self.replay.adapter.from_fen(self.replay.game.starting_fen)
@@ -1422,115 +1126,6 @@ class ChessUI(MenuLayoutMixin):
         return True
 
     # ================================================================= AI
-    def _ai_params(self):
-        _, tl, dcap = DIFFICULTIES[self.difficulty]
-        return tl, dcap
-
-    def _maybe_start_ai(self):
-        if self.challenge_save_error is not None:
-            return
-        if self.status != "ongoing":
-            return
-        if self.board.side_to_move in self.human_colors:
-            return
-        if self.thinking:
-            return
-        if self.challenge is not None:
-            self.thinking = True
-            self.think_started = time.monotonic()
-            session = self.challenge
-            token = (session.match_id, self.challenge_generation,
-                     len(session.moves), to_fen(session.board))
-            result_queue = self.ai_queue
-            if session.opponent.preset is None:
-                try:
-                    result_queue.put((session.choose_move(), 0, None, token))
-                except Exception as error:
-                    result_queue.put((None, None, str(error), token))
-            else:
-                random_move = session.choose_random_search_move()
-                if random_move is not None:
-                    result_queue.put((random_move, 0, None, token))
-                    return
-                cancel = threading.Event()
-                self.challenge_cancel_event = cancel
-                snap = session.board.clone()
-                params = session.opponent.policy_parameters
-
-                def work():
-                    try:
-                        move, score, _pv, _nodes = ai.analyse(
-                            snap, time_limit=params["seconds"],
-                            max_depth=params["depth"], cancel_event=cancel)
-                        result_queue.put((move, score, None, token))
-                    except ai.SearchCancelled:
-                        return
-                    except Exception as error:
-                        result_queue.put((None, None, str(error), token))
-
-                threading.Thread(target=work, daemon=True).start()
-            return
-        self.thinking = True
-        self.think_started = time.monotonic()
-        tl, dcap = self._ai_params()
-        snap = self.board.clone()
-        result_queue = self.ai_queue
-
-        def work():
-            try:
-                move, score, _pv, _n = ai.analyse(
-                    snap, time_limit=tl, max_depth=dcap)
-                result_queue.put((move, score, None))
-            except Exception as error:
-                result_queue.put((None, None, str(error)))
-
-        threading.Thread(target=work, daemon=True).start()
-
-    def _poll_ai(self):
-        if not self.thinking:
-            return False
-        try:
-            response = self.ai_queue.get_nowait()
-        except queue.Empty:
-            return False
-        if self.challenge is not None:
-            move, score, error, token = response
-            session = self.challenge
-            expected = (session.match_id, self.challenge_generation,
-                        len(session.moves), to_fen(session.board))
-            if (token != expected or session.status != "ongoing" or
-                    session.board.side_to_move == session.color):
-                return False
-        else:
-            move, score, error = response
-        self.thinking = False
-        self.challenge_cancel_event = None
-        if error is not None:
-            if self.challenge is not None:
-                self.challenge_ai_error = True
-            self._flash("AI move failed: " + error)
-            self._dirty = True
-            return True
-        if self.challenge is not None:
-            self.challenge_ai_error = False
-        self.eval_cp = score if self.board.side_to_move == WHITE else -score
-        if self.challenge is not None:
-            if move is None:
-                self.challenge_ai_error = True
-                self._flash("Opponent did not return a move")
-                return True
-            try:
-                if session.opponent.preset is not None:
-                    session.authorize_search_move(move)
-            except ValueError as error:
-                self.challenge_ai_error = True
-                self._flash("Opponent move failed: " + str(error))
-                return True
-            self._apply(move, actor=BLACK if session.color == WHITE else WHITE)
-        elif move is not None:
-            self._apply(move)
-        return True
-
     # ================================================================= flow
     def _apply(self, move, actor=None):
         if self.challenge is not None:
@@ -2087,6 +1682,10 @@ class ChessUI(MenuLayoutMixin):
         return next((item for item in entries if item.lesson and record and
                      item.lesson.lesson_id == record.lesson_id), None)
 
+    def _start_beginner_course(self):
+        self.course_return_view = "learn"
+        self._open_course("chicky-first-knight-steps")
+
     def _continue_learning(self):
         entries = self._path_entries()
         entry = self._resume_entry()
@@ -2290,6 +1889,9 @@ class ChessUI(MenuLayoutMixin):
                 ("Flip", self._toggle_flip),
                 ("Back", self._leave_replay),
             ]
+        if self.match_review is not None:
+            specs[2] = ("Next moment", self._next_review_moment)
+            specs[5] = ("Practise", self._practise_review)
         for index, (label, action) in enumerate(specs):
             column, row = index % 2, index // 2
             self._game_buttons.append(Button(
@@ -2413,12 +2015,13 @@ class ChessUI(MenuLayoutMixin):
                 return
 
     def _toggle_flip(self):
-        if self.challenge is not None:
+        if self.challenge is not None and self.scene == "game":
             return
         self.flipped = not self.flipped
         self._game_bg = None
 
     def _to_menu(self):
+        self.toast = ""
         self._cancel_challenge_search()
         self.challenge_save_error = None
         self._reset_button_focus()
@@ -2429,6 +2032,7 @@ class ChessUI(MenuLayoutMixin):
         self.challenge = None
         self.challenge_progress_snapshot = None
         self.menu_view = "main"
+        self._home_resume_entry = self._resume_entry()
         self.coach_profile = None
         self._menu_buttons = []
         self._maybe_reload_theme()
@@ -2448,6 +2052,9 @@ class ChessUI(MenuLayoutMixin):
             return
         self.scene = "menu"
         self.menu_view = route["view"]
+        if self.menu_view == "challenge_result" and self.challenge is not None:
+            self.board = self.challenge.board.clone()
+            self.status = self.challenge.status
         self.library_filter = route.get("category", self.library_filter)
         self.library_page = route.get("page", self.library_page)
         self.active_course_id = route.get("course_id", self.active_course_id)
@@ -3115,10 +2722,10 @@ class ChessUI(MenuLayoutMixin):
             if (self.lesson.state == QUESTION and self.selected is None
                     and self.lesson.lesson.initial_help
                     and self.lesson.current_step.practice_mode == "guided"):
-                sources = {move.frm for move in legal_moves(self.board)}
-                gentle = tuple(SquareHighlight(
-                    chr(ord("a") + col) + str(8 - row), "focus")
-                    for row, col in sorted(sources))
+                # Only authored source cues belong on a guided question.
+                # Marking every movable piece competes with the actual task.
+                gentle = tuple(item for item in self.lesson.current_step.highlights
+                               if item.role == "focus")
                 lesson_highlights = tuple(lesson_highlights) + gentle
         self.board_view.draw_position(
             self.board,
@@ -3297,7 +2904,7 @@ class ChessUI(MenuLayoutMixin):
         self.lesson_max_scroll = self.study_view.draw_lesson_panel(
             panel, self.lesson, self._game_buttons,
             pygame.mouse.get_pos(), self.lesson_scroll,
-            (self.lesson_retry_feedback if self.lesson_message_kind == "try_again"
+            (self.lesson_retry_feedback if self.lesson_message_kind in ("try_again", "legal_move")
              else self.lesson_message),
             self._button_focus,
             (coach_thought(self.coach_profile, self.lesson, self.lesson_message)
@@ -3310,7 +2917,9 @@ class ChessUI(MenuLayoutMixin):
                             self.lesson.current_step.practice_mode == "guided"),
             coach_label=(self.coach_profile.short_name
                          if self.coach_profile else ""),
-            transient_label=("TRY AGAIN" if self.lesson_message_kind == "try_again"
+            transient_label=("LEGAL MOVE · TRY THE GOAL"
+                             if self.lesson_message_kind == "legal_move" else
+                             "TRY AGAIN" if self.lesson_message_kind == "try_again"
                              else "HINT"))
         if self._portrait_in_panel:
             self._portrait_hit_rect = self.study_view.thought_hit_rect

@@ -59,7 +59,7 @@
           {
             "uci": "f1h3",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "Bh3 develops the bishop, but it misses the space behind your moved g-pawn. Try another home."
           }
         ],

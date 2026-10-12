@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass, replace
 from importlib import resources
+from functools import lru_cache
 import json
 
 from .models import (
@@ -290,6 +291,16 @@ def _read_text(package, name):
             "cannot read {} from {}: {}".format(name, package, error)) from error
 
 
+@lru_cache(maxsize=64)
+def _parse_bundled_games(text, source, source_info):
+    """Reuse immutable trees only when resource text and provenance match.
+
+    The loader still rereads resources, so edits and invalid replacement PGNs
+    are validated instead of being hidden by a filename-only cache.
+    """
+    return tuple(parse_pgn_games(text, source=source, source_info=source_info))
+
+
 def load_game_library(pack_package="chess_game.content.starter"):
     """Load a packaged game library, retaining errors for individual entries."""
     try:
@@ -342,7 +353,7 @@ def load_game_library(pack_package="chess_game.content.starter"):
             continue
         try:
             text = _read_text(game_package, filename)
-            games = parse_pgn_games(
+            games = _parse_bundled_games(
                 text, source="{}:{}".format(pack_id, filename),
                 source_info=source)
             if len(games) != 1:

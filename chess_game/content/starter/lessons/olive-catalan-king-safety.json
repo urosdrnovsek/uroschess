@@ -61,7 +61,7 @@
           {
             "uci": "b1c3",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "Nc3 develops another piece and helps the centre. Your king still needs a safer home in this lesson."
           }
         ],

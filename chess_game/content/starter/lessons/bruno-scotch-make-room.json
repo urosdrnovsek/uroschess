@@ -84,7 +84,7 @@
           {
             "uci": "d2d3",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "d3 supports your pawn, but it does not challenge Black's pawn yet. Try moving farther."
           }
         ],

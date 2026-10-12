@@ -84,7 +84,7 @@ def test_custom_black_to_move_start():
 def test_packaged_library_game_is_complete_and_sourced():
     library = load_game_library()
     assert not library.errors
-    assert len(library.entries) == 31
+    assert len(library.entries) == 33
     entry = next(entry for entry in library.entries
                  if entry.game.game_id == "coordination-study")
     assert entry.game.game_id == "coordination-study"

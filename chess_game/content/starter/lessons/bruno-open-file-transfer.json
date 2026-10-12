@@ -1,0 +1,86 @@
+{
+  "schema_version": 3,
+  "lesson_id": "bruno-open-file-transfer",
+  "content_revision": 1,
+  "title": "Find a file on your own",
+  "level": "intermediate",
+  "estimated_minutes": 3,
+  "objective": "Choose an open file for either rook in a fresh position.",
+  "prerequisites": [
+    "rook movement",
+    "open files"
+  ],
+  "concepts": [
+    "piece activity",
+    "open file"
+  ],
+  "game_id": "bruno-open-file-transfer-position",
+  "coach_player_id": "bruno-bear",
+  "content_kind": "synthetic",
+  "initial_help": false,
+  "commentary_source": {
+    "name": "Uroschess original transfer exercise",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "try-a-new-position",
+      "practice_mode": "independent",
+      "node_path": [],
+      "expected_fen": "r4rk1/pp3ppp/8/8/8/8/PP3PPP/R4RK1 w - - 0 1",
+      "explanation": "The kings are sheltered by pawns. Look for a file with no pawns of either colour, then give one of your rooks that clear route.",
+      "coach_prompt": "Take a moment to find your own move.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move either rook onto an open file.",
+        "hints": [
+          "Check each file for white and black pawns.",
+          "The c-, d- and e-files are open. Either rook can reach them."
+        ],
+        "tree": [
+          {
+            "uci": "a1c1",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Yes. Your rook on c1 now has an open file: there are no pawns of either colour on the c-file."
+          },
+          {
+            "uci": "a1d1",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "Yes. Your rook on d1 now has an open file: there are no pawns of either colour on the d-file."
+          },
+          {
+            "uci": "a1e1",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "Yes. Your rook on e1 now has an open file: there are no pawns of either colour on the e-file."
+          },
+          {
+            "uci": "f1c1",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "Yes. Your rook on c1 now has an open file: there are no pawns of either colour on the c-file."
+          },
+          {
+            "uci": "f1d1",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "Yes. Your rook on d1 now has an open file: there are no pawns of either colour on the d-file."
+          },
+          {
+            "uci": "f1e1",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "Yes. Your rook on e1 now has an open file: there are no pawns of either colour on the e-file."
+          }
+        ],
+        "other_legal_move_text": "That move is legal. Look again at the goal: Move either rook onto an open file."
+      }
+    }
+  ],
+  "takeaway": "An open file has no pawns of either colour. More than one useful rook move may be possible."
+}

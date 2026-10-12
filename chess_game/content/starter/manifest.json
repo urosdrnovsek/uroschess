@@ -424,7 +424,11 @@
       "title": "Queen routes practice",
       "category": "movement",
       "level": "beginner",
-      "themes": ["queen", "piece movement", "captures"],
+      "themes": [
+        "queen",
+        "piece movement",
+        "captures"
+      ],
       "description": "Move a queen straight, then capture diagonally.",
       "source": {
         "name": "Uroschess original beginner position",
@@ -438,7 +442,11 @@
       "title": "King safety practice",
       "category": "movement",
       "level": "beginner",
-      "themes": ["king", "king safety", "check"],
+      "themes": [
+        "king",
+        "king safety",
+        "check"
+      ],
       "description": "Move the king one square, then escape a rook's check.",
       "source": {
         "name": "Uroschess original beginner position",
@@ -452,7 +460,11 @@
       "title": "Simple checkmate practice",
       "category": "movement",
       "level": "beginner",
-      "themes": ["queen", "king", "checkmate"],
+      "themes": [
+        "queen",
+        "king",
+        "checkmate"
+      ],
       "description": "Set up a queen move, then give checkmate with help from the king.",
       "source": {
         "name": "Uroschess original beginner position",
@@ -466,7 +478,11 @@
       "title": "Pippa developing moves practice",
       "category": "opening",
       "level": "beginner",
-      "themes": ["development", "centre", "opening"],
+      "themes": [
+        "development",
+        "centre",
+        "opening"
+      ],
       "description": "Develop a bishop and knight with a clear purpose.",
       "source": {
         "name": "Uroschess original beginner position",
@@ -480,7 +496,11 @@
       "title": "Tina promotion practice",
       "category": "endgame",
       "level": "beginner",
-      "themes": ["endgame", "pawn", "promotion"],
+      "themes": [
+        "endgame",
+        "pawn",
+        "promotion"
+      ],
       "description": "Advance a safe pawn and promote it to a queen.",
       "source": {
         "name": "Uroschess original beginner position",
@@ -494,7 +514,11 @@
       "title": "Tina active king practice",
       "category": "endgame",
       "level": "beginner",
-      "themes": ["endgame", "king activity", "pawn support"],
+      "themes": [
+        "endgame",
+        "king activity",
+        "pawn support"
+      ],
       "description": "Use the king to protect a pawn and approach safely.",
       "source": {
         "name": "Uroschess original beginner position",
@@ -508,7 +532,11 @@
       "title": "Bruno's piece activity practice",
       "category": "middlegame",
       "level": "intermediate",
-      "themes": ["middlegame", "piece activity", "open file"],
+      "themes": [
+        "middlegame",
+        "piece activity",
+        "open file"
+      ],
       "description": "An original planning exercise about an inactive bishop and an open file.",
       "source": {
         "name": "Uroschess original planning position",
@@ -522,7 +550,11 @@
       "title": "Olivia's knight fork practice",
       "category": "tactics",
       "level": "intermediate",
-      "themes": ["tactics", "fork", "check"],
+      "themes": [
+        "tactics",
+        "fork",
+        "check"
+      ],
       "description": "An original knight fork puzzle with a checked queen-winning continuation.",
       "source": {
         "name": "Uroschess original tactics position",
@@ -536,13 +568,50 @@
       "title": "Amsterdam 1889 tournament score",
       "category": "source_game",
       "level": "intermediate",
-      "themes": ["historical analysis", "king attack", "rook lift"],
+      "themes": [
+        "historical analysis",
+        "king attack",
+        "rook lift"
+      ],
       "description": "An anonymized historical score from the 1889 Amsterdam tournament.",
       "source": {
         "name": "Amsterdam 1889 tournament game score",
         "url": "https://en.wikipedia.org/wiki/Lasker_versus_Bauer,_Amsterdam,_1889",
         "license": "Historical move score; original Uroschess notes are MIT",
         "attribution": "Recorded tournament moves; player identities deliberately omitted in app"
+      }
+    },
+    {
+      "game_id": "chicky-knight-transfer-position",
+      "file": "chicky-knight-transfer.pgn",
+      "title": "A knight on a new square",
+      "category": "movement",
+      "level": "beginner",
+      "themes": [
+        "knight-movement"
+      ],
+      "description": "Use a knight jump to capture a pawn in an unfamiliar position.",
+      "source": {
+        "name": "Uroschess original transfer exercise",
+        "license": "MIT",
+        "attribution": "Original practice position and teaching text; not a historical game"
+      }
+    },
+    {
+      "game_id": "bruno-open-file-transfer-position",
+      "file": "bruno-open-file-transfer.pgn",
+      "title": "Find a file on your own",
+      "category": "middlegame",
+      "level": "intermediate",
+      "themes": [
+        "piece activity",
+        "open file"
+      ],
+      "description": "Choose an open file for either rook in a fresh position.",
+      "source": {
+        "name": "Uroschess original transfer exercise",
+        "license": "MIT",
+        "attribution": "Original practice position and teaching text; not a historical game"
       }
     }
   ],
@@ -701,6 +770,16 @@
       "lesson_id": "monty-amsterdam-analysis",
       "game_id": "monty-amsterdam-1889",
       "file": "monty-amsterdam-analysis.json"
+    },
+    {
+      "lesson_id": "chicky-knight-transfer",
+      "game_id": "chicky-knight-transfer-position",
+      "file": "chicky-knight-transfer.json"
+    },
+    {
+      "lesson_id": "bruno-open-file-transfer",
+      "game_id": "bruno-open-file-transfer-position",
+      "file": "bruno-open-file-transfer.json"
     }
   ]
 }

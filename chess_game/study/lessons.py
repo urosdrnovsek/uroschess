@@ -309,7 +309,7 @@ class LessonController:
         result = AttemptResult(answer.outcome, feedback, uci, learner_move)
         # Incorrect attempts are feedback only: leave the lesson position
         # visible so the learner can choose again from the same board.
-        self._display_board = (question_board if answer.outcome == "wrong"
+        self._display_board = (question_board if answer.outcome in ("wrong", "off_goal")
                                else attempt_board)
         self._last_attempt = result
         self.state = FEEDBACK

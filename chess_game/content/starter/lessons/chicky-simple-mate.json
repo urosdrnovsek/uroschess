@@ -42,7 +42,7 @@
           {
             "uci": "b4a5",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "That gives check, but Black's king can escape. For this setup, move the queen to b5."
           }
         ],

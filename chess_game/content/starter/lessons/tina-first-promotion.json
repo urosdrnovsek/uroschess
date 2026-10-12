@@ -42,7 +42,7 @@
           {
             "uci": "b5b6",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "Your king can move there, but the pawn is ready to advance. Try a7."
           }
         ],
@@ -73,19 +73,19 @@
           {
             "uci": "a7a8r",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "A rook is a legal promotion too. In this first exercise, choose a queen."
           },
           {
             "uci": "a7a8b",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "A bishop is a legal promotion too. In this first exercise, choose a queen."
           },
           {
             "uci": "a7a8n",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "A knight is a legal promotion too. In this first exercise, choose a queen."
           }
         ],

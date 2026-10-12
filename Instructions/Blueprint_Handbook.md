@@ -1,6 +1,6 @@
 # Uroschess blueprint handbook
 
-Updated: 2 October 2026. Earlier baseline: `b078911`.
+Updated: 12 October 2026. Earlier baseline: `b078911`.
 This is the single local planning handbook. This file is tracked for handoffs;
 the other files in `Instructions/` remain ignored by Git. Update this document
 in place; keep technical contracts in the existing
@@ -45,8 +45,8 @@ The old milestone logs and already-fixed defect lists are deliberately omitted.
 - Learn / Play / Watch games navigation. Learn now opens a portrait gallery
   for all seven character guides, with a short description of each guide's
   topic. A character page holds their courses and related older practice
-  lessons; all 31 lessons remain reachable without a separate category menu.
-  The starter pack has 31 games, 31 lessons, and nine published courses; some
+  lessons; all 33 lessons remain reachable without a separate category menu.
+  The starter pack has 33 games, 33 lessons, and nine published courses; some
   game records are practice lines. Fresh learners can start with Chicky, while
   the other guides are directly available. Monty's
   historical analysis opens after one verified win against him with either
@@ -135,10 +135,11 @@ Prioritize these Character Challenge improvements before expanding the mode:
    and next opponent, and requires explicit Master celebration dismissal.
    Schema 10 stores verified repeat wins; Medals opens all seven character
    counts on one page. See `docs/development/calibration-and-rewards.md`.
-4. **Add a short post-game review.** Replay the saved match and highlight one or
-   two checked moments that help the learner understand a choice. Keep review
-   separate from live challenge play; do not present an unreviewed engine guess
-   as authored coaching.
+4. **Short post-game review: first slice implemented.** Finished matches replay
+   up to two verified events (check evasion, castling, promotion, mate or
+   stalemate), with a related practice route. See
+   `docs/architecture/0004-match-review.md`. Review remains separate from live
+   play; richer tactical coaching needs independently checked branches.
 5. **Observe real players.** With an adult, watch children choose an opponent
    and colour, interpret locked cards and badges, reread comments, resume a
    match, and use mouse and keyboard controls. Record findings in
@@ -179,7 +180,7 @@ local, without streak pressure.
 ### Character-led lessons: first slice implemented, expansion pending
 
 Every character now has a first teaching slice in Learn and on their character
-page. The 31-lesson pack is not the complete set of paths described here. Keep
+page. The 33-lesson pack is not the complete set of paths described here. Keep
 ordinary lesson browsing available regardless of challenge progress, with the
 one Monty exception below. The general course loader, variable-length course
 pages, stable progress IDs, and return routes serve all seven guides.
@@ -410,17 +411,19 @@ the owner's current commit/push instructions.
    lesson loading or packaging. Update the status here and in
    `docs/development/upgrade-preparation.md`.
 
-The current pack has 31 games, 31 lessons, and nine courses. The
+The current pack has 33 games, 33 lessons, and nine courses. The
 [release audit](../docs/development/release-audit-2026-10-02.md) records a
 successful offline wheel check, content validation, smoke, responsive screen
 review, and 160 passing tests. None of the seven teaching paths has a recorded
 learner observation. The 12-game, 80-ply calibration follow-up had no search
-failures but six truncations; opponent strength remains unproven. The post-game
-review remains a separate Challenge follow-up.
+failures but six truncations; opponent strength remains unproven. The 12 October review slice adds factual post-game
+review, engine interruption/quiescence fixes, two independent transfer
+exercises, home resume, proportional reading text, and explicit content and
+installed-wheel CI checks. See `docs/development/improvements-2026-10-12.md`.
 
 The later Learn menu redesign routes through seven portrait cards. Course
-membership still comes from `chess_game/content/starter/courses.json`; the ten
-older lessons outside published courses are assigned to guides for navigation
+membership still comes from `chess_game/content/starter/courses.json`; the twelve
+lessons outside published courses are assigned to guides for navigation
 in `GUIDE_LESSONS` in `chess_game/menu.py`. Their IDs, revisions, and saved
 progress remain intact. Review the guide descriptions and the new route with
 learners; visual checks alone do not establish that the topics are clear.

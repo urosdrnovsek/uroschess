@@ -42,7 +42,7 @@
           {
             "uci": "c3c4",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "c4 also protects the pawn. For this guided step, try d3."
           }
         ],
@@ -79,7 +79,7 @@
           {
             "uci": "d3e3",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "e3 protects the pawn, but it does not bring your king forward. Try a safe square on the fourth row."
           }
         ],

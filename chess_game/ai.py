@@ -179,31 +179,37 @@ class Engine:
         moves.sort(key=key, reverse=True)
 
     # -- quiescence -------------------------------------------------------
-    def _qsearch(self, board, alpha, beta):
+    def _qsearch(self, board, alpha, beta, ply=0):
         self.nodes += 1
         if self.nodes % 256 == 0:
             self._checkpoint()
 
-        stand = evaluate(board) if board.side_to_move == WHITE else -evaluate(board)
-        if stand >= beta:
-            return beta
-        if stand > alpha:
-            alpha = stand
-
-        moves = [m for m in legal_moves(board) if board.piece_at(m.to) or m.promo]
-        moves.sort(
-            key=lambda m: (VALUES[board.piece_at(m.to)[1]] if board.piece_at(m.to) else 0)
-            + (VALUES[m.promo] if m.promo else 0),
-            reverse=True,
-        )
+        moves = legal_moves(board)
+        checked = in_check(board, board.side_to_move)
+        if not moves:
+            return -MATE + ply if checked else 0
+        if self._draw(board):
+            return 0
+        # Bound checking sequences as well as capture sequences.
+        if ply >= 128:
+            return evaluate(board) if board.side_to_move == WHITE else -evaluate(board)
+        if not checked:
+            stand = evaluate(board) if board.side_to_move == WHITE else -evaluate(board)
+            if stand >= beta:
+                return beta
+            alpha = max(alpha, stand)
+            moves = [m for m in moves
+                     if board.piece_at(m.to) or m.promo or m.is_en_passant]
+        self._order(board, moves, None, ply)
         for m in moves:
             undo = board.make_move(m)
-            score = -self._qsearch(board, -beta, -alpha)
-            board.undo_move(undo)
+            try:
+                score = -self._qsearch(board, -beta, -alpha, ply + 1)
+            finally:
+                board.undo_move(undo)
             if score >= beta:
                 return beta
-            if score > alpha:
-                alpha = score
+            alpha = max(alpha, score)
         return alpha
 
     # -- main search -----------------------------------------------------
@@ -213,6 +219,9 @@ class Engine:
             self._checkpoint()
 
         if ply > 0 and self._draw(board):
+            # A mating move takes precedence over the move-count draw.
+            if not legal_moves(board) and in_check(board, board.side_to_move):
+                return -MATE + ply
             return 0
 
         alpha_orig = beta_orig = None
@@ -240,7 +249,7 @@ class Engine:
             return 0
 
         if depth <= 0:
-            return self._qsearch(board, alpha, beta)
+            return self._qsearch(board, alpha, beta, ply)
 
         self._order(board, moves, tt_move, ply)
 
@@ -248,8 +257,10 @@ class Engine:
         best_move = moves[0]
         for m in moves:
             undo = board.make_move(m)
-            score = -self._search(board, depth - 1, -beta, -alpha, ply + 1)
-            board.undo_move(undo)
+            try:
+                score = -self._search(board, depth - 1, -beta, -alpha, ply + 1)
+            finally:
+                board.undo_move(undo)
             if score > best:
                 best = score
                 best_move = m
@@ -309,8 +320,10 @@ class Engine:
         best_move = moves[0]
         for m in moves:
             undo = board.make_move(m)
-            score = -self._search(board, depth - 1, -beta, -alpha, 1)
-            board.undo_move(undo)
+            try:
+                score = -self._search(board, depth - 1, -beta, -alpha, 1)
+            finally:
+                board.undo_move(undo)
             if score > best:
                 best = score
                 best_move = m

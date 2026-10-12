@@ -20,3 +20,36 @@ hints if they want. Watch without directing them:
 Ask what they learned about the position, which words were unclear, and whether
 the text size and window layout helped. Keep feedback anonymous; the app does
 not need a child account for this review.
+
+## First observation round
+
+Status: **not conducted**. The implementation and automated checks do not
+establish teaching effectiveness or suitability for a particular age.
+
+Arrange five short sessions with a child and an adult present. Use anonymous
+labels A–E, fresh local progress, and about 15 minutes per session. Do not
+collect names, ages precise enough to identify a participant, recordings, or
+accounts in the repository. Let the adult end the session whenever needed.
+
+1. Ask “How would you start learning?” Observe whether the home shortcut and
+   Chicky's course make sense without directions.
+2. Try Knight steps. If the learner chooses a valid alternative, observe
+   whether the feedback distinguishes a legal jump from the requested move.
+3. Open **A knight on a new square** from Chicky's practice lessons. Ask the
+   learner to describe the jump before moving. Record whether they succeed
+   independently, with a hint, or after seeing an answer.
+4. Leave a lesson, close the app, and return. Observe whether **Continue
+   learning** resumes the task they expect.
+5. Play a short challenge, resign if necessary, and open **Review match**.
+   Observe whether the explanation and **Practise** action make sense.
+6. For learners who already know rook moves, try Bruno's **Find a file on
+   your own**. Ask what makes the chosen file open.
+
+Use the same prompts for everyone. Avoid correcting hesitation immediately;
+record what happened before giving help. Use the text size and window size the
+learner prefers. Ask “What would you do in another position?” afterwards.
+
+Copy [the observation sheet](learner-session-template.md) once per anonymous
+session. After the first round, group repeated difficulties, choose the three
+most consequential changes, and repeat those tasks in another round. Report
+observations as a small qualitative sample, without claims of mastery.

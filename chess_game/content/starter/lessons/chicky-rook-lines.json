@@ -50,7 +50,7 @@
           {
             "uci": "a2a3",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "That is a legal rook move. For this first step, keep going to a4."
           }
         ],
@@ -87,7 +87,7 @@
           {
             "uci": "a4a5",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "That is a legal rook move, but it does not capture a pawn. Look across the row."
           }
         ],

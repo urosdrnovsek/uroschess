@@ -47,8 +47,7 @@ def choose_move(board, opponent, seed, ply):
     policy = opponent.policy_parameters
     completed = []
     start = time.monotonic()
-    # A timed search may unwind through an unfinished branch. Keep the game
-    # board separate from the disposable search board, as the UI does.
+    # Isolate each diagnostic search from the recorded game position.
     move, _score, _pv, nodes = ai.analyse(
         board.clone(), time_limit=policy["seconds"], max_depth=policy["depth"],
         on_progress=lambda depth, score, pv, count: completed.append(depth))
@@ -100,8 +99,12 @@ def build_report(pairs, positions, seeds, max_plies):
         for position in positions:
             for seed in seeds:
                 for color in (WHITE, BLACK):
-                    games.append(play_game(weaker, stronger, color, position,
-                                           seed, max_plies))
+                    game = play_game(weaker, stronger, color, position,
+                                     seed, max_plies)
+                    games.append(game)
+                    print("{} vs {} / {} / {} / seed {}: {} ({} plies)".format(
+                        weaker_id, stronger_id, position, color, seed,
+                        game["outcome"], game["plies"]), flush=True)
     summaries = []
     for weaker_id, stronger_id in pairs:
         subset = [game for game in games if game["weaker"] == weaker_id]

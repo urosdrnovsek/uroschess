@@ -339,6 +339,14 @@ class StudyView:
                 x, question_top, width, content_top - question_top)
         else:
             self.question_rect = None
+        legal_label = (bool(transient_message) and
+                       transient_label.startswith("LEGAL MOVE"))
+        if legal_label:
+            # Keep the distinction visible when long feedback is scrolled.
+            label = _fit_text(self.tag_font, transient_label, width)
+            self.surface.blit(self.tag_font.render(label, True, p.accent),
+                              (x, content_top))
+            content_top += self.tag_font.get_linesize() + 5
         available_height = max(1, button_top - content_top - 8)
         content = []
 
@@ -350,16 +358,21 @@ class StudyView:
 
         if lesson.state in ("READING", "QUESTION"):
             if transient_message:
-                add(transient_label, self.tag_font, p.accent, 5)
+                if not legal_label:
+                    add(transient_label, self.tag_font, p.accent, 5)
                 add(transient_message, self.text_font, p.text, 6)
             else:
                 add(step.explanation, self.text_font, p.text, 6)
         elif lesson.state == "FEEDBACK":
             if lesson.last_attempt:
                 outcome = lesson.last_attempt.outcome
+                label = ("GOOD MOVE" if outcome in ("preferred", "acceptable")
+                         else "LEGAL MOVE · TRY THE GOAL" if outcome == "off_goal"
+                         else "ANSWER" if outcome == "revealed" else "TRY AGAIN")
+                add(label, self.tag_font, p.accent, 5)
                 color = (p.good if outcome in ("preferred", "acceptable")
                          else p.warn if outcome in
-                         ("revealed", "not_covered", "continue")
+                         ("revealed", "not_covered", "off_goal", "continue")
                          else p.bad)
                 add(lesson.last_attempt.feedback, self.text_font, color, 6)
             if transient_message:

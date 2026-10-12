@@ -129,7 +129,7 @@ def test_beginner_moves_and_captures_keep_wrong_attempts_on_the_board():
             lesson = LessonController(entry.game, entry.lesson)
             lesson.begin_question()
             fen = ChessAdapter.fen(lesson.board)
-            assert lesson.attempt_uci(wrong).outcome == "wrong"
+            assert lesson.attempt_uci(wrong).outcome == "off_goal"
             assert ChessAdapter.fen(lesson.board) == fen
             lesson.retry()
             assert lesson.attempt_uci(first).outcome == "preferred"
@@ -157,7 +157,7 @@ def test_chicky_king_lesson_accepts_every_safe_escape():
             lesson = LessonController(entry.game, entry.lesson)
             lesson.begin_question()
             fen = ChessAdapter.fen(lesson.board)
-            assert lesson.attempt_uci("e1f1").outcome == "wrong"
+            assert lesson.attempt_uci("e1f1").outcome == "off_goal"
             assert ChessAdapter.fen(lesson.board) == fen
             lesson.retry()
             assert lesson.attempt_uci("e1d1").outcome == "preferred"
@@ -183,7 +183,7 @@ def test_chicky_simple_mate_requires_a_finish_not_just_check():
     lesson = LessonController(entry.game, entry.lesson)
     lesson.begin_question()
     initial_fen = ChessAdapter.fen(lesson.board)
-    assert lesson.attempt_uci("b4a5").outcome == "wrong"
+    assert lesson.attempt_uci("b4a5").outcome == "off_goal"
     assert ChessAdapter.fen(lesson.board) == initial_fen
     lesson.retry()
     assert lesson.attempt_uci("b4b5").outcome == "preferred"
@@ -221,7 +221,7 @@ def test_pippa_development_has_a_related_independent_move():
     assert lesson.current_step.practice_mode == "independent"
     lesson.begin_question()
     fen = ChessAdapter.fen(lesson.board)
-    assert lesson.attempt_uci("b1a3").outcome == "wrong"
+    assert lesson.attempt_uci("b1a3").outcome == "off_goal"
     assert ChessAdapter.fen(lesson.board) == fen
     lesson.retry()
     assert lesson.attempt_uci("b1c3").outcome == "preferred"
@@ -249,7 +249,7 @@ def test_tina_promotion_keeps_a_wrong_piece_choice_retryable():
     assert lesson.current_step.practice_mode == "independent"
     lesson.begin_question()
     fen = ChessAdapter.fen(lesson.board)
-    assert lesson.attempt_uci("a7a8r").outcome == "wrong"
+    assert lesson.attempt_uci("a7a8r").outcome == "off_goal"
     assert ChessAdapter.fen(lesson.board) == fen
     lesson.retry()
     assert lesson.attempt_uci("a7a8q").outcome == "preferred"
@@ -278,7 +278,7 @@ def test_tina_active_king_accepts_safe_independent_approaches():
         assert lesson.current_step.practice_mode == "independent"
         lesson.begin_question()
         fen = ChessAdapter.fen(lesson.board)
-        assert lesson.attempt_uci("d3e3").outcome == "wrong"
+        assert lesson.attempt_uci("d3e3").outcome == "off_goal"
         assert ChessAdapter.fen(lesson.board) == fen
         lesson.retry()
         assert lesson.attempt_uci(finish).outcome in ("preferred", "acceptable")
@@ -366,7 +366,7 @@ def test_bruno_improves_bishop_then_uses_open_file():
     lesson.begin_question()
     fen = ChessAdapter.fen(lesson.board)
     wrong = lesson.attempt_uci("a1b1")
-    assert wrong.outcome == "wrong" and "b2 pawn" in wrong.feedback
+    assert wrong.outcome == "off_goal" and "b2 pawn" in wrong.feedback
     assert ChessAdapter.fen(lesson.board) == fen
     lesson.retry()
     assert lesson.attempt_uci("a1c1").outcome == "preferred"
@@ -433,7 +433,7 @@ def test_monty_analysis_predicts_recorded_moves_and_preserves_source():
     lesson.continue_lesson()
     assert lesson.current_step.practice_mode == "independent"
     lesson.begin_question()
-    assert lesson.attempt_uci("f1f2").outcome == "wrong"
+    assert lesson.attempt_uci("f1f2").outcome == "off_goal"
     lesson.retry()
     assert lesson.attempt_uci("f1f3").outcome == "preferred"
     lesson.continue_lesson()
@@ -443,3 +443,34 @@ def test_monty_analysis_predicts_recorded_moves_and_preserves_source():
         steps = store.load_step_progress("monty-amsterdam-analysis", 1)
         assert steps["first-bishop-offer"].outcome == "independent"
         assert steps["bring-the-rook"].outcome == "independent"
+
+
+def test_transfer_exercises_use_new_positions_and_accept_multiple_rook_plans():
+    library = load_game_library()
+    knight = library.lesson_entry('chicky-knight-transfer')
+    lesson = LessonController(knight.game, knight.lesson)
+    lesson.begin_question()
+    assert not knight.lesson.initial_help
+    assert not lesson.visible_highlights
+    assert lesson.attempt_uci('c4b6').outcome == 'preferred'
+    entry = library.lesson_entry('bruno-open-file-transfer')
+    for move in ('a1c1', 'a1d1', 'a1e1', 'f1c1', 'f1d1', 'f1e1'):
+        lesson = LessonController(entry.game, entry.lesson)
+        lesson.begin_question()
+        assert not lesson.visible_arrows
+        assert lesson.attempt_uci(move).outcome in ('preferred', 'acceptable')
+        assert lesson.step_solved and not lesson.assisted
+
+
+def test_off_goal_move_does_not_claim_success_or_change_the_question_board():
+    entry = load_game_library().lesson_entry('chicky-knight-steps')
+    lesson = LessonController(entry.game, entry.lesson)
+    lesson.begin_question()
+    fen = lesson.adapter.fen(lesson.board)
+    result = lesson.attempt_uci('g1h3')
+    assert result.outcome == 'off_goal'
+    assert 'legal L-shaped jump' in result.feedback
+    assert not lesson.step_solved and lesson.successes == 0
+    assert lesson.adapter.fen(lesson.board) == fen
+    lesson.retry()
+    assert lesson.attempt_uci('g1f3').outcome == 'preferred'

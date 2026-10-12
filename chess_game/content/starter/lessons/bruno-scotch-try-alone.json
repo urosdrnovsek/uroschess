@@ -58,13 +58,13 @@
           {
             "uci": "f1c4",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "Bc4 develops the bishop well, but this lesson asks you to challenge Black's centre with a pawn. Try again."
           },
           {
             "uci": "d2d3",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "d3 supports your centre, but it does not challenge Black's e-pawn yet. Try another pawn move."
           }
         ],

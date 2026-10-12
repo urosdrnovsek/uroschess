@@ -95,3 +95,13 @@ lesson. Lessons without a historical link offer Replay practice instead.
 Run `.venv/bin/python -m scripts.validate_content` to resolve all PGN paths,
 FENs, and reviewed branches before shipping. Run the test suite and build a
 wheel to ensure every JSON, PGN, and portrait resource is packaged.
+
+Reviewed learner moves may use `off_goal` when a move is legal and has a
+reasonable chess purpose but does not perform the exercise's requested task.
+It keeps the question position, does not mark the step solved, and permits a
+retry. Reserve `wrong` for an explained chess mistake or failure of the tested
+mate/promotion goal. `preferred` and `acceptable` both solve the step;
+unreviewed legal moves still return `not_covered`, without an engine verdict.
+Feedback classifications can change without resetting compatible saved board
+and step identities. New or materially changed positions need a content
+revision or new lesson ID.

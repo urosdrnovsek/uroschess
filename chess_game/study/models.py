@@ -108,7 +108,7 @@ class MoveAnswer:
     def __post_init__(self):
         if len(self.uci) not in (4, 5):
             raise ValueError("answer uci must contain four or five characters")
-        if self.outcome not in ("preferred", "acceptable", "wrong"):
+        if self.outcome not in ("preferred", "acceptable", "wrong", "off_goal"):
             raise ValueError("unsupported answer outcome: " + self.outcome)
         if not self.feedback.strip():
             raise ValueError("answer feedback must not be empty")
@@ -137,7 +137,7 @@ class ReviewedMove:
             raise ValueError("reviewed-tree uci must contain four or five characters")
         if self.role not in ("learner", "opponent"):
             raise ValueError("reviewed-tree role must be learner or opponent")
-        allowed = ({"continue", "preferred", "acceptable", "wrong"}
+        allowed = ({"continue", "preferred", "acceptable", "wrong", "off_goal"}
                    if self.role == "learner" else {"reply"})
         if self.outcome not in allowed:
             raise ValueError(

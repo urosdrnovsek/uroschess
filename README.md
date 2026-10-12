@@ -10,7 +10,9 @@ and checkmate. Pippa's first course practises useful developing moves, and
 Tina's first course shows how a pawn becomes a queen, how a king can support
 one, and why stalemate is a draw. Tom's first opening course practises spotting
 an attack on a pawn and choosing a sound reply. Bruno's planning lesson
-improves a quiet bishop and puts a rook on an open file. Olivia's first puzzle
+improves a quiet bishop and puts a rook on an open file. Chicky and Bruno also
+have fresh-position exercises to practise a knight capture and open files.
+Olivia's first puzzle
 uses a knight fork to win a queen. The strategy lessons
 may be useful for children
 who already know how the pieces move and what check and
@@ -57,7 +59,10 @@ Omarchy colours when available and otherwise uses a built-in dark theme.
   characters' collections on one page. Each win fills one portrait circle;
   the tenth replaces that character's row with a larger gold circle. The
   collection also shows lifetime counts. The result screen
-  distinguishes a new colour badge from a previously earned one. The Master
+  distinguishes a new colour badge from a previously earned one. **Review match**
+  replays a finished challenge with up to two explanations of verified events,
+  such as escaping check or the final mate. **Practise** opens a related lesson.
+  The Master
   celebration is dismissed explicitly and its title remains earned.
 - **Learn:** choose one of seven character guides. Each portrait explains what
   that character teaches and opens their courses and practice lessons. Chicky's
@@ -78,6 +83,8 @@ Monty's commentary is also original; his favourite historical game is the
 [1889 Amsterdam tournament score](https://en.wikipedia.org/wiki/Lasker_versus_Bauer,_Amsterdam,_1889),
 shown without player identities in the app.
 
+Choose **Start with Chicky** on the main menu for the beginner course.
+**Continue learning** appears when an unfinished lesson can be resumed.
 Choose **Meet the characters** on the main menu to browse all seven animals,
 read their short stories, and see their favourite chess pieces. Click the
 larger portrait on the main menu, or press **N**, to see another character's
@@ -97,7 +104,9 @@ quote.
 
 In a lesson, read the question beside or below the board and make a move.
 **Hint** gives a clue; **Show answer** reveals a move. After a move, the panel
-shows feedback and a clear next step. The back and next arrows beside the step
+shows feedback and a clear next step. A legal move outside the exercise's goal
+is distinguished from a chess mistake; it does not count as a solved question.
+The back and next arrows beside the step
 label move between that character's lessons; the lesson buttons also let you
 return to the lesson list or main menu. On a small window, the board and lesson
 panel stack vertically.
@@ -123,11 +132,16 @@ are kept locally.
 ## Development
 
 ```bash
+python -m pip install -e ".[dev]" build
 pytest
 python -m scripts.validate_content
 python -m scripts.smoke
 python -m scripts.update_readme_screenshots
 ```
+
+CI also builds a wheel and checks its bundled content, rendering and challenge
+resume outside the checkout. [Learner observation](docs/LEARNER_REVIEW.md)
+remains a separate check; automated tests do not establish teaching quality.
 
 The [content format](docs/CONTENT_FORMAT.md) describes the bundled lessons.
 The [learner review guide](docs/LEARNER_REVIEW.md) lists questions to try with

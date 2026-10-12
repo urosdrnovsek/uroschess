@@ -54,3 +54,14 @@ at ten wins the row is replaced by one larger gold portrait circle, while the
 lifetime count keeps increasing.
 The Master title is durable and its celebration is acknowledged only by an
 explicit action.
+
+
+The 12 October 2026 run, after quiescence and search restoration fixes, used
+all six adjacent pairs, both colour assignments, seed 11, and a 160-ply cap.
+The [pawn-ending report](calibration-2026-10-12.json) completed twelve draws
+without failures or truncations. The [start-position report](calibration-start-2026-10-12.json)
+recorded nine stronger-side wins, one loss, two truncations, and zero search
+failures. Olivia and Monty split their start-position games. This is stronger
+completion evidence than the earlier four-ply diagnostic, but one game per
+colour and position remains insufficient for ratings or confident tuning.
+The actual policies were retained, including Monty's six-second Max setting.

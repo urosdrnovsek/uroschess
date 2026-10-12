@@ -50,7 +50,7 @@
           {
             "uci": "e2e4",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "Two squares is legal from the starting square when both squares are clear. This time, take just one step to e3."
           }
         ],
@@ -87,7 +87,7 @@
           {
             "uci": "e3e4",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "Moving straight forward is legal here, but it does not capture the black pawn. Look diagonally."
           }
         ],

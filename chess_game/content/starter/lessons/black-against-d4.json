@@ -30,7 +30,7 @@
           {"uci": "d7d5", "outcome": "preferred", "feedback": "Good! ...d5 gives Black space in the middle."},
           {"uci": "g8f6", "outcome": "acceptable", "feedback": "...Nf6 develops and controls e4, keeping several Indian defences available."},
           {"uci": "e7e6", "outcome": "acceptable", "feedback": "...e6 prepares ...d5 and keeps the position solid."},
-          {"uci": "a7a6", "outcome": "wrong", "feedback": "...a6 is too slow here. Contest the centre or develop first."}
+          {"uci": "a7a6", "outcome": "off_goal", "feedback": "...a6 is too slow here. Contest the centre or develop first."}
         ],
         "other_legal_move_text": "That may lead to another opening. This exercise checks central control and development."
       }
@@ -50,7 +50,7 @@
           {"uci": "e7e6", "outcome": "preferred", "feedback": "...e6 supports d5 and prepares development: the Queen's Gambit Declined."},
           {"uci": "c7c6", "outcome": "acceptable", "feedback": "...c6 supports d5 in the Slav Defence and keeps the light bishop open."},
           {"uci": "d5c4", "outcome": "acceptable", "feedback": "...dxc4 accepts the gambit. Black should develop rather than try to hold the pawn at any cost."},
-          {"uci": "a7a6", "outcome": "wrong", "feedback": "...a6 does not answer the pressure on d5. Address the centre first."}
+          {"uci": "a7a6", "outcome": "off_goal", "feedback": "...a6 does not answer the pressure on d5. Address the centre first."}
         ],
         "other_legal_move_text": "That move may be playable, but this step checks three standard responses to c4."
       }

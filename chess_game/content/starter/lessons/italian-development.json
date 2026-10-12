@@ -33,7 +33,7 @@
           {"uci": "f1c4", "outcome": "preferred", "feedback": "Bc4 enters the Italian Game, develops actively, and prepares castling."},
           {"uci": "f1b5", "outcome": "acceptable", "feedback": "Bb5 is excellent too. It enters the Spanish Game and still develops with purpose."},
           {"uci": "f1e2", "outcome": "acceptable", "feedback": "Be2 is quieter, but it develops and clears the castling path."},
-          {"uci": "f3g1", "outcome": "wrong", "feedback": "Ng1 moves a developed piece backward. Bring a new piece into the game instead."}
+          {"uci": "f3g1", "outcome": "off_goal", "feedback": "Ng1 moves a developed piece backward. Bring a new piece into the game instead."}
         ],
         "other_legal_move_text": "That move may be playable, but this exercise asks for useful bishop development."
       }

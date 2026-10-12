@@ -111,7 +111,7 @@
                   {
                     "uci": "a2a3",
                     "role": "learner",
-                    "outcome": "wrong",
+                    "outcome": "off_goal",
                     "feedback": "a3 is usually too slow here. Develop a piece or fight for the centre."
                   }
                 ]
@@ -121,7 +121,7 @@
           {
             "uci": "a2a3",
             "role": "learner",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "a3 is legal, but it does not help control the centre or develop a piece."
           }
         ],
@@ -163,7 +163,7 @@
           },
           {
             "uci": "f3g1",
-            "outcome": "wrong",
+            "outcome": "off_goal",
             "feedback": "Moving the knight back loses time. Bring out a piece that has not moved yet."
           }
         ],

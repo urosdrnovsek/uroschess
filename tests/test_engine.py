@@ -3,8 +3,9 @@
 import random
 
 from chess_game.board import Board
-from chess_game.moves import legal_moves, game_status, insufficient_material
+from chess_game.moves import legal_moves, game_status, insufficient_material, in_check
 from chess_game import ai, zobrist
+from chess_game.pieces import WHITE
 from chess_game import notation as N
 
 
@@ -96,3 +97,50 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def test_search_restores_board_when_timeout_interrupts_a_branch(monkeypatch):
+    board = Board()
+    before = board.clone()
+    engine = ai.Engine(time_limit=10)
+    def expire():
+        if engine.nodes >= 256:
+            raise ai._Timeout
+    monkeypatch.setattr(engine, '_checkpoint', expire)
+    move, _, _ = engine.search(board)
+    assert move in legal_moves(board)
+    assert vars(board) == vars(before)
+
+
+def test_search_restores_board_when_cancelled_inside_a_branch(monkeypatch):
+    import pytest
+    board = Board()
+    before = board.clone()
+    engine = ai.Engine(time_limit=10)
+    def cancel():
+        if engine.nodes >= 256:
+            raise ai.SearchCancelled
+    monkeypatch.setattr(engine, '_checkpoint', cancel)
+    with pytest.raises(ai.SearchCancelled):
+        engine.search(board)
+    assert vars(board) == vars(before)
+
+
+def test_quiescence_checks_terminal_positions_and_quiet_check_evasions():
+    import time
+    engine = ai.Engine(time_limit=10)
+    engine.deadline = time.monotonic() + 10
+    stalemate = N.from_fen('7k/8/5KQ1/8/8/8/8/8 b - - 0 1')
+    assert engine._qsearch(stalemate, -2 * ai.MATE, 2 * ai.MATE) == 0
+    mate = N.from_fen('7k/6Q1/5K2/8/8/8/8/8 b - - 0 1')
+    assert engine._qsearch(mate, -2 * ai.MATE, 2 * ai.MATE, 3) == -ai.MATE + 3
+    mate.halfmove_clock = 100
+    assert engine._search(mate, 1, -2 * ai.MATE, 2 * ai.MATE, 3) == -ai.MATE + 3
+    checked = N.from_fen('k7/8/8/8/8/8/8/4K2r w - - 0 1')
+    before = checked.clone()
+    assert in_check(checked, WHITE)
+    assert all(not checked.piece_at(m.to) for m in legal_moves(checked))
+    nodes_before = engine.nodes
+    engine._qsearch(checked, -2 * ai.MATE, 2 * ai.MATE)
+    assert engine.nodes > nodes_before + 1
+    assert vars(checked) == vars(before)

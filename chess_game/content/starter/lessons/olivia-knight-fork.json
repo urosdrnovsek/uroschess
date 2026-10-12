@@ -6,8 +6,16 @@
   "level": "intermediate",
   "estimated_minutes": 4,
   "objective": "Find a knight check that attacks the queen, then take the queen after the king moves.",
-  "prerequisites": ["knight movement", "check", "rough piece values"],
-  "concepts": ["tactics", "fork", "check"],
+  "prerequisites": [
+    "knight movement",
+    "check",
+    "rough piece values"
+  ],
+  "concepts": [
+    "tactics",
+    "fork",
+    "check"
+  ],
   "game_id": "olivia-knight-fork-position",
   "coach_player_id": "olive-owl",
   "content_kind": "synthetic",
@@ -31,19 +39,62 @@
         "timing": "before_move",
         "evaluator": "reviewed_tree",
         "prompt": "Find the knight fork of king and queen.",
-        "hints": ["The knight on g5 can jump toward Black's back row.", "Move the knight from g5 to f7 with check."],
+        "hints": [
+          "The knight on g5 can jump toward Black's back row.",
+          "Move the knight from g5 to f7 with check."
+        ],
         "tree": [
-          {"uci": "g5f7", "role": "learner", "outcome": "preferred", "feedback": "Nf7+ checks the king on h8 and attacks the queen on d8. Black must answer the check first."},
-          {"uci": "g5h7", "role": "learner", "outcome": "wrong", "feedback": "Nxh7 takes a pawn, but Black's king can capture that knight. Look for a check that also attacks the queen."},
-          {"uci": "g5f3", "role": "learner", "outcome": "wrong", "feedback": "Nf3 saves the knight, but misses the chance to attack two valuable targets at once."}
+          {
+            "uci": "g5f7",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Nf7+ checks the king on h8 and attacks the queen on d8. Black must answer the check first."
+          },
+          {
+            "uci": "g5h7",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "Nxh7 takes a pawn, but Black's king can capture that knight. Look for a check that also attacks the queen."
+          },
+          {
+            "uci": "g5f3",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Nf3 saves the knight, but misses the chance to attack two valuable targets at once."
+          }
         ],
         "other_legal_move_text": "That move may be useful, but look for a knight check that also attacks the queen."
-      }
+      },
+      "highlights": [
+        {
+          "square": "h8",
+          "role": "target"
+        },
+        {
+          "square": "d8",
+          "role": "target"
+        }
+      ],
+      "arrows": [
+        {
+          "from": "f7",
+          "to": "h8",
+          "role": "idea"
+        },
+        {
+          "from": "f7",
+          "to": "d8",
+          "role": "idea"
+        }
+      ]
     },
     {
       "step_id": "take-the-queen",
       "practice_mode": "independent",
-      "node_path": ["g5f7", "h8g8"],
+      "node_path": [
+        "g5f7",
+        "h8g8"
+      ],
       "expected_fen": "r2q2k1/ppp1bNpp/2n1p3/8/2B5/3P4/PPP2PPP/R2Q2K1 w - - 2 2",
       "explanation": "Black moved the king out of check. Your knight on f7 still attacks Black's queen. Finish the fork by taking it.",
       "detail": "Black's rook may capture your knight afterward, but a queen is worth much more than a knight.",
@@ -53,10 +104,23 @@
         "timing": "before_move",
         "evaluator": "reviewed_tree",
         "prompt": "Capture the queen with your knight.",
-        "hints": ["The queen is on d8, one knight jump from f7.", "Move the knight from f7 to d8."],
+        "hints": [
+          "The queen is on d8, one knight jump from f7.",
+          "Move the knight from f7 to d8."
+        ],
         "tree": [
-          {"uci": "f7d8", "role": "learner", "outcome": "preferred", "feedback": "Nxd8 wins the queen. Black can recapture your knight with the rook, but you traded a knight for a queen."},
-          {"uci": "f7h8", "role": "learner", "outcome": "wrong", "feedback": "Nh8 moves the knight away from the queen. The queen on d8 is still yours to take."}
+          {
+            "uci": "f7d8",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Nxd8 wins the queen. Black can recapture your knight with the rook, but you traded a knight for a queen."
+          },
+          {
+            "uci": "f7h8",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Nh8 moves the knight away from the queen. The queen on d8 is still yours to take."
+          }
         ],
         "other_legal_move_text": "The king has moved, so you can take the queen on d8 now."
       }

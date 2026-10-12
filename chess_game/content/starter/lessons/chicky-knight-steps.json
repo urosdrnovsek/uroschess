@@ -34,7 +34,7 @@
         "hints": ["Click the white horse-shaped piece beside your king.", "From g1, click f3."],
         "tree": [
           {"uci": "g1f3", "role": "learner", "outcome": "preferred", "feedback": "Yes. From g1 to f3 is an L shape: two squares up and one to the side."},
-          {"uci": "g1h3", "role": "learner", "outcome": "wrong", "feedback": "That is a legal L-shaped jump. This time, try the other landing square: f3."}
+          {"uci": "g1h3", "role": "learner", "outcome": "off_goal", "feedback": "That is a legal L-shaped jump. This time, try the other landing square: f3."}
         ],
         "other_legal_move_text": "That move is legal, but this turn is for the knight. Return and try an L-shaped jump."
       }
