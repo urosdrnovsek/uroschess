@@ -66,6 +66,31 @@ def _luma(c):
     return 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]
 
 
+def contrast_ratio(first, second):
+    """WCAG relative-luminance contrast for two RGB colours."""
+    def luminance(color):
+        channels = [value / 255 for value in color]
+        return sum((value / 12.92 if value <= 0.04045 else
+                    ((value + 0.055) / 1.055) ** 2.4) * weight
+                   for value, weight in zip(channels, (0.2126, 0.7152, 0.0722)))
+    dark, light = sorted((luminance(first), luminance(second)))
+    return (light + 0.05) / (dark + 0.05)
+
+
+def _readable_muted(color, backgrounds):
+    """Keep secondary instructions readable across light and dark themes."""
+    if min(contrast_ratio(color, bg) for bg in backgrounds) >= 4.5:
+        return color
+    target = max(((0, 0, 0), (255, 255, 255)),
+                 key=lambda candidate: min(contrast_ratio(candidate, bg)
+                                           for bg in backgrounds))
+    for amount in range(1, 101):
+        candidate = _mix(color, target, amount / 100)
+        if min(contrast_ratio(candidate, bg) for bg in backgrounds) >= 4.5:
+            return candidate
+    return target
+
+
 def _colors_path():
     for p in _CANDIDATES:
         try:
@@ -169,6 +194,8 @@ class Palette:
         self.btn_active = self.accent
         self.on_accent = (20, 18, 22) if _luma(self.accent) > 150 else (250, 250, 252)
         self.field = _mix(self.bg, self.text, 0.07)
+        self.text_dim = _readable_muted(
+            self.text_dim, (self.bg, self.panel, self.btn, self.btn_hot, self.field))
 
         # board squares — force checker contrast while keeping the theme's tint
         if light:

@@ -204,6 +204,185 @@
         "license": "Historical move score",
         "attribution": "Recorded tournament moves with player identities omitted in app"
       }
+    },
+    {
+      "course_id": "chicky-answer-check",
+      "player_id": "chicky",
+      "title": "Get out of check",
+      "card_title": "Answer check",
+      "description": "Capture an attacker, move your king, or block a checking line.",
+      "level": "beginner",
+      "category": "movement",
+      "content_kind": "original",
+      "objective": "Capture an attacker, move your king, or block a checking line.",
+      "assumed_knowledge": [
+        "legal moves",
+        "piece movement",
+        "check"
+      ],
+      "completion_policy": "independent_final",
+      "published": true,
+      "prerequisite_lesson_ids": [
+        "chicky-king-safety"
+      ],
+      "lesson_ids": [
+        "chicky-capture-check",
+        "chicky-block-check"
+      ]
+    },
+    {
+      "course_id": "pippa-castle-both-colours",
+      "player_id": "pippa-pomeranian",
+      "title": "Castle with either colour",
+      "card_title": "Learn castling",
+      "description": "Clear the castling path and castle safely with White and Black.",
+      "level": "beginner",
+      "category": "opening",
+      "content_kind": "original",
+      "objective": "Clear the castling path and castle safely with White and Black.",
+      "assumed_knowledge": [
+        "legal moves",
+        "piece movement",
+        "check"
+      ],
+      "completion_policy": "independent_final",
+      "published": true,
+      "prerequisite_lesson_ids": [
+        "pippa-develop-pieces"
+      ],
+      "lesson_ids": [
+        "pippa-castle-white",
+        "pippa-castle-black"
+      ]
+    },
+    {
+      "course_id": "olivia-rook-tactics",
+      "player_id": "olive-owl",
+      "title": "Rook tactics",
+      "card_title": "Rook tactics",
+      "description": "Find a rook skewer and a back-rank checkmate.",
+      "level": "intermediate",
+      "category": "tactics",
+      "content_kind": "original",
+      "objective": "Find a rook skewer and a back-rank checkmate.",
+      "assumed_knowledge": [
+        "legal moves",
+        "piece movement",
+        "check"
+      ],
+      "completion_policy": "independent_final",
+      "published": true,
+      "prerequisite_lesson_ids": [
+        "chicky-rook-lines",
+        "chicky-simple-mate"
+      ],
+      "lesson_ids": [
+        "olivia-rook-skewer",
+        "olivia-back-rank-mate"
+      ]
+    },
+    {
+      "course_id": "chicky-pawn-surprises",
+      "player_id": "chicky",
+      "title": "More pawn moves",
+      "card_title": "Pawn surprises",
+      "description": "Try en passant and promote a black pawn.",
+      "level": "beginner",
+      "category": "movement",
+      "content_kind": "original",
+      "objective": "Try en passant and promote a black pawn.",
+      "assumed_knowledge": [
+        "legal moves",
+        "piece movement",
+        "check"
+      ],
+      "completion_policy": "independent_final",
+      "published": true,
+      "prerequisite_lesson_ids": [
+        "chicky-pawn-steps"
+      ],
+      "lesson_ids": [
+        "chicky-en-passant",
+        "chicky-black-promotion"
+      ]
+    },
+    {
+      "course_id": "tom-keep-pieces-safe",
+      "player_id": "tom-rabbit",
+      "title": "Keep your pieces safe",
+      "card_title": "Save your pieces",
+      "description": "Remove an attacker, add a defender, and move threatened pieces to safety.",
+      "level": "beginner",
+      "category": "tactics",
+      "content_kind": "original",
+      "objective": "Remove an attacker, add a defender, and move threatened pieces to safety.",
+      "assumed_knowledge": [
+        "legal moves",
+        "piece movement",
+        "check"
+      ],
+      "completion_policy": "independent_final",
+      "published": true,
+      "prerequisite_lesson_ids": [
+        "chicky-bishop-diagonals",
+        "chicky-knight-steps"
+      ],
+      "lesson_ids": [
+        "tom-remove-attacker",
+        "tom-save-threatened-pieces"
+      ]
+    },
+    {
+      "course_id": "tina-endgame-helpers",
+      "player_id": "tina-turtle",
+      "title": "Kings and rooks help pawns",
+      "card_title": "Endgame helpers",
+      "description": "Catch an opposing passed pawn and support your own with a rook.",
+      "level": "beginner",
+      "category": "endgame",
+      "content_kind": "original",
+      "objective": "Catch an opposing passed pawn and support your own with a rook.",
+      "assumed_knowledge": [
+        "legal moves",
+        "piece movement",
+        "check"
+      ],
+      "completion_policy": "independent_final",
+      "published": true,
+      "prerequisite_lesson_ids": [
+        "tina-active-king",
+        "chicky-rook-lines"
+      ],
+      "lesson_ids": [
+        "tina-catch-a-pawn",
+        "tina-rook-behind-pawn"
+      ]
+    },
+    {
+      "course_id": "bruno-active-rooks",
+      "player_id": "bruno-bear",
+      "title": "Make your rooks active",
+      "card_title": "Active rooks",
+      "description": "Enter the seventh rank and coordinate two rooks on an open file.",
+      "level": "intermediate",
+      "category": "middlegame",
+      "content_kind": "original",
+      "objective": "Enter the seventh rank and coordinate two rooks on an open file.",
+      "assumed_knowledge": [
+        "legal moves",
+        "piece movement",
+        "check"
+      ],
+      "completion_policy": "independent_final",
+      "published": true,
+      "prerequisite_lesson_ids": [
+        "bruno-activate-pieces",
+        "chicky-rook-lines"
+      ],
+      "lesson_ids": [
+        "bruno-rook-seventh",
+        "bruno-double-rooks"
+      ]
     }
   ]
 }

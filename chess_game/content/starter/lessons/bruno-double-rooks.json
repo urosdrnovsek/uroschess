@@ -1,0 +1,99 @@
+{
+  "schema_version": 3,
+  "lesson_id": "bruno-double-rooks",
+  "content_revision": 1,
+  "title": "Work together on a file",
+  "level": "intermediate",
+  "estimated_minutes": 4,
+  "objective": "Double two rooks on one file, then advance the leading rook with support.",
+  "prerequisites": [
+    "rook movement",
+    "open files"
+  ],
+  "concepts": [
+    "rooks",
+    "coordination",
+    "open file"
+  ],
+  "game_id": "bruno-double-rooks-position",
+  "coach_player_id": "bruno-bear",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original practice lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "double-on-the-file",
+      "practice_mode": "guided",
+      "explanation": "Your rook on d2 occupies an open file. Bring the other rook to d1, behind it, so the rooks can work together.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Put your second rook behind the rook on d2.",
+        "hints": [
+          "The a1 rook can move across the first rank.",
+          "Move a1 to d1."
+        ],
+        "tree": [
+          {
+            "uci": "a1d1",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Rd1 doubles your rooks on the d-file. The rear rook protects the leading rook on d2."
+          },
+          {
+            "uci": "a1b1",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Rb1 moves the rook, but does not join its partner on the d-file."
+          }
+        ],
+        "other_legal_move_text": "That move is legal but is not reviewed for this task. Read the question again or try a hint."
+      },
+      "node_path": [],
+      "expected_fen": "7k/pp6/8/8/8/8/3R1PPP/R5K1 w - - 0 1"
+    },
+    {
+      "step_id": "advance-the-leading-rook",
+      "practice_mode": "independent",
+      "explanation": "Black moved the king to h7. Your leading rook can enter the seventh rank with check. The rook behind it will still protect the square it reaches.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Advance the leading rook to the seventh rank with check.",
+        "hints": [
+          "Move the rook on d2 up the open d-file.",
+          "Move d2 to d7."
+        ],
+        "tree": [
+          {
+            "uci": "d2d7",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Rd7+ enters the seventh rank with check. Your rook on d1 protects the rook on d7."
+          },
+          {
+            "uci": "d2d6",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Rd6 stays protected on the file, but does not give the requested seventh-rank check."
+          }
+        ],
+        "other_legal_move_text": "That move is legal but is not reviewed for this task. Read the question again or try a hint."
+      },
+      "node_path": [
+        "a1d1",
+        "h8h7"
+      ],
+      "expected_fen": "8/pp5k/8/8/8/8/3R1PPP/3R2K1 w - - 2 2"
+    }
+  ],
+  "takeaway": "Two rooks on an open file can support each other. Advance the leading rook when its entry square is safe and the rear rook can still protect it."
+}

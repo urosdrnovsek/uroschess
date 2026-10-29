@@ -1,0 +1,12 @@
+{
+  "kind": "internal automated usability audit; no learner observations",
+  "screens_checked": {
+    "lesson": 2730,
+    "menu": 1512,
+    "game": 21,
+    "challenge": 21,
+    "replay": 21
+  },
+  "total": 4305,
+  "issues": []
+}

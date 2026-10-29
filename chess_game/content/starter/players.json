@@ -14,7 +14,7 @@
       "name": "Olivia the Owl",
       "short_name": "Olivia",
       "portrait": "olive.bmp",
-      "intro": "Spot a knight fork and explore a Catalan bishop idea with Olivia.",
+      "intro": "Spot forks, rook skewers, and checkmate with Olivia.",
       "portrait_attribution": "Original animal illustration for Uroschess"
     },
     {
@@ -22,7 +22,7 @@
       "name": "Chicky",
       "short_name": "Chicky",
       "portrait": "chicky.bmp",
-      "intro": "Learn piece moves, king safety, and a simple checkmate with Chicky.",
+      "intro": "Learn piece moves, answer check, and give checkmate with Chicky.",
       "portrait_attribution": "Original animal illustration for Uroschess"
     },
     {
@@ -30,7 +30,7 @@
       "name": "Pippa the Pomeranian",
       "short_name": "Pippa",
       "portrait": "pomeranian.bmp",
-      "intro": "Find useful opening moves with Pippa.",
+      "intro": "Develop pieces and castle with White and Black with Pippa.",
       "portrait_attribution": "Original animal illustration for Uroschess"
     },
     {
@@ -38,7 +38,7 @@
       "name": "Tina the Turtle",
       "short_name": "Tina",
       "portrait": "tina.bmp",
-      "intro": "Help a pawn become a queen with Tina.",
+      "intro": "Promote pawns, catch them, and support them with kings and rooks with Tina.",
       "portrait_attribution": "Original animal illustration for Uroschess"
     },
     {
@@ -46,7 +46,7 @@
       "name": "Tom the Rabbit",
       "short_name": "Tom",
       "portrait": "tom.bmp",
-      "intro": "Spot an opening threat and reply with Tom.",
+      "intro": "Spot threats, save pieces, and add defenders with Tom.",
       "portrait_attribution": "Original animal illustration for Uroschess"
     },
     {

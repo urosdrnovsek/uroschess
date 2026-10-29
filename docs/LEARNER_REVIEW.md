@@ -53,3 +53,21 @@ Copy [the observation sheet](learner-session-template.md) once per anonymous
 session. After the first round, group repeated difficulties, choose the three
 most consequential changes, and repeat those tasks in another round. Report
 observations as a small qualitative sample, without claims of mastery.
+
+## Internal usability audit — 29 October 2026
+
+This was an automated and visual desktop review, separate from the learner
+sessions above. No learner sessions have been conducted.
+
+The review found overlapping content at 360×320, a very small board at 360×600
+with extra-large text, insufficient feedback space under two longer questions,
+faint secondary labels, and coordinate labels touching the status area. The
+update sets a supported 360×720 narrow / 720×600 wide minimum, prioritizes the
+board over the compact top portrait, increases reading space and secondary text
+contrast, and fits coordinates within their frame.
+
+Run `python -m scripts.audit_usability` to reproduce the layout and interaction
+scan with isolated progress. See [the update report](development/update-2026-10-29.md)
+for coverage, verification and the remaining device/accessibility limits.
+Use the existing observation template to check whether these changes help real
+learners; internal review does not establish teaching effectiveness.

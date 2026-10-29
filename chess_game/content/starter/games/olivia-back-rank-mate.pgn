@@ -1,0 +1,10 @@
+[Event "Uroschess Find a back-rank mate"]
+[Site "Synthetic lesson"]
+[White "Learner"]
+[Black "Practice position"]
+[Result "1-0"]
+[SetUp "1"]
+[FEN "6k1/5ppp/8/8/8/8/4NPPP/4R1K1 w - - 0 1"]
+[Annotator "Uroschess"]
+
+1. Nc3 Kh8 2. Re8# 1-0

@@ -90,6 +90,25 @@ read their short stories, and see their favourite chess pieces. Click the
 larger portrait on the main menu, or press **N**, to see another character's
 quote.
 
+Additional short courses are available from **Learn**:
+
+- **Chicky — Get out of check:** capture the attacker, move your king to
+  safety, and block a rook check with a protected piece.
+- **Pippa — Castle with either colour:** practise kingside castling with
+  White and Black, and support your centre afterward.
+- **Olivia — Rook tactics:** skewer a king and queen, then find a back-rank
+  checkmate.
+- **Chicky — More pawn moves:** capture en passant and promote a black pawn.
+- **Tom — Keep your pieces safe:** remove an attacker, add a defender, and
+  move threatened pieces to safety.
+- **Tina — Kings and rooks help pawns:** catch a passed pawn with your king
+  and support your own pawn with a rook behind it.
+- **Bruno — Make your rooks active:** enter the seventh rank and coordinate
+  two rooks on an open file.
+
+These fourteen lessons contain twenty-eight exercises, with hints, reviewed alternative
+moves, and a final step to try independently in each lesson.
+
 ![Chicky's first knight movement lesson](docs/chicky-lesson.png)
 
 ![Chicky's pawn movement and capture lesson](docs/chicky-pawn-lesson.png)
@@ -116,16 +135,22 @@ panel stack vertically.
 - Move by clicking or dragging pieces. Arrow keys and Enter or Space also work
   for selecting squares.
 - **F** flips the board. **Esc** goes back. **M** returns to the main menu from
-  a lesson.
+  a game or lesson.
 - **Tab** moves keyboard focus between visible buttons; **Enter** activates one.
 - In a replay, use the on-screen controls or Left and Right to step through
   moves. Space starts or pauses autoplay.
 - In an ordinary game, **R** starts over and **U** takes back a move. **S** saves
-  a PGN; **L** loads `game.pgn` from the working directory. Challenge matches
+  a PGN; **L** loads `game.pgn` from the working directory. **Main menu**
+  at the bottom right ends the current session and returns to the main menu, including
+  while the computer is thinking. Save a PGN first if you want to keep the
+  moves. **New game** starts over with the same game mode. Challenge matches
   have fixed opponents and no takeback or PGN import. **Save & return** keeps
   the current match; **Resign** asks for a second click before ending it.
 
-The window is resizable. **Appearance** offers board styles, piece colours,
+The window is resizable, with a supported minimum of 360×720 in narrow layouts
+or 720×600 in wide layouts. Smaller resize requests are enlarged to preserve
+usable board and reading space. Compact lesson views omit the decorative
+portrait above the board. **Appearance** offers board styles, piece colours,
 text sizes, and a sound switch. Settings, lesson progress, and challenge badges
 are kept locally.
 
@@ -136,6 +161,7 @@ python -m pip install -e ".[dev]" build
 pytest
 python -m scripts.validate_content
 python -m scripts.smoke
+python -m scripts.audit_usability --output /tmp/uroschess-usability
 python -m scripts.update_readme_screenshots
 ```
 

@@ -1,0 +1,100 @@
+{
+  "schema_version": 3,
+  "lesson_id": "pippa-castle-white",
+  "content_revision": 1,
+  "title": "Castle with White",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Castle kingside with White and use a central pawn to support your pieces.",
+  "prerequisites": [
+    "legal moves",
+    "piece movement",
+    "check"
+  ],
+  "concepts": [
+    "castling",
+    "king safety",
+    "pawn support"
+  ],
+  "game_id": "pippa-castle-white-position",
+  "coach_player_id": "pippa-pomeranian",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original practice lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "castle-kingside",
+      "practice_mode": "guided",
+      "explanation": "Your king and h1 rook have not moved. The squares f1 and g1 are clear and safe. Castling moves the king two squares and brings the rook beside it.",
+      "detail": "You cannot castle after moving the king or that rook, while in check, or through an attacked square.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Castle kingside: move your king from e1 to g1.",
+        "hints": [
+          "Choose the king, not the rook. The rook will move automatically.",
+          "Click e1, then g1."
+        ],
+        "tree": [
+          {
+            "uci": "e1g1",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "O-O puts your king on g1 and your rook on f1 in one move."
+          },
+          {
+            "uci": "a2a3",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "a3 is legal, but does not complete king safety. Try castling."
+          }
+        ],
+        "other_legal_move_text": "That move is legal, but it is not reviewed for this task. Try the hint or choose a move that answers the question."
+      },
+      "node_path": [],
+      "expected_fen": "r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 6 5"
+    },
+    {
+      "step_id": "support-the-centre",
+      "practice_mode": "independent",
+      "explanation": "Black castled too. Your bishop on c1 is still waiting. A pawn move can open its diagonal and add a defender to your e4 pawn.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move a pawn to support e4 and free the c1 bishop.",
+        "hints": [
+          "A white pawn on d3 attacks e4.",
+          "Move the pawn from d2 to d3."
+        ],
+        "tree": [
+          {
+            "uci": "d2d3",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "d3 supports e4 and clears d2 so your c1 bishop can develop."
+          },
+          {
+            "uci": "d2d4",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "d4 challenges the centre, but a pawn on d4 does not defend e4. Try the supporting move for this task."
+          }
+        ],
+        "other_legal_move_text": "That move is legal, but it is not reviewed for this task. Try the hint or choose a move that answers the question."
+      },
+      "node_path": [
+        "e1g1",
+        "e8g8"
+      ],
+      "expected_fen": "r1bq1rk1/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQ1RK1 w - - 8 6"
+    }
+  ],
+  "takeaway": "Develop the pieces between your king and rook, check that the king's path is safe, and castle. Then keep helping your centre."
+}

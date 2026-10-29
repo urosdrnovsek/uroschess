@@ -30,6 +30,7 @@ import pygame
 
 from . import ai, sound, theme
 from .board import Board
+from .startup import StartupCancelled, run_startup_task
 from .chess_thoughts import ChessThought, random_thought
 from .challenge import (ChallengeSaveError, ChallengeStore, ChallengeVerification,
                         OPPONENTS, ROSTER, RECOVERY_MESSAGES, stage_states,
@@ -58,7 +59,7 @@ from .views import BoardView, Button, StudyView, draw_focus_ring
 from .views.chess_thought_view import draw_chess_thought, _portrait
 from .views.course_about_view import draw_course_about
 from .views.player_library_view import draw_player_card, draw_guide_card
-from .views.layout import layout_board
+from .views.layout import layout_board, supported_window_size
 from .review_actions import ReviewActionsMixin
 from .lesson_actions import LessonActionsMixin
 from .engine_actions import EngineActionsMixin
@@ -328,7 +329,7 @@ def _paint_board(surf, ox, oy, px, sdef, rng, coord_font=None, flipped=False,
 
     if coord_font is not None:
         files = "abcdefgh"
-        off = max(9, int(frame * 0.55))
+        off = max(4, frame // 2)
         for i in range(8):
             c = i if not flipped else 7 - i
             fs = coord_font.render(files[c], True, sdef["coord"])
@@ -519,8 +520,14 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
                 self.preferences_error = str(error)
         sound.set_enabled(self.sound_enabled)
         try:
-            self.game_library = load_game_library()
+            self.game_library = run_startup_task(
+                load_game_library, self._startup_event,
+                self._draw_startup, self.clock)
             self.library_errors = self.game_library.errors
+        except StartupCancelled:
+            self.running = False
+            self.game_library = None
+            self.library_errors = ()
         except ContentLoadError as error:
             self.game_library = None
             self.library_errors = (str(error),)
@@ -529,6 +536,26 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
         self._layout()
         self._ensure_fonts()
         self._new_game(human_colors={WHITE})
+
+    def _startup_event(self, event):
+        if event.type == pygame.QUIT:
+            return False
+        if event.type == pygame.VIDEORESIZE:
+            self._last_resize = supported_window_size(event.w, event.h)
+            self.screen = pygame.display.set_mode(self._last_resize, self._flags)
+            self.win_w, self.win_h = self.screen.get_size()
+        return True
+
+    def _draw_startup(self):
+        self.screen.fill(self.pal.bg)
+        title = self.title_font.render("Uroschess", True, self.pal.text)
+        dots = "." * (1 + pygame.time.get_ticks() // 350 % 3)
+        message = self.text_font.render("Preparing lessons" + dots,
+                                        True, self.pal.text)
+        center = (self.win_w // 2, self.win_h // 2)
+        self.screen.blit(title, title.get_rect(center=(center[0], center[1] - 28)))
+        self.screen.blit(message, message.get_rect(center=(center[0], center[1] + 18)))
+        pygame.display.flip()
 
     # ------------------------------------------------------------- theme/layout
     def _rebuild_ui_fonts(self):
@@ -622,6 +649,8 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
 
     def _ensure_fonts(self):
         size = int(self.SQ * 0.82)
+        self.coord_font = _ui_font(
+            max(8, min(round(11 * self.text_scale), int(self.frame * 0.7))), bold=True)
         if self._piece_size != size:
             self.piece_font, self.use_glyphs = _load_piece_font(size)
             self.small_piece_font, _ = _load_piece_font(max(14, self.SQ // 4))
@@ -651,7 +680,7 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
             self.small_font, self.mono_font, self.tag_font)
 
     def _on_resize(self, w, h):
-        w, h = max(360, w), max(320, h)
+        w, h = supported_window_size(w, h)
         # Compare against the last size we were *asked* for, not screen.get_size()
         # — on Wayland SDL reports the frame size back but keeps sending the
         # (smaller) content size, which otherwise loops forever.
@@ -1260,6 +1289,11 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
         return True
 
     def _on_mouse_down(self, pos):
+        if self.scene == "game" and self.challenge is None:
+            for button in self._game_buttons:
+                if button.action == self._to_menu and button.rect.collidepoint(pos):
+                    button.action()
+                    return
         if self.pending_promo is not None:
             for index, b in enumerate(self._promo_buttons):
                 if b.rect.collidepoint(pos):
@@ -1281,6 +1315,8 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
                     return
         buttons = self._menu_buttons if self.scene == "menu" else self._game_buttons
         for index, b in enumerate(buttons):
+            if b.kind == "disabled":
+                continue
             if b.rect.collidepoint(pos):
                 if b.kind == "lesson_nav_disabled":
                     return
@@ -1354,7 +1390,7 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
     def _move_button_focus(self, reverse=False):
         buttons = self._active_buttons()
         available = [index for index, button in enumerate(buttons)
-                     if button.kind != "lesson_nav_disabled"]
+                     if button.kind not in ("lesson_nav_disabled", "disabled")]
         if not available:
             self._button_focus = None
             return
@@ -1370,7 +1406,7 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
         buttons = self._active_buttons()
         if self._button_focus is None or self._button_focus >= len(buttons):
             return False
-        if buttons[self._button_focus].kind == "lesson_nav_disabled":
+        if buttons[self._button_focus].kind in ("lesson_nav_disabled", "disabled"):
             return False
         sound.play("click")
         buttons[self._button_focus].action()
@@ -1819,13 +1855,20 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
                     rect, label, action))
             return
         specs = [
-            ("New", lambda: self._new_game(self.human_colors)),
+            ("New game", lambda: self._new_game(self.human_colors)),
             ("Takeback", self._takeback),
             ("Flip", self._toggle_flip),
             ("Save PGN", self._save_pgn),
             ("Load PGN", self._load_pgn),
-            ("Menu", self._to_menu),
+            ("Main menu", self._to_menu),
         ]
+
+        def add_control(rect, label, action):
+            disabled = (label == "Takeback" and (self.thinking or not self.moves)
+                        or label == "Load PGN" and self.thinking)
+            self._game_buttons.append(Button(
+                rect, label, action, kind="disabled" if disabled else "normal"))
+
         if not self.show_panel:
             gap = 6
             width = (self.status_w - 2 * gap) // 3
@@ -1835,17 +1878,17 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
             for index, (label, action) in enumerate(specs):
                 col, row = index % 3, index // 3
                 x = self.status_x + col * (width + gap)
-                self._game_buttons.append(Button(
+                add_control(
                     (x, y + row * (height + row_gap), width, height),
-                    label, action))
+                    label, action)
             return
-        bw, bh, gap = (self.panel_w - 20) // 2, 30, 8
-        x0 = self.panel_x + 8
-        y0 = self.panel_y + self.panel_h - 14 - (bh + gap) * 3
+        bw, bh, gap = (self.panel_w - 32) // 2, 36, 8
+        x0 = self.panel_x + 12
+        y0 = self.panel_y + self.panel_h - 12 - (bh + gap) * 3
         for i, (label, action) in enumerate(specs):
             col, row = i % 2, i // 2
             rect = (x0 + col * (bw + gap), y0 + row * (bh + gap), bw, bh)
-            self._game_buttons.append(Button(rect, label, action))
+            add_control(rect, label, action)
 
     def _build_replay_buttons(self):
         self._game_buttons = []
@@ -2023,6 +2066,9 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
     def _to_menu(self):
         self.toast = ""
         self._cancel_challenge_search()
+        self.pending_promo = self.dragging = self.selected = None
+        self.legal_from_selected = []
+        self._game_buttons = []
         self.challenge_save_error = None
         self._reset_button_focus()
         self.replay_autoplay = False
@@ -2172,9 +2218,13 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
         if self.scene == "menu":
             self._draw_menu(thought_progress)
         else:
+            if self.scene == "game" and self.challenge is None:
+                self._build_game_buttons()
             self._ensure_game_bg()
             self.screen.blit(self._game_bg, (0, 0))
             self._draw_board()
+            if self._game_header_rect:
+                self._draw_game_header()
             if self._board_thought_rect:
                 self._portrait_hit_rect = self._board_thought_rect.copy()
                 draw_chess_thought(
@@ -2757,14 +2807,41 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
         p = self.pal
         mx, my = pygame.mouse.get_pos()
         for index, button in enumerate(self._game_buttons):
+            disabled = button.kind == "disabled"
+            hot = button.rect.collidepoint(mx, my) and not disabled
             _flat_button(self.screen, button.rect,
-                         p.btn_hot if button.rect.collidepoint(mx, my) else p.btn,
+                         p.btn_hot if hot else p.btn,
                          p.panel_line)
             label = _fit_text(self.small_font, button.label, button.rect.w - 12)
-            text = self.small_font.render(label, True, p.text)
+            text = self.small_font.render(
+                label, True, p.text_dim if disabled else p.text)
             self.screen.blit(text, text.get_rect(center=button.rect.center))
             if index == self._button_focus:
                 draw_focus_ring(self.screen, button.rect, p.accent, 8)
+
+    def _draw_game_header(self):
+        p = self.pal
+        rect = self._game_header_rect
+        _round_rect_alpha(self.screen, rect, (*p.panel, 255), 8)
+        if len(self.human_colors) == 1:
+            title = "Play against AI"
+            color = "White" if WHITE in self.human_colors else "Black"
+            detail = "You: {} · {}".format(color, DIFFICULTIES[self.difficulty][0])
+        elif self.human_colors:
+            title, detail = "Play with a friend", "White and Black · local game"
+        else:
+            title, detail = "Watch AI play", DIFFICULTIES[self.difficulty][0] + " difficulty"
+        width = rect.w - 24
+        if self.status_font.size(title)[0] > width:
+            title = ("vs AI" if len(self.human_colors) == 1 else
+                     "Local game" if self.human_colors else "AI vs AI")
+        if len(self.human_colors) == 1 and self.small_font.size(detail)[0] > width:
+            detail = color + " · " + DIFFICULTIES[self.difficulty][0]
+        title = _fit_text(self.status_font, title, width)
+        detail = _fit_text(self.small_font, detail, width)
+        self.screen.blit(self.status_font.render(title, True, p.text), (rect.x + 12, rect.y + 4))
+        self.screen.blit(self.small_font.render(detail, True, p.text_dim),
+                         (rect.x + 12, rect.bottom - self.small_font.get_height() - 4))
 
     def _draw_challenge_panel(self):
         p = self.pal
@@ -2812,13 +2889,13 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
 
         by, bh = self.panel_y + 16, 14
         if self._portrait_in_panel:
-            portrait = pygame.Rect(ix, by, iw, 260)
+            portrait = pygame.Rect(ix, by, iw, 120)
             self._portrait_hit_rect = portrait
             draw_chess_thought(
                 self.screen, portrait, self.chess_thought,
                 self.status_font, self.small_font, self.tag_font, p,
                 previous=self._thought_previous,
-                progress=thought_progress)
+                progress=thought_progress, compact=True)
             by = portrait.bottom + 16
         cp = max(-1000, min(1000, self.eval_cp))
         frac = 0.5 + cp / 2000.0
@@ -2838,12 +2915,17 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
             self.screen.blit(s, (ix + iw - s.get_width(), by + bh + 20))
 
         top = by + bh + 66
-        bottom = (self.panel_y + self.panel_h - 14 - (30 + 8) * 3 - 10
-                  if self.show_panel else self.panel_y + self.panel_h - 14)
+        bottom = self.panel_y + self.panel_h - 12 - (36 + 8) * 3 - 12
+        heading = self.small_font.render("MOVES", True, p.text_dim)
+        self.screen.blit(heading, (ix, top))
+        top += heading.get_height() + 8
         _round_rect_alpha(self.screen, (ix, top, iw, bottom - top),
                           (*p.field, 255), max(4, min(rad, 8)))
-        line_h = 17
+        line_h = self.mono_font.get_linesize() + 4
         rows = (len(self.sans) + 1) // 2
+        if not rows:
+            self.screen.blit(self.small_font.render("No moves yet", True, p.text_dim),
+                             (ix + 8, top + 6))
         visible = max(1, (bottom - top - 10) // line_h)
         start = max(0, rows - visible)
         y = top + 6
@@ -2867,18 +2949,7 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
                 self.screen.blit(s, (xx, y))
             y += line_h
 
-        mx, my = pygame.mouse.get_pos()
-        for index, btn in enumerate(self._game_buttons):
-            hot = btn.rect.collidepoint(mx, my)
-            _flat_button(self.screen, btn.rect,
-                         p.btn_hot if hot else p.btn, p.panel_line,
-                         max(4, min(rad, 8)))
-            s = self.small_font.render(btn.label, True, p.text)
-            self.screen.blit(s, s.get_rect(center=btn.rect.center))
-            if index == self._button_focus:
-                draw_focus_ring(
-                    self.screen, btn.rect, p.accent,
-                    max(4, min(rad, 8)))
+        self._draw_game_buttons()
 
     def _draw_replay_panel(self, thought_progress=1.0):
         self._sync_study_view()
@@ -3031,6 +3102,8 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
             mover = "White" if self.board.side_to_move == WHITE else "Black"
             who = "Your move" if self.board.side_to_move in self.human_colors else "AI"
             text = f"{who} — {mover} to move"
+            if in_check(self.board, self.board.side_to_move):
+                text += " · Check!"
         text = _fit_text(self.status_font, text, rect.w - 28)
         s = self.status_font.render(text, True, p.accent if hot else p.text)
         self.screen.blit(s, s.get_rect(midleft=(rect.x + 14, rect.centery)))
@@ -3303,6 +3376,8 @@ class ChessUI(MenuLayoutMixin, LessonActionsMixin, EngineActionsMixin, ReviewAct
             self._save_pgn()
         elif key == pygame.K_l and self.challenge is None:
             self._load_pgn()
+        elif key == pygame.K_m:
+            self._to_menu()
         return True
 
 

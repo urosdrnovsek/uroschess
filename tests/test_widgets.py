@@ -183,7 +183,17 @@ def test_character_gallery_covers_every_lesson_and_preserves_return_route():
     assert guide_ids == {opponent.ident for opponent in ROSTER}
     ui._open_guide_lessons("pippa-pomeranian")
     entry = ui.game_library.lesson_entry("italian-development")
-    ui.start_lesson(entry)
+    # Start through the guide's paginated list, then return to that page.
+    for _ in range(len(ui._guide_entries("pippa-pomeranian"))):
+        ui._build_menu_buttons()
+        lesson_button = next((button for button in ui._menu_buttons
+                              if button.label == entry.lesson.title), None)
+        if lesson_button is not None:
+            break
+        next(button for button in ui._menu_buttons
+             if button.label == "Next ›").action()
+    assert lesson_button is not None
+    lesson_button.action()
     assert ui.coach_profile.player_id == "pippa-pomeranian"
     assert ui._next_path_entry() is None
     ui._leave_lesson()
@@ -801,6 +811,11 @@ def test_lesson_arrows_move_within_a_character_and_keep_the_return_page():
     assert ui.lesson_course_id == course.course_id
     ui._lesson_next()
     ui._lesson_next()
+    assert ui.lesson_entry.lesson.lesson_id == "bruno-rook-seventh"
+    assert ui.lesson_course_id == "bruno-active-rooks"
+    ui._lesson_next()
+    assert ui.lesson_entry.lesson.lesson_id == "bruno-double-rooks"
+    ui._lesson_next()
     assert ui.lesson_entry.lesson.lesson_id == "coordination-before-material"
     assert ui.lesson_return_view == "guide_lessons"
     ui._build_lesson_buttons()
@@ -921,6 +936,10 @@ def test_portrait_click_changes_player_and_completes_animation():
     ui._build_lesson_buttons()
     ui._draw()
     assert ui._portrait_hit_rect == ui._board_thought_rect
+    assert ui._portrait_hit_rect is None
+    ui._on_resize(700, 900)
+    ui._build_lesson_buttons()
+    ui._draw()
     assert ui._portrait_hit_rect.bottom < ui.board_y
     first = ui.chess_thought
     ui._on_mouse_down(ui._portrait_hit_rect.center)
@@ -1122,14 +1141,82 @@ def test_narrow_ordinary_game_keeps_controls_visible_and_clickable():
         ui._build_game_buttons()
         ui._draw()
         assert [button.label for button in ui._game_buttons] == [
-            "New", "Takeback", "Flip", "Save PGN", "Load PGN", "Menu"]
+            "New game", "Takeback", "Flip", "Save PGN", "Load PGN", "Main menu"]
         assert all(ui.screen.get_rect().contains(button.rect)
                    for button in ui._game_buttons)
         assert all(button.rect.top > ui.status_y + ui.status_h
                    for button in ui._game_buttons)
         menu = ui._game_buttons[-1]
+        assert menu.rect.right == max(button.rect.right for button in ui._game_buttons)
+        assert menu.rect.bottom == max(button.rect.bottom for button in ui._game_buttons)
         ui._on_mouse_down(menu.rect.center)
         assert (ui.scene, ui.menu_view) == ("menu", "main")
+    ui.progress_store.close()
+    pygame.quit()
+
+
+def test_game_layout_keeps_board_status_and_controls_apart_at_all_text_sizes():
+    ui = ChessUI(":memory:")
+    ui.start_game({"w", "b"})
+    for scale in (1.0, 1.2, 1.4):
+        ui._set_text_scale(scale)
+        for size in ((360, 320), (360, 420), (640, 700), (720, 440), (980, 760)):
+            ui._on_resize(*size)
+            ui._draw()
+            board = pygame.Rect(ui.board_x, ui.board_y, ui.board_px, ui.board_px)
+            status = pygame.Rect(ui.status_x, ui.status_y, ui.status_w, ui.status_h)
+            assert ui.screen.get_rect().contains(board.inflate(2 * ui.frame, 2 * ui.frame))
+            assert ui.screen.get_rect().contains(status)
+            for index, button in enumerate(ui._game_buttons):
+                assert ui.screen.get_rect().contains(button.rect)
+                assert not button.rect.colliderect(board)
+                assert not button.rect.colliderect(status)
+                assert not any(button.rect.colliderect(other.rect)
+                               for other in ui._game_buttons[index + 1:])
+            menu = ui._game_buttons[-1]
+            assert menu.label == "Main menu"
+            assert menu.rect.right == max(button.rect.right for button in ui._game_buttons)
+            assert menu.rect.bottom == max(button.rect.bottom for button in ui._game_buttons)
+            assert ui.small_font.size(menu.label)[0] <= menu.rect.w - 12
+    ui.progress_store.close()
+    pygame.quit()
+
+
+def test_exit_during_ai_search_cancels_it_and_clears_promotion(monkeypatch):
+    def launch(board, seconds, depth, cancel, result_queue, token=None):
+        pass
+
+    monkeypatch.setattr(ChessUI, "_launch_search", staticmethod(launch))
+    ui = ChessUI(":memory:")
+    ui.start_game({"b"})
+    cancel = ui.challenge_cancel_event
+    assert ui.thinking
+    ui.pending_promo = (0, 0)
+    ui._draw()
+    ui._on_mouse_down(ui._game_buttons[-1].rect.center)
+    assert (ui.scene, ui.menu_view) == ("menu", "main")
+    assert cancel.is_set() and not ui.thinking
+    assert ui.pending_promo is None
+    ui._build_menu_buttons()
+    ui._on_key(pygame.K_TAB)
+    assert ui._active_buttons() == ui._menu_buttons
+    ui.progress_store.close()
+    pygame.quit()
+
+
+def test_finished_game_keeps_bottom_right_menu_accessible_by_keyboard():
+    ui = ChessUI(":memory:")
+    ui.start_game({"w", "b"})
+    for uci in ("f2f3", "e7e5", "g2g4", "d8h4"):
+        ui._apply(next(move for move in legal_moves(ui.board) if str(move) == uci))
+    assert ui.status == "checkmate"
+    ui._draw()
+    assert ui._game_buttons[-1].label == "Main menu"
+    for _ in range(len(ui._game_buttons)):
+        ui._on_key(pygame.K_TAB)
+    assert ui._active_buttons()[ui._button_focus].label == "Main menu"
+    ui._on_key(pygame.K_RETURN)
+    assert ui.scene == "menu"
     ui.progress_store.close()
     pygame.quit()
 
@@ -1265,7 +1352,12 @@ def test_player_opening_route_keeps_coach_and_question_visible(tmp_path):
                                           if button.kind not in
                                           ("lesson_nav", "lesson_nav_disabled"))
             assert ui.study_view.lesson_content_rect.height >= 20
-            assert ui._portrait_hit_rect is not None
+            if ui._board_thought_rect or ui._portrait_in_panel:
+                assert ui._portrait_hit_rect is not None
+            else:
+                assert ui._portrait_hit_rect is None
+    ui._on_resize(980, 760)
+    ui._draw()
     ui._on_mouse_down(ui._portrait_hit_rect.center)
     assert ui.lesson.hints_used == 0
     ui._leave_lesson()
@@ -1412,3 +1504,47 @@ def test_finished_challenge_review_returns_and_opens_related_practice():
     assert ui.challenge is None
     ui.progress_store.close()
     pygame.quit()
+
+
+def test_minimum_layout_keeps_board_and_long_question_usable():
+    ui = ChessUI(":memory:")
+    try:
+        for scale in (1.0, 1.2, 1.4):
+            ui._set_text_scale(scale)
+            for size in ((360, 320), (719, 320), (720, 320), (820, 480)):
+                ui._on_resize(*size)
+                for ident in ("chicky-knight-steps", "pippa-castle-white",
+                              "tom-save-threatened-pieces"):
+                    ui.start_lesson(ui.game_library.lesson_entry(ident))
+                    ui._build_lesson_buttons()
+                    ui._draw()
+                    board = pygame.Rect(ui.board_x - ui.frame, ui.board_y - ui.frame,
+                                        ui.board_px + 2 * ui.frame,
+                                        ui.board_px + 2 * ui.frame)
+                    assert ui.SQ >= 24
+                    assert board.bottom <= ui.status_y
+                    assert ui.study_view.lesson_content_rect.h >= 40
+                    assert (ui.study_view.question_rect.bottom
+                            <= ui.study_view.lesson_content_rect.top)
+    finally:
+        ui.progress_store.close()
+        pygame.quit()
+
+
+def test_secondary_instructions_remain_readable_in_light_and_dark_themes(monkeypatch):
+    from chess_game import theme
+
+    for mode, bg, surface, text, muted, accent in (
+        ("dark", "#1a1b26", "#24283b", "#a9b1d6", "#565f89", "#7aa2f7"),
+        ("light", "#ffffff", "#eeeeee", "#202020", "#aaaaaa", "#456789"),
+    ):
+        raw = dict(theme._FALLBACK, mode=mode, background=bg,
+                   lighter_background=surface, foreground=text,
+                   dark_foreground=muted, accent=accent)
+        monkeypatch.setattr(theme, "_load_raw", lambda: (raw, False))
+        monkeypatch.setattr(theme, "theme_name", lambda: None)
+        monkeypatch.setattr(theme, "hypr_rounding", lambda: 8)
+        palette = theme.Palette()
+        for background in (palette.bg, palette.panel, palette.btn,
+                           palette.btn_hot, palette.field):
+            assert theme.contrast_ratio(palette.text_dim, background) >= 4.5

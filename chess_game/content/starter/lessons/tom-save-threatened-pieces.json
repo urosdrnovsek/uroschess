@@ -1,0 +1,166 @@
+{
+  "schema_version": 3,
+  "lesson_id": "tom-save-threatened-pieces",
+  "content_revision": 1,
+  "title": "Save a threatened piece",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Move an attacked knight to safety and notice the next attack on your rook.",
+  "prerequisites": [
+    "bishop movement",
+    "knight movement",
+    "rook movement"
+  ],
+  "concepts": [
+    "defence",
+    "threats",
+    "safe squares"
+  ],
+  "game_id": "tom-save-threatened-pieces-position",
+  "coach_player_id": "tom-rabbit",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original practice lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "save-the-knight",
+      "practice_mode": "guided",
+      "explanation": "The bishop on h6 attacks your knight on d2 along the diagonal through g5, f4, and e3. Move the knight to f3, outside that diagonal.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move your knight from d2 to f3.",
+        "hints": [
+          "Knights can jump over other pieces.",
+          "Click d2, then f3."
+        ],
+        "tree": [
+          {
+            "uci": "d2f3",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Nf3 escapes the bishop's diagonal safely."
+          },
+          {
+            "uci": "a1a2",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "Ra2 moves the rook, but leaves the knight on d2 available for Bxd2. Save the knight first."
+          }
+        ],
+        "other_legal_move_text": "That move is legal but is not reviewed for this task. Read the question again or try a hint."
+      },
+      "node_path": [],
+      "expected_fen": "7k/8/7b/8/8/8/3N1PPP/R5K1 w - - 0 1"
+    },
+    {
+      "step_id": "notice-the-rook-threat",
+      "practice_mode": "independent",
+      "explanation": "Black moved the bishop to g7. Now its long diagonal reaches your rook on a1. Notice the new target and move that rook to safety.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move your rook off the bishop's diagonal.",
+        "hints": [
+          "The rook on a1 is the piece under attack.",
+          "Moving the rook from a1 to a2 is one safe choice."
+        ],
+        "tree": [
+          {
+            "uci": "a1a2",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "The rook leaves the bishop's diagonal and reaches a safe square."
+          },
+          {
+            "uci": "a1a3",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "The rook leaves the bishop's diagonal and reaches a safe square."
+          },
+          {
+            "uci": "a1a4",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "The rook leaves the bishop's diagonal and reaches a safe square."
+          },
+          {
+            "uci": "a1a5",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "The rook leaves the bishop's diagonal and reaches a safe square."
+          },
+          {
+            "uci": "a1a6",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "The rook leaves the bishop's diagonal and reaches a safe square."
+          },
+          {
+            "uci": "a1a7",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "The rook leaves the bishop's diagonal and reaches a safe square."
+          },
+          {
+            "uci": "a1a8",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "The rook leaves the bishop's diagonal and reaches a safe square."
+          },
+          {
+            "uci": "a1b1",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "The rook leaves the bishop's diagonal and reaches a safe square."
+          },
+          {
+            "uci": "a1c1",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "The rook leaves the bishop's diagonal and reaches a safe square."
+          },
+          {
+            "uci": "a1d1",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "The rook leaves the bishop's diagonal and reaches a safe square."
+          },
+          {
+            "uci": "a1e1",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "The rook leaves the bishop's diagonal and reaches a safe square."
+          },
+          {
+            "uci": "a1f1",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "The rook leaves the bishop's diagonal and reaches a safe square."
+          },
+          {
+            "uci": "f3g5",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "Ng5 leaves the rook on a1 exposed to Bxa1. Save the threatened rook."
+          }
+        ],
+        "other_legal_move_text": "That move is legal but is not reviewed for this task. Read the question again or try a hint."
+      },
+      "node_path": [
+        "d2f3",
+        "h6g7"
+      ],
+      "expected_fen": "7k/6b1/8/8/8/5N2/5PPP/R5K1 w - - 2 2"
+    }
+  ],
+  "takeaway": "After every opponent move, ask what it attacks. A safe square should be outside the enemy piece's reach."
+}

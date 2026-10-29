@@ -1,0 +1,100 @@
+{
+  "schema_version": 3,
+  "lesson_id": "tom-remove-attacker",
+  "content_revision": 1,
+  "title": "Remove the attacker",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Capture a pawn that attacks your bishop, then defend the capturing pawn.",
+  "prerequisites": [
+    "pawn captures",
+    "bishop movement",
+    "knight movement"
+  ],
+  "concepts": [
+    "defence",
+    "captures",
+    "defenders"
+  ],
+  "game_id": "tom-remove-attacker-position",
+  "coach_player_id": "tom-rabbit",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original practice lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "capture-the-attacking-pawn",
+      "practice_mode": "guided",
+      "explanation": "Black's pawn on d5 attacks your bishop on c4. You can save the bishop by removing the attacker with your e4 pawn.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Capture the pawn that attacks your bishop.",
+        "hints": [
+          "Your pawn captures diagonally from e4.",
+          "Move the e4 pawn to d5."
+        ],
+        "tree": [
+          {
+            "uci": "e4d5",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "exd5 removes the pawn that attacked c4. Your bishop can stay on its active square."
+          },
+          {
+            "uci": "c4b3",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Bb3 saves the bishop too. This exercise practises capturing the attacker with a pawn."
+          }
+        ],
+        "other_legal_move_text": "That move is legal but is not reviewed for this task. Read the question again or try a hint."
+      },
+      "node_path": [],
+      "expected_fen": "6nk/8/8/3p4/2B1P3/8/5PPP/RN1Q2K1 w - - 0 1"
+    },
+    {
+      "step_id": "defend-the-capturing-pawn",
+      "practice_mode": "independent",
+      "explanation": "Black developed the knight to f6, where it attacks your pawn on d5. Bring out your remaining knight so it adds a defender to that pawn.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Develop a knight to defend d5.",
+        "hints": [
+          "A knight on c3 attacks d5.",
+          "Move the knight from b1 to c3."
+        ],
+        "tree": [
+          {
+            "uci": "b1c3",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Nc3 develops a piece and protects d5. Defence and development can work together."
+          },
+          {
+            "uci": "b1a3",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Na3 develops the knight, but it does not protect the pawn on d5. Try c3."
+          }
+        ],
+        "other_legal_move_text": "That move is legal but is not reviewed for this task. Read the question again or try a hint."
+      },
+      "node_path": [
+        "e4d5",
+        "g8f6"
+      ],
+      "expected_fen": "7k/8/5n2/3P4/2B5/8/5PPP/RN1Q2K1 w - - 1 2"
+    }
+  ],
+  "takeaway": "When a piece is attacked, consider capturing the attacker. After your reply, look for the opponent's next threat."
+}

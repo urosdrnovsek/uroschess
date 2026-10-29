@@ -613,6 +613,258 @@
         "license": "MIT",
         "attribution": "Original practice position and teaching text; not a historical game"
       }
+    },
+    {
+      "game_id": "chicky-capture-check-position",
+      "file": "chicky-capture-check.pgn",
+      "title": "Capture the checking piece practice",
+      "category": "movement",
+      "level": "beginner",
+      "themes": [
+        "check",
+        "captures",
+        "king safety"
+      ],
+      "description": "Answer a rook check by capturing the rook, then escape another check with your king.",
+      "source": {
+        "name": "Uroschess original practice lesson",
+        "license": "MIT",
+        "attribution": "Original practice position and teaching text; not a historical game"
+      }
+    },
+    {
+      "game_id": "chicky-block-check-position",
+      "file": "chicky-block-check.pgn",
+      "title": "Block a rook check practice",
+      "category": "movement",
+      "level": "beginner",
+      "themes": [
+        "check",
+        "blocking",
+        "defenders"
+      ],
+      "description": "Block a rook check with a protected bishop and recapture if the rook takes it.",
+      "source": {
+        "name": "Uroschess original practice lesson",
+        "license": "MIT",
+        "attribution": "Original practice position and teaching text; not a historical game"
+      }
+    },
+    {
+      "game_id": "pippa-castle-white-position",
+      "file": "pippa-castle-white.pgn",
+      "title": "Castle with White practice",
+      "category": "opening",
+      "level": "beginner",
+      "themes": [
+        "castling",
+        "king safety",
+        "pawn support"
+      ],
+      "description": "Castle kingside with White and use a central pawn to support your pieces.",
+      "source": {
+        "name": "Uroschess original practice lesson",
+        "license": "MIT",
+        "attribution": "Original practice position and teaching text; not a historical game"
+      }
+    },
+    {
+      "game_id": "pippa-castle-black-position",
+      "file": "pippa-castle-black.pgn",
+      "title": "Castle with Black practice",
+      "category": "opening",
+      "level": "beginner",
+      "themes": [
+        "development",
+        "castling",
+        "king safety"
+      ],
+      "description": "Clear the last piece from Black's castling path and castle kingside.",
+      "source": {
+        "name": "Uroschess original practice lesson",
+        "license": "MIT",
+        "attribution": "Original practice position and teaching text; not a historical game"
+      }
+    },
+    {
+      "game_id": "olivia-rook-skewer-position",
+      "file": "olivia-rook-skewer.pgn",
+      "title": "Skewer a king and queen practice",
+      "category": "tactics",
+      "level": "intermediate",
+      "themes": [
+        "rook",
+        "skewer",
+        "check"
+      ],
+      "description": "Use a rook check to expose a queen on the same file, then capture it.",
+      "source": {
+        "name": "Uroschess original practice lesson",
+        "license": "MIT",
+        "attribution": "Original practice position and teaching text; not a historical game"
+      }
+    },
+    {
+      "game_id": "olivia-back-rank-mate-position",
+      "file": "olivia-back-rank-mate.pgn",
+      "title": "Find a back-rank mate practice",
+      "category": "tactics",
+      "level": "intermediate",
+      "themes": [
+        "rook",
+        "back rank",
+        "checkmate"
+      ],
+      "description": "Clear a rook's file and recognise a king trapped behind its own pawns.",
+      "source": {
+        "name": "Uroschess original practice lesson",
+        "license": "MIT",
+        "attribution": "Original practice position and teaching text; not a historical game"
+      }
+    },
+    {
+      "game_id": "chicky-en-passant-position",
+      "file": "chicky-en-passant.pgn",
+      "title": "A special pawn capture practice",
+      "category": "movement",
+      "level": "beginner",
+      "themes": [
+        "pawn",
+        "en passant",
+        "captures"
+      ],
+      "description": "Capture en passant immediately after a pawn double-step, then advance the capturing pawn.",
+      "source": {
+        "name": "Uroschess original practice lesson",
+        "license": "MIT",
+        "attribution": "Original practice position and teaching text; not a historical game"
+      }
+    },
+    {
+      "game_id": "chicky-black-promotion-position",
+      "file": "chicky-black-promotion.pgn",
+      "title": "Promote a black pawn practice",
+      "category": "movement",
+      "level": "beginner",
+      "themes": [
+        "pawn",
+        "Black",
+        "promotion"
+      ],
+      "description": "Move a black pawn toward the first rank and promote it to a queen.",
+      "source": {
+        "name": "Uroschess original practice lesson",
+        "license": "MIT",
+        "attribution": "Original practice position and teaching text; not a historical game"
+      }
+    },
+    {
+      "game_id": "tom-remove-attacker-position",
+      "file": "tom-remove-attacker.pgn",
+      "title": "Remove the attacker practice",
+      "category": "tactics",
+      "level": "beginner",
+      "themes": [
+        "defence",
+        "captures",
+        "defenders"
+      ],
+      "description": "Capture a pawn that attacks your bishop, then defend the capturing pawn.",
+      "source": {
+        "name": "Uroschess original practice lesson",
+        "license": "MIT",
+        "attribution": "Original practice position and teaching text; not a historical game"
+      }
+    },
+    {
+      "game_id": "tom-save-threatened-pieces-position",
+      "file": "tom-save-threatened-pieces.pgn",
+      "title": "Save a threatened piece practice",
+      "category": "tactics",
+      "level": "beginner",
+      "themes": [
+        "defence",
+        "threats",
+        "safe squares"
+      ],
+      "description": "Move an attacked knight to safety and notice the next attack on your rook.",
+      "source": {
+        "name": "Uroschess original practice lesson",
+        "license": "MIT",
+        "attribution": "Original practice position and teaching text; not a historical game"
+      }
+    },
+    {
+      "game_id": "tina-catch-a-pawn-position",
+      "file": "tina-catch-a-pawn.pgn",
+      "title": "Catch a passed pawn practice",
+      "category": "endgame",
+      "level": "beginner",
+      "themes": [
+        "king activity",
+        "passed pawn",
+        "defence"
+      ],
+      "description": "Approach an opposing passed pawn safely and capture it with your king.",
+      "source": {
+        "name": "Uroschess original practice lesson",
+        "license": "MIT",
+        "attribution": "Original practice position and teaching text; not a historical game"
+      }
+    },
+    {
+      "game_id": "tina-rook-behind-pawn-position",
+      "file": "tina-rook-behind-pawn.pgn",
+      "title": "Put a rook behind a pawn practice",
+      "category": "endgame",
+      "level": "beginner",
+      "themes": [
+        "rook endgame",
+        "passed pawn",
+        "pawn support"
+      ],
+      "description": "Place a rook behind a passed pawn so it keeps protecting the pawn as it advances.",
+      "source": {
+        "name": "Uroschess original practice lesson",
+        "license": "MIT",
+        "attribution": "Original practice position and teaching text; not a historical game"
+      }
+    },
+    {
+      "game_id": "bruno-rook-seventh-position",
+      "file": "bruno-rook-seventh.pgn",
+      "title": "A rook on the seventh rank practice",
+      "category": "middlegame",
+      "level": "intermediate",
+      "themes": [
+        "rook activity",
+        "seventh rank",
+        "captures"
+      ],
+      "description": "Bring a rook into the opponent's position and capture a pawn on the seventh rank.",
+      "source": {
+        "name": "Uroschess original practice lesson",
+        "license": "MIT",
+        "attribution": "Original practice position and teaching text; not a historical game"
+      }
+    },
+    {
+      "game_id": "bruno-double-rooks-position",
+      "file": "bruno-double-rooks.pgn",
+      "title": "Work together on a file practice",
+      "category": "middlegame",
+      "level": "intermediate",
+      "themes": [
+        "rooks",
+        "coordination",
+        "open file"
+      ],
+      "description": "Double two rooks on one file, then advance the leading rook with support.",
+      "source": {
+        "name": "Uroschess original practice lesson",
+        "license": "MIT",
+        "attribution": "Original practice position and teaching text; not a historical game"
+      }
     }
   ],
   "lessons": [
@@ -780,6 +1032,76 @@
       "lesson_id": "bruno-open-file-transfer",
       "game_id": "bruno-open-file-transfer-position",
       "file": "bruno-open-file-transfer.json"
+    },
+    {
+      "lesson_id": "chicky-capture-check",
+      "game_id": "chicky-capture-check-position",
+      "file": "chicky-capture-check.json"
+    },
+    {
+      "lesson_id": "chicky-block-check",
+      "game_id": "chicky-block-check-position",
+      "file": "chicky-block-check.json"
+    },
+    {
+      "lesson_id": "pippa-castle-white",
+      "game_id": "pippa-castle-white-position",
+      "file": "pippa-castle-white.json"
+    },
+    {
+      "lesson_id": "pippa-castle-black",
+      "game_id": "pippa-castle-black-position",
+      "file": "pippa-castle-black.json"
+    },
+    {
+      "lesson_id": "olivia-rook-skewer",
+      "game_id": "olivia-rook-skewer-position",
+      "file": "olivia-rook-skewer.json"
+    },
+    {
+      "lesson_id": "olivia-back-rank-mate",
+      "game_id": "olivia-back-rank-mate-position",
+      "file": "olivia-back-rank-mate.json"
+    },
+    {
+      "lesson_id": "chicky-en-passant",
+      "game_id": "chicky-en-passant-position",
+      "file": "chicky-en-passant.json"
+    },
+    {
+      "lesson_id": "chicky-black-promotion",
+      "game_id": "chicky-black-promotion-position",
+      "file": "chicky-black-promotion.json"
+    },
+    {
+      "lesson_id": "tom-remove-attacker",
+      "game_id": "tom-remove-attacker-position",
+      "file": "tom-remove-attacker.json"
+    },
+    {
+      "lesson_id": "tom-save-threatened-pieces",
+      "game_id": "tom-save-threatened-pieces-position",
+      "file": "tom-save-threatened-pieces.json"
+    },
+    {
+      "lesson_id": "tina-catch-a-pawn",
+      "game_id": "tina-catch-a-pawn-position",
+      "file": "tina-catch-a-pawn.json"
+    },
+    {
+      "lesson_id": "tina-rook-behind-pawn",
+      "game_id": "tina-rook-behind-pawn-position",
+      "file": "tina-rook-behind-pawn.json"
+    },
+    {
+      "lesson_id": "bruno-rook-seventh",
+      "game_id": "bruno-rook-seventh-position",
+      "file": "bruno-rook-seventh.json"
+    },
+    {
+      "lesson_id": "bruno-double-rooks",
+      "game_id": "bruno-double-rooks-position",
+      "file": "bruno-double-rooks.json"
     }
   ]
 }

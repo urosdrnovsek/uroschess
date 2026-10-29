@@ -1,0 +1,106 @@
+{
+  "schema_version": 3,
+  "lesson_id": "chicky-block-check",
+  "content_revision": 1,
+  "title": "Block a rook check",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Block a rook check with a protected bishop and recapture if the rook takes it.",
+  "prerequisites": [
+    "legal moves",
+    "piece movement",
+    "check"
+  ],
+  "concepts": [
+    "check",
+    "blocking",
+    "defenders"
+  ],
+  "game_id": "chicky-block-check-position",
+  "coach_player_id": "chicky",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original practice lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "put-a-piece-between",
+      "practice_mode": "guided",
+      "explanation": "The rook on e8 checks your king on e1. You can put your bishop between them. Your knight on g2 protects the blocking square e3.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Block the check with your bishop.",
+        "hints": [
+          "A bishop can reach e3 from c1 through d2.",
+          "Move the bishop from c1 to e3."
+        ],
+        "tree": [
+          {
+            "uci": "c1e3",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Be3 blocks the e-file. The knight on g2 protects your bishop."
+          },
+          {
+            "uci": "g2e3",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Ne3 also blocks the check. Here, use the bishop so the knight can protect it."
+          },
+          {
+            "uci": "e1d1",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Kd1 moves your king out of check, but this task asks you to block the attack."
+          }
+        ],
+        "other_legal_move_text": "That move is legal, but it is not reviewed for this task. Try the hint or choose a move that answers the question."
+      },
+      "node_path": [],
+      "expected_fen": "4r2k/8/8/8/8/8/6N1/2B1K3 w - - 0 1"
+    },
+    {
+      "step_id": "recapture-with-defender",
+      "practice_mode": "independent",
+      "explanation": "Black captured your bishop on e3 with check. Your knight still protects e3. Take the rook to stop the check.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Capture the checking rook with your knight.",
+        "hints": [
+          "The knight on g2 can jump to e3.",
+          "Move g2 to e3."
+        ],
+        "tree": [
+          {
+            "uci": "g2e3",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Nxe3 removes the rook. You lost a bishop but won a rook, which is usually worth more."
+          },
+          {
+            "uci": "e1d1",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Kd1 escapes check, but leaves the rook on the board. Your knight can capture it."
+          }
+        ],
+        "other_legal_move_text": "That move is legal, but it is not reviewed for this task. Try the hint or choose a move that answers the question."
+      },
+      "node_path": [
+        "c1e3",
+        "e8e3"
+      ],
+      "expected_fen": "7k/8/8/8/8/4r3/6N1/4K3 w - - 0 2"
+    }
+  ],
+  "takeaway": "You can block a rook, bishop, or queen check along a line. Protect the blocking piece so you can recapture. A knight check cannot be blocked."
+}

@@ -1,0 +1,10 @@
+[Event "Uroschess Castle with Black"]
+[Site "Synthetic lesson"]
+[White "Practice position"]
+[Black "Learner"]
+[Result "*"]
+[SetUp "1"]
+[FEN "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/3P1N2/PPP2PPP/RNBQK2R b KQkq - 0 4"]
+[Annotator "Uroschess"]
+
+4... Be7 5. O-O O-O *

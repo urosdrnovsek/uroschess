@@ -1,0 +1,99 @@
+{
+  "schema_version": 3,
+  "lesson_id": "tina-catch-a-pawn",
+  "content_revision": 1,
+  "title": "Catch a passed pawn",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Approach an opposing passed pawn safely and capture it with your king.",
+  "prerequisites": [
+    "king movement",
+    "pawn attacks"
+  ],
+  "concepts": [
+    "king activity",
+    "passed pawn",
+    "defence"
+  ],
+  "game_id": "tina-catch-a-pawn-position",
+  "coach_player_id": "tina-turtle",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original practice lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "approach-the-pawn",
+      "practice_mode": "guided",
+      "explanation": "Black's h-pawn has no opposing pawn to stop it. Your king can help. Move beside it on g4, avoiding the square g3 that the pawn attacks.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move your king from f3 to the safe square g4.",
+        "hints": [
+          "A black pawn on h4 attacks g3, not g4.",
+          "Click f3, then g4."
+        ],
+        "tree": [
+          {
+            "uci": "f3g4",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Kg4 approaches safely. The pawn on h4 cannot capture a king on g4."
+          },
+          {
+            "uci": "f3e3",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Ke3 is safe, but moves away from the pawn. This exercise uses the direct approach to g4."
+          }
+        ],
+        "other_legal_move_text": "That move is legal but is not reviewed for this task. Read the question again or try a hint."
+      },
+      "node_path": [],
+      "expected_fen": "k7/8/8/8/7p/5K2/8/8 w - - 0 1"
+    },
+    {
+      "step_id": "capture-the-passed-pawn",
+      "practice_mode": "independent",
+      "explanation": "Black advanced the pawn to h3. Your king can capture it diagonally, because Black's king is far away and the pawn is unprotected.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Capture the pawn with your king.",
+        "hints": [
+          "The pawn is now beside your king on a diagonal.",
+          "Move g4 to h3."
+        ],
+        "tree": [
+          {
+            "uci": "g4h3",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Kxh3 stops the pawn. Only the two kings remain, so the position is a draw."
+          },
+          {
+            "uci": "g4h4",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Kh4 is legal, but leaves the pawn on h3. Capture it directly."
+          }
+        ],
+        "other_legal_move_text": "That move is legal but is not reviewed for this task. Read the question again or try a hint."
+      },
+      "node_path": [
+        "f3g4",
+        "h4h3"
+      ],
+      "expected_fen": "k7/8/8/8/6K1/7p/8/8 w - - 0 2"
+    }
+  ],
+  "takeaway": "A king can stop a passed pawn. Approach through safe squares, remembering that pawns attack diagonally."
+}

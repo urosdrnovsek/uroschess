@@ -144,3 +144,39 @@ def test_quiescence_checks_terminal_positions_and_quiet_check_evasions():
     engine._qsearch(checked, -2 * ai.MATE, 2 * ai.MATE)
     assert engine.nodes > nodes_before + 1
     assert vars(checked) == vars(before)
+
+
+def test_san_resolution_keeps_special_moves_and_disambiguation_strict():
+    import pytest
+    cases = (
+        ('4k3/8/8/8/8/8/8/4K2R w K - 0 1', '0-0', 'e1g1'),
+        ('1r5k/P7/8/8/8/8/8/7K w - - 0 1', 'axb8=Q+', 'a7b8q'),
+        ('4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1', 'exd6', 'e5d6'),
+        ('7k/8/8/8/8/8/8/1N3N1K w - - 0 1', 'Nbd2', 'b1d2'),
+        ('7k/8/8/8/8/R7/8/R6K w - - 0 1', 'R1a2', 'a1a2'),
+        ('7k/8/8/8/8/1N6/8/1N3N1K w - - 0 1', 'Nb1d2', 'b1d2'),
+    )
+    for fen, san, uci in cases:
+        board = N.from_fen(fen)
+        before = board.clone()
+        assert str(N.san_to_move(board, san)) == uci
+        assert vars(board) == vars(before)
+    board = N.from_fen('7k/8/8/8/8/8/8/1N3N1K w - - 0 1')
+    with pytest.raises(ValueError):
+        N.san_to_move(board, 'Nd2')
+    with pytest.raises(ValueError):
+        N.san_to_move(board, 'Qh9')
+    board = N.from_fen('1r5k/P7/8/8/8/8/8/7K w - - 0 1')
+    with pytest.raises(ValueError):
+        N.san_to_move(board, 'ab8=Q')
+
+
+def test_san_import_does_not_format_unrelated_legal_moves(monkeypatch):
+    calls = []
+    original = N.to_san
+    def counted(board, move):
+        calls.append(str(move))
+        return original(board, move)
+    monkeypatch.setattr(N, 'to_san', counted)
+    assert str(N.san_to_move(Board(), 'e4')) == 'e2e4'
+    assert calls == ['e2e4']

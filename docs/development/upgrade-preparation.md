@@ -313,3 +313,18 @@ every lesson state. They follow each guide's courses and related practice
 lessons, save progress before switching, and keep the relevant character or
 course page as the return route. The first and last directions remain visible
 but inactive. Narrow and wide lesson screenshots were refreshed.
+
+## Current handoff — 29 October 2026
+
+The desktop update now contains 47 games, 47 lessons and 16 published courses,
+including fourteen new lessons (twenty-eight exercises) across seven courses.
+Responsive startup and clearer ordinary-game controls are complete. The
+usability review replaced the unusable tiny-window baseline with a supported
+360×720 narrow / 720×600 wide minimum, improved large-text reading space and
+secondary text contrast, and kept coordinates inside the board frame.
+
+See [the current update report](update-2026-10-29.md) for verification and
+remaining limits, and [browser feasibility](web-feasibility-2026-10-29.md) for
+web options. Older entries above describe historical slices; use these current
+counts and the updated blueprint handbook for new work. Real learner
+observation and stronger opponent calibration evidence remain outstanding.

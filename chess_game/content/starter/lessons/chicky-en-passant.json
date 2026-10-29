@@ -1,0 +1,105 @@
+{
+  "schema_version": 3,
+  "lesson_id": "chicky-en-passant",
+  "content_revision": 1,
+  "title": "A special pawn capture",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Capture en passant immediately after a pawn double-step, then advance the capturing pawn.",
+  "prerequisites": [
+    "pawn movement",
+    "pawn captures"
+  ],
+  "concepts": [
+    "pawn",
+    "en passant",
+    "captures"
+  ],
+  "game_id": "chicky-en-passant-position",
+  "coach_player_id": "chicky",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original practice lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "capture-in-passing",
+      "practice_mode": "guided",
+      "explanation": "Black has just moved the pawn from d7 to d5 in one move. Your pawn on e5 can capture it as if it had stopped on d6. This special capture is called en passant.",
+      "detail": "En passant is available only on the next move after the opposing pawn moves two squares from its starting square and lands beside your pawn.",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Capture the d5 pawn en passant.",
+        "hints": [
+          "The capturing pawn lands on d6, not d5.",
+          "Move your pawn from e5 to d6."
+        ],
+        "tree": [
+          {
+            "uci": "e5d6",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Your pawn lands on d6 and the black pawn on d5 is removed. That is en passant."
+          },
+          {
+            "uci": "h1g1",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Kg1 is legal, but passing your turn loses this en passant opportunity. Try the special pawn capture now."
+          },
+          {
+            "uci": "e5e6",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "e6 advances the pawn but leaves Black's pawn on d5. Practise the special capture instead."
+          }
+        ],
+        "other_legal_move_text": "That move is legal but is not reviewed for this task. Read the question again or try a hint."
+      },
+      "node_path": [],
+      "expected_fen": "7k/8/8/3pP3/8/8/8/7K w - d6 0 2"
+    },
+    {
+      "step_id": "advance-after-capture",
+      "practice_mode": "independent",
+      "explanation": "Black moved the king to g8. Your pawn is on d6 after the special capture. The square in front is empty, so it can advance one square normally.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Advance the pawn one square toward promotion.",
+        "hints": [
+          "White pawns move toward the eighth rank.",
+          "Move d6 to d7."
+        ],
+        "tree": [
+          {
+            "uci": "d6d7",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "d7 brings the pawn one step from promotion. After en passant, it moves like any other pawn."
+          },
+          {
+            "uci": "h1g1",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Your king can move safely, but this task asks you to advance the pawn."
+          }
+        ],
+        "other_legal_move_text": "That move is legal but is not reviewed for this task. Read the question again or try a hint."
+      },
+      "node_path": [
+        "e5d6",
+        "h8g8"
+      ],
+      "expected_fen": "6k1/8/3P4/8/8/8/8/7K w - - 1 3"
+    }
+  ],
+  "takeaway": "En passant captures a pawn that just moved two squares beside yours. Use it immediately, or the opportunity disappears."
+}

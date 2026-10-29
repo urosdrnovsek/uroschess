@@ -1,10 +1,15 @@
 """SAN (Standard Algebraic Notation) and minimal PGN / FEN support."""
 
+import re
+
 from .board import Board, Move
 from .moves import legal_moves, in_check, game_status
 from .pieces import WHITE, BLACK
 
 _FILES = "abcdefgh"
+_SAN_MOVE_RE = re.compile(
+    r"^(?P<piece>[KQRBN])?[a-h]?[1-8]?x?"
+    r"(?P<target>[a-h][1-8])(?:=(?P<promotion>[QRBN]))?$")
 
 
 def sq_name(sq):
@@ -142,12 +147,27 @@ def game_to_pgn(moves, board_start=None, result="*", headers=None):
 
 
 def san_to_move(board, san):
-    """Resolve standard algebraic notation to one legal move."""
+    """Resolve SAN, generating notation only for matching legal candidates."""
     san = san.strip().replace("0-0-0", "O-O-O").replace("0-0", "O-O")
     san = san.rstrip("+#!?")
-    for m in legal_moves(board):
-        if to_san(board, m).rstrip("+#!?") == san:
-            return m
+    moves = legal_moves(board)
+    if san in ("O-O", "O-O-O"):
+        column = 6 if san == "O-O" else 2
+        candidates = [m for m in moves if m.is_castle and m.to[1] == column]
+    else:
+        fields = _SAN_MOVE_RE.fullmatch(san)
+        if fields is None:
+            raise ValueError(f"illegal/ambiguous SAN: {san}")
+        target = parse_sq(fields.group("target"))
+        piece_type = (fields.group("piece") or "P").lower()
+        promotion = fields.group("promotion")
+        promotion = promotion.lower() if promotion else None
+        candidates = [m for m in moves if m.to == target and m.promo == promotion
+                      and board.piece_at(m.frm)[1] == piece_type]
+    matches = [m for m in candidates
+               if to_san(board, m).rstrip("+#!?") == san]
+    if len(matches) == 1:
+        return matches[0]
     raise ValueError(f"illegal/ambiguous SAN: {san}")
 
 

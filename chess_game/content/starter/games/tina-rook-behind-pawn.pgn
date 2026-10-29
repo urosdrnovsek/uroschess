@@ -1,0 +1,10 @@
+[Event "Uroschess Put a rook behind a pawn"]
+[Site "Synthetic lesson"]
+[White "Learner"]
+[Black "Practice position"]
+[Result "*"]
+[SetUp "1"]
+[FEN "7k/7p/8/P7/8/8/8/1R4K1 w - - 0 1"]
+[Annotator "Uroschess"]
+
+1. Ra1 Kg8 2. a6 *

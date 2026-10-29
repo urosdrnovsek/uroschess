@@ -1,0 +1,111 @@
+{
+  "schema_version": 3,
+  "lesson_id": "chicky-black-promotion",
+  "content_revision": 1,
+  "title": "Promote a black pawn",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Move a black pawn toward the first rank and promote it to a queen.",
+  "prerequisites": [
+    "pawn movement",
+    "promotion"
+  ],
+  "concepts": [
+    "pawn",
+    "Black",
+    "promotion"
+  ],
+  "game_id": "chicky-black-promotion-position",
+  "coach_player_id": "chicky",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original practice lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "black-pawn-forward",
+      "practice_mode": "guided",
+      "explanation": "You are playing Black. Black pawns travel toward the first rank, in the opposite direction to White's pawns. The white king is far from your h-pawn.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move Black's pawn from h3 to h2.",
+        "hints": [
+          "Look below the pawn on the board as shown.",
+          "Click h3, then h2."
+        ],
+        "tree": [
+          {
+            "uci": "h3h2",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "The black pawn reaches h2. One more forward move can promote it."
+          },
+          {
+            "uci": "f3g3",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "That king move is legal, but the pawn is ready to advance. Try h2."
+          }
+        ],
+        "other_legal_move_text": "That move is legal but is not reviewed for this task. Read the question again or try a hint."
+      },
+      "node_path": [],
+      "expected_fen": "8/8/8/8/8/5k1p/8/K7 b - - 0 1"
+    },
+    {
+      "step_id": "promote-on-first-rank",
+      "practice_mode": "independent",
+      "explanation": "White moved the king to b1. Your black pawn is ready to reach h1. Promotion works for Black too: choose a queen when the piece choices appear.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Promote Black's h-pawn to a queen.",
+        "hints": [
+          "Black promotes on the first rank.",
+          "Move h2 to h1, then choose Queen."
+        ],
+        "tree": [
+          {
+            "uci": "h2h1q",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "The pawn becomes a queen on h1 and checks the white king along the first rank."
+          },
+          {
+            "uci": "h2h1r",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "A rook is a legal promotion too. For this exercise, choose the queen."
+          },
+          {
+            "uci": "h2h1b",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "A bishop is a legal promotion too. For this exercise, choose the queen."
+          },
+          {
+            "uci": "h2h1n",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "A knight is a legal promotion too. For this exercise, choose the queen."
+          }
+        ],
+        "other_legal_move_text": "That move is legal but is not reviewed for this task. Read the question again or try a hint."
+      },
+      "node_path": [
+        "h3h2",
+        "a1b1"
+      ],
+      "expected_fen": "8/8/8/8/8/5k2/7p/1K6 b - - 1 2"
+    }
+  ],
+  "takeaway": "White pawns promote on the eighth rank; Black pawns promote on the first. Either colour may choose a queen, rook, bishop, or knight."
+}

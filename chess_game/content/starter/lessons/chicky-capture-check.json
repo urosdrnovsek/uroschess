@@ -1,0 +1,106 @@
+{
+  "schema_version": 3,
+  "lesson_id": "chicky-capture-check",
+  "content_revision": 1,
+  "title": "Capture the checking piece",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Answer a rook check by capturing the rook, then escape another check with your king.",
+  "prerequisites": [
+    "legal moves",
+    "piece movement",
+    "check"
+  ],
+  "concepts": [
+    "check",
+    "captures",
+    "king safety"
+  ],
+  "game_id": "chicky-capture-check-position",
+  "coach_player_id": "chicky",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original practice lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "capture-the-rook",
+      "practice_mode": "guided",
+      "explanation": "The rook on e4 checks your king along the e-file. Your bishop can capture it on a clear diagonal.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Capture the checking rook with your bishop.",
+        "hints": [
+          "Follow the diagonal from c2 through d3.",
+          "Move the bishop from c2 to e4."
+        ],
+        "tree": [
+          {
+            "uci": "c2e4",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Bxe4 removes the checking rook. Your king is safe from that attack."
+          },
+          {
+            "uci": "e1f1",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Kf1 escapes check too. This exercise asks you to remove the checking rook instead."
+          }
+        ],
+        "other_legal_move_text": "That move is legal, but it is not reviewed for this task. Try the hint or choose a move that answers the question."
+      },
+      "node_path": [],
+      "expected_fen": "r6k/8/8/8/4r3/8/2B5/4K3 w - - 0 1"
+    },
+    {
+      "step_id": "move-out-of-check",
+      "practice_mode": "independent",
+      "explanation": "Black moved the remaining rook from a8 to a1 with check. Your bishop cannot capture it. Move your king off the first rank.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move your king to a safe square.",
+        "hints": [
+          "The rook attacks every clear square on the first rank.",
+          "Try d2, e2, or f2."
+        ],
+        "tree": [
+          {
+            "uci": "e1f2",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Kf2 leaves the rook's line of attack."
+          },
+          {
+            "uci": "e1d2",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "Kd2 also escapes the rook check safely."
+          },
+          {
+            "uci": "e1e2",
+            "role": "learner",
+            "outcome": "acceptable",
+            "feedback": "Ke2 is safe too. The rook on a1 does not attack e2."
+          }
+        ],
+        "other_legal_move_text": "That move is legal, but it is not reviewed for this task. Try the hint or choose a move that answers the question."
+      },
+      "node_path": [
+        "c2e4",
+        "a8a1"
+      ],
+      "expected_fen": "7k/8/8/8/4B3/8/8/r3K3 w - - 1 2"
+    }
+  ],
+  "takeaway": "When you are in check, look for a safe king move, a capture of the attacker, or a piece that can block its line."
+}

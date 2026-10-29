@@ -134,16 +134,16 @@ def test_packaged_starter_collection_categories_and_endgame_claims():
 
     library = load_game_library()
     assert not library.errors
-    assert len(library.entries) == 33
-    assert len(library.lessons) == 33
-    assert len(library.lesson_entries) == 33
+    assert len(library.entries) == 47
+    assert len(library.lessons) == 47
+    assert len(library.lesson_entries) == 47
     assert [entry.category for entry in library.entries].count("guided_game") == 1
-    assert [entry.category for entry in library.entries].count("opening") == 10
-    assert [entry.category for entry in library.entries].count("endgame") == 8
+    assert [entry.category for entry in library.entries].count("opening") == 12
+    assert [entry.category for entry in library.entries].count("endgame") == 10
     assert [entry.category for entry in library.entries].count("source_game") == 3
-    assert [entry.category for entry in library.entries].count("movement") == 8
-    assert [entry.category for entry in library.entries].count("middlegame") == 2
-    assert [entry.category for entry in library.entries].count("tactics") == 1
+    assert [entry.category for entry in library.entries].count("movement") == 12
+    assert [entry.category for entry in library.entries].count("middlegame") == 4
+    assert [entry.category for entry in library.entries].count("tactics") == 5
     assert all(resolve_lesson(entry.game, entry.lesson)
                for entry in library.lesson_entries)
     assert all(entry.game.source.name and entry.game.source.license
@@ -292,8 +292,8 @@ def test_catalog_keeps_multiple_lessons_for_one_game(monkeypatch):
     monkeypatch.setattr(content, "_read_text", extra_resource)
     library = load_game_library()
     assert not library.errors
-    assert len(library.entries) == 33
-    assert len(library.lesson_entries) == 34
+    assert len(library.entries) == 47
+    assert len(library.lesson_entries) == 48
     first = library.lesson_entry("bruno-scotch-make-room")
     second = library.lesson_entry("shared-scotch-copy")
     assert first.game is second.game

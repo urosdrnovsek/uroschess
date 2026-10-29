@@ -1,0 +1,100 @@
+{
+  "schema_version": 3,
+  "lesson_id": "pippa-castle-black",
+  "content_revision": 1,
+  "title": "Castle with Black",
+  "level": "beginner",
+  "estimated_minutes": 4,
+  "objective": "Clear the last piece from Black's castling path and castle kingside.",
+  "prerequisites": [
+    "legal moves",
+    "piece movement",
+    "check"
+  ],
+  "concepts": [
+    "development",
+    "castling",
+    "king safety"
+  ],
+  "game_id": "pippa-castle-black-position",
+  "coach_player_id": "pippa-pomeranian",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original practice lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "clear-the-bishop",
+      "practice_mode": "guided",
+      "explanation": "You are playing Black. Your knight has moved from g8, but the bishop on f8 still stands between your king and rook. Develop it to e7.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move Black's bishop from f8 to e7.",
+        "hints": [
+          "The e7 square is clear because Black's pawn moved to e5.",
+          "Click f8, then e7."
+        ],
+        "tree": [
+          {
+            "uci": "f8e7",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Be7 develops the bishop and clears f8 for castling."
+          },
+          {
+            "uci": "f8c5",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Bc5 develops and clears f8 too. Use e7 for this guided setup."
+          }
+        ],
+        "other_legal_move_text": "That move is legal, but it is not reviewed for this task. Try the hint or choose a move that answers the question."
+      },
+      "node_path": [],
+      "expected_fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/3P1N2/PPP2PPP/RNBQK2R b KQkq - 0 4"
+    },
+    {
+      "step_id": "castle-as-black",
+      "practice_mode": "independent",
+      "explanation": "White has castled. Black's king and h8 rook have not moved. The two squares between them are now clear, and the king's path is safe.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Castle kingside with Black.",
+        "hints": [
+          "Black's king moves two squares toward the h8 rook.",
+          "Move the king from e8 to g8."
+        ],
+        "tree": [
+          {
+            "uci": "e8g8",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "O-O moves Black's king to g8 and rook to f8. The same castling rules apply to both colours."
+          },
+          {
+            "uci": "a7a6",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "a6 is legal, but it leaves your king in the centre. Finish the castling plan."
+          }
+        ],
+        "other_legal_move_text": "That move is legal, but it is not reviewed for this task. Try the hint or choose a move that answers the question."
+      },
+      "node_path": [
+        "f8e7",
+        "e1g1"
+      ],
+      "expected_fen": "r1bqk2r/ppppbppp/2n2n2/4p3/2B1P3/3P1N2/PPP2PPP/RNBQ1RK1 b kq - 2 5"
+    }
+  ],
+  "takeaway": "For Black, kingside castling moves the king from e8 to g8 and the rook from h8 to f8. The king cannot castle out of, through, or into check."
+}

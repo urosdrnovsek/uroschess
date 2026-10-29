@@ -1,0 +1,10 @@
+[Event "Uroschess Promote a black pawn"]
+[Site "Synthetic lesson"]
+[White "Practice position"]
+[Black "Learner"]
+[Result "*"]
+[SetUp "1"]
+[FEN "8/8/8/8/8/5k1p/8/K7 b - - 0 1"]
+[Annotator "Uroschess"]
+
+1... h2 2. Kb1 h1=Q+ *

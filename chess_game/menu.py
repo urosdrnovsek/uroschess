@@ -37,22 +37,22 @@ GUIDE_LESSONS = {
 }
 
 GUIDE_TOPICS = {
-    "chicky": "Piece moves, captures, king safety and checkmate",
-    "pippa-pomeranian": "Opening basics and useful developing moves",
-    "tina-turtle": "Promotion, active kings and endgame practice",
-    "tom-rabbit": "Spot opening threats and choose a reply",
+    "chicky": "Piece moves, check defence and checkmate",
+    "pippa-pomeranian": "Develop pieces and castle with either colour",
+    "tina-turtle": "Pawn endings with active kings and rooks",
+    "tom-rabbit": "Spot threats and protect your pieces",
     "bruno-bear": "Make a middlegame plan and coordinate pieces",
-    "olive-owl": "Tactics, knight forks and active bishops",
+    "olive-owl": "Knight forks, rook tactics and bishop plans",
     "monty-cat": "Study a recorded game after beating Monty",
 }
 
 GUIDE_SHORT_TOPICS = {
-    "chicky": "Moves, captures and checkmate",
-    "pippa-pomeranian": "Opening moves and development",
-    "tina-turtle": "Promote pawns and finish games",
-    "tom-rabbit": "Spot and answer opening threats",
+    "chicky": "Piece moves and check defence",
+    "pippa-pomeranian": "Develop pieces and castle",
+    "tina-turtle": "Kings, rooks and passed pawns",
+    "tom-rabbit": "Spot threats and save pieces",
     "bruno-bear": "Plan with bishops and rooks",
-    "olive-owl": "Find forks and active squares",
+    "olive-owl": "Forks, skewers and checkmate",
     "monty-cat": "Study a game after beating Monty",
 }
 
@@ -60,7 +60,7 @@ GUIDE_PROFILE_TOPICS = {
     "chicky": "Piece moves",
     "pippa-pomeranian": "Opening ideas",
     "tina-turtle": "Pawn endgames",
-    "tom-rabbit": "Opening defence",
+    "tom-rabbit": "Threat defence",
     "bruno-bear": "Middlegame plans",
     "olive-owl": "Chess tactics",
     "monty-cat": "Recorded game study",
@@ -70,7 +70,7 @@ class MenuLayoutMixin:
     """Build menu controls while the UI owns their actions and state."""
 
     def _simple_menu_top(self):
-        return max(95, min(218, self.win_h - 436))
+        return max(12, min(218, self.win_h - 448))
 
     def _study_menu_top(self):
         """Leave room for the card and its navigation at shorter heights."""
@@ -277,7 +277,8 @@ class MenuLayoutMixin:
                               and item.player_id == player_id]
                              if self.game_library else [])
         course = next((item for item in available_courses
-                       if item.category in ("middlegame", "tactics")),
+                       if player_id in ("bruno-bear", "olive-owl")
+                       and item.category in ("middlegame", "tactics")),
                       available_courses[0] if available_courses else None)
         if course:
             side = (inner - 16) // 3

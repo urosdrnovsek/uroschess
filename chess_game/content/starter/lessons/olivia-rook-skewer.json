@@ -1,0 +1,100 @@
+{
+  "schema_version": 3,
+  "lesson_id": "olivia-rook-skewer",
+  "content_revision": 1,
+  "title": "Skewer a king and queen",
+  "level": "intermediate",
+  "estimated_minutes": 4,
+  "objective": "Use a rook check to expose a queen on the same file, then capture it.",
+  "prerequisites": [
+    "legal moves",
+    "piece movement",
+    "check"
+  ],
+  "concepts": [
+    "rook",
+    "skewer",
+    "check"
+  ],
+  "game_id": "olivia-rook-skewer-position",
+  "coach_player_id": "olive-owl",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original practice lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "line-up-the-rook",
+      "practice_mode": "guided",
+      "explanation": "Black's king on d5 stands in front of the queen on d8. Put your rook on their file with check. This is a skewer: the king shields the piece behind it.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Give a rook check on the king and queen's file.",
+        "hints": [
+          "Both targets are on the d-file.",
+          "Move the rook from a1 to d1."
+        ],
+        "tree": [
+          {
+            "uci": "a1d1",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Rd1+ checks the king along the d-file. The queen sits behind it on d8."
+          },
+          {
+            "uci": "a1a5",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "Ra5+ checks, but Black can capture that rook with Qxa5. Use the d-file instead."
+          }
+        ],
+        "other_legal_move_text": "That move is legal, but it is not reviewed for this task. Try the hint or choose a move that answers the question."
+      },
+      "node_path": [],
+      "expected_fen": "3q4/7p/8/3k4/8/8/8/R5K1 w - - 0 1"
+    },
+    {
+      "step_id": "take-the-exposed-queen",
+      "practice_mode": "independent",
+      "explanation": "In this practice line, Black moved the king to e5. The d-file is clear from your rook to Black's queen.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Capture the queen with your rook.",
+        "hints": [
+          "Your rook can travel up the clear d-file.",
+          "Move d1 to d8."
+        ],
+        "tree": [
+          {
+            "uci": "d1d8",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Rxd8 wins the exposed queen. The king on e5 cannot recapture the rook."
+          },
+          {
+            "uci": "d1e1",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Re1 moves away from the queen. Capture the queen before Black can save it."
+          }
+        ],
+        "other_legal_move_text": "That move is legal, but it is not reviewed for this task. Try the hint or choose a move that answers the question."
+      },
+      "node_path": [
+        "a1d1",
+        "d5e5"
+      ],
+      "expected_fen": "3q4/7p/8/4k3/8/8/8/3R2K1 w - - 2 2"
+    }
+  ],
+  "takeaway": "Line up a rook, bishop, or queen with two targets. A check can force the king to move, exposing a valuable piece behind it."
+}

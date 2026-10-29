@@ -1,6 +1,6 @@
 # Uroschess blueprint handbook
 
-Updated: 12 October 2026. Earlier baseline: `b078911`.
+Updated: 29 October 2026. Previous committed baseline: `f38fd8f`.
 This is the single local planning handbook. This file is tracked for handoffs;
 the other files in `Instructions/` remain ignored by Git. Update this document
 in place; keep technical contracts in the existing
@@ -45,8 +45,8 @@ The old milestone logs and already-fixed defect lists are deliberately omitted.
 - Learn / Play / Watch games navigation. Learn now opens a portrait gallery
   for all seven character guides, with a short description of each guide's
   topic. A character page holds their courses and related older practice
-  lessons; all 33 lessons remain reachable without a separate category menu.
-  The starter pack has 33 games, 33 lessons, and nine published courses; some
+  lessons; all 47 lessons remain reachable without a separate category menu.
+  The starter pack has 47 games, 47 lessons, and sixteen published courses; some
   game records are practice lines. Fresh learners can start with Chicky, while
   the other guides are directly available. Monty's
   historical analysis opens after one verified win against him with either
@@ -61,10 +61,13 @@ The old milestone logs and already-fixed defect lists are deliberately omitted.
   contextual feedback, and back/next lesson arrows beside the step label.
 - A shorter README and refreshed screenshots, including the character gallery.
   The first seven-character and menu work was committed as `8b0b355`.
-  The latest lesson slice passed content validation, rendering smoke, an
-  installed offline wheel check, and 157 tests in the full suite; focused
-  checks passed after the final test additions. These checks do not establish
-  lesson quality or calibrated opponent strength.
+  The 29 October update adds fourteen lessons (twenty-eight exercises) in
+  seven courses: check defence, castling with either colour, rook tactics,
+  special pawn moves, threatened pieces, pawn endings, and active rooks.
+  Startup now services window events while content is prepared. Ordinary play
+  has clearer mode/colour information, disabled unavailable controls and a
+  consistent Main menu exit. See `docs/development/update-2026-10-29.md`
+  for the current verification and usability audit.
 
 Learner observation is still pending. A multi-move exercise resumes at the
 start of its current step, preserving help use; it does not resume every move.
@@ -118,9 +121,10 @@ Prioritize these Character Challenge improvements before expanding the mode:
    diagnostic games, 35 were truncated and one ended from an imbalanced tactical
    position, so run a longer batch before deciding
    whether Pippa, Bruno, or Olivia need tuning. Retain Monty's Max policy.
-   A 12-game, 80-ply follow-up on three adjacent pairs had no search failures
-   after a timeout fix, but six games were truncated. Do not advertise Elo
-   ratings without evidence.
+   Later 12 October reports cover all six adjacent pairs with both colours:
+   24 games, nine stronger-side wins, one loss, twelve draws and two truncations,
+   with zero search failures. This remains too small for ratings or tuning.
+   Do not advertise Elo ratings without evidence.
 2. **Saved-match recovery: implemented and verified in test batches.**
    Invalid active saves now have a dedicated explanation, retry, export, and
    transactional archive path. The archive remains exportable after restart.
@@ -180,19 +184,19 @@ local, without streak pressure.
 ### Character-led lessons: first slice implemented, expansion pending
 
 Every character now has a first teaching slice in Learn and on their character
-page. The 33-lesson pack is not the complete set of paths described here. Keep
+page. The 47-lesson pack is not the complete set of paths described here. Keep
 ordinary lesson browsing available regardless of challenge progress, with the
 one Monty exception below. The general course loader, variable-length course
 pages, stable progress IDs, and return routes serve all seven guides.
 
 | Character | Current slice and next content direction | Voice and first exercise |
 | --- | --- | --- |
-| Chicky | Seven beginner lessons cover movement, captures, king safety, and mate; review with novices before adding more. | Curious questions and guided board moves. |
-| Pippa | First opening lesson develops a bishop and knight; later centre and king-safety work remains. | Sweet encouragement and useful development. |
-| Tina | Three-lesson endgame course covers promotion, active king, and stalemate; transfer exercises remain. | Gloomy but kind endgame guidance. |
-| Tom | First threat lesson reuses `black-against-e4`; more unfamiliar replies remain. | Comically angry at idle pieces; choose a sound opening reply. |
-| Bruno | First middlegame lesson activates bishop and rook; exchanges and rook or pawn endings remain. | Calm, fatherly planning. |
-| Olivia | First tactics lesson teaches a knight fork; pins, defence, and mating patterns remain. | Observant questions around a reviewed position. |
+| Chicky | Beginner movement and mate, plus check defence, en passant and Black promotion; learner review remains. | Curious questions and guided board moves. |
+| Pippa | Development plus White and Black castling courses; unfamiliar opening replies remain. | Sweet encouragement and useful development. |
+| Tina | Promotion, active king, stalemate, catching a pawn and rook support; learner review remains. | Gloomy but kind endgame guidance. |
+| Tom | Opening threats plus removing attackers, adding defenders and saving pieces; unfamiliar replies remain. | Comically angry at idle pieces; choose a sound opening reply. |
+| Bruno | Bishop/rook plans, open-file transfer, seventh rank and doubled rooks; exchanges and further endings remain. | Calm, fatherly planning. |
+| Olivia | Knight fork, rook skewer and back-rank mate; pins and more defence remain. | Observant questions around a reviewed position. |
 | Monty | First historical analysis predicts two moves from a sourced 1889 tournament score; learner review remains. | Proud commentary that credits both sides, without claiming to have played. |
 
 Monty refuses to teach until the learner records a verified win against him
@@ -380,55 +384,34 @@ direction and remaining work; replace obsolete status instead of appending
 another handoff log. Record actual checks and remaining limitations, and follow
 the owner's current commit/push instructions.
 
-## Start here after the 2 October 2026 release audit
+## Start here after the 29 October 2026 update
 
-1. Read `git status --short` before editing and keep any user edits. The
-   1 October lesson work is in commit `5330131`; the 2 October release audit
-   remains in the working tree. Read the last section of
-   `docs/development/upgrade-preparation.md` for the exact Bruno, Olivia, and
-   Monty implementation and verification notes. The source of truth for course
-   metadata is `chess_game/content/starter/courses.json`; Monty's access check
-   is in `chess_game/ui.py` and reads `collection_counts` from verified wins.
-2. Begin with **learner review, not another new lesson**. Use
-   `docs/LEARNER_REVIEW.md` and a fresh temporary progress profile. Have a
-   learner choose Chicky's portrait and try his first lesson without coaching,
-   then find Pippa's first course; ask them to move, use help or retry, leave, and
-   resume. Record exact words/actions and window/text size, without personal
-   details. Do not claim this review happened until it actually does. After
-   these two, observe Tina's promotion and Monty's locked card when practical.
-3. If no learner is available, start the lesson interaction audit at Chicky's
-   first course: inspect question, wrong move, hint, answer, automatic reply,
-   exploration, completion, and return states at 360 pixels and each text
-   size. Compare the current board and copy; reproduce any problem before
-   changing it. Then repeat for Pippa, Tina, Tom, Bruno, Olivia, and Monty.
-   Record findings in `docs/LEARNER_REVIEW.md` as an internal audit, clearly
-   separate from learner observations. Fix the first concrete confusion found
-   and verify its saved progress and return route.
-4. Before handing off a change, run `.venv/bin/python -m scripts.validate_content`
-   and `.venv/bin/python -m scripts.smoke`, run focused tests for altered flows,
-   then inspect the affected narrow and wide screens. Run the full suite and
-   offline wheel check for a release candidate or a change that affects shared
-   lesson loading or packaging. Update the status here and in
-   `docs/development/upgrade-preparation.md`.
+1. Inspect `git status --short` and preserve user work. Current content is
+   47 games, 47 lessons and 16 published courses. Course membership comes from
+   `chess_game/content/starter/courses.json`; older standalone practice remains
+   mapped through `GUIDE_LESSONS` in `chess_game/menu.py`.
+2. Read `docs/development/update-2026-10-29.md` for the release and usability
+   evidence. The supported desktop minimum is 360×720 in narrow layouts or
+   720×600 in wide layouts. Smaller resize requests are enlarged. Compact
+   lesson screens prioritize the board and question over the top portrait.
+3. Conduct learner review using `docs/LEARNER_REVIEW.md` and a fresh temporary
+   profile. No real learner observation has been recorded for any teaching path.
+   Use the anonymous template and improve concrete observed difficulties.
+4. For further UI work, run `python -m scripts.audit_usability` alongside the
+   relevant tests and inspect its captures. This internal audit covers every
+   lesson step, all text sizes, seven window requests, guide/course/library
+   pages and representative lesson interaction states. It does not establish
+   teaching quality, native screen-reader support or actual device usability.
+5. For browser work, read `docs/development/web-feasibility-2026-10-29.md`.
+   A Pygbag compatibility spike is the proposed next step, not an implemented
+   web version. Establish async rendering, responsive search and durable
+   browser storage before promising a public beta. Prefer a native web UI if
+   phones and accessible browser controls are first-release requirements.
+6. Opponent calibration remains a separate open task. The latest reports are
+   `calibration-2026-10-12.json` and `calibration-start-2026-10-12.json`; the small
+   sample does not establish ratings or a reliable seven-opponent ordering.
 
-The current pack has 33 games, 33 lessons, and nine courses. The
-[release audit](../docs/development/release-audit-2026-10-02.md) records a
-successful offline wheel check, content validation, smoke, responsive screen
-review, and 160 passing tests. None of the seven teaching paths has a recorded
-learner observation. The 12-game, 80-ply calibration follow-up had no search
-failures but six truncations; opponent strength remains unproven. The 12 October review slice adds factual post-game
-review, engine interruption/quiescence fixes, two independent transfer
-exercises, home resume, proportional reading text, and explicit content and
-installed-wheel CI checks. See `docs/development/improvements-2026-10-12.md`.
-
-The later Learn menu redesign routes through seven portrait cards. Course
-membership still comes from `chess_game/content/starter/courses.json`; the twelve
-lessons outside published courses are assigned to guides for navigation
-in `GUIDE_LESSONS` in `chess_game/menu.py`. Their IDs, revisions, and saved
-progress remain intact. Review the guide descriptions and the new route with
-learners; visual checks alone do not establish that the topics are clear.
-Content validation, rendering smoke, and all 161 tests passed for this menu
-change; the affected Learn tests also passed after the final layout adjustment.
-The later lesson navigation change adds back and next arrows to every lesson
-state. The arrows stay within one character's teaching path, preserve progress
-when switching, and show an inactive direction at the first or last lesson.
+Keep normal offline play and revisioned progress intact. Run content validation,
+rendering smoke and focused regressions after changes; run the full suite and
+an installed offline wheel check for a release candidate. Update this handbook
+in place and follow the owner's current commit/push instructions.

@@ -1,0 +1,10 @@
+[Event "Uroschess A special pawn capture"]
+[Site "Synthetic lesson"]
+[White "Learner"]
+[Black "Practice position"]
+[Result "*"]
+[SetUp "1"]
+[FEN "7k/8/8/3pP3/8/8/8/7K w - d6 0 2"]
+[Annotator "Uroschess"]
+
+2. exd6 Kg8 3. d7 *

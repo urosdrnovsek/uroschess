@@ -3,10 +3,17 @@
 import pygame
 
 
+def supported_window_size(width, height):
+    """Reserve usable board and reading space instead of shrinking indefinitely."""
+    width = max(360, width)
+    return width, max(720 if width < 720 else 600, height)
+
+
 def layout_board(ui):
     P, GAP, SGAP, SH = 16, 14, 12, 42
     ui.pad, ui.status_h = P, SH
     ui._board_thought_rect = None
+    ui._game_header_rect = None
     if getattr(ui, "challenge", None) is not None and ui.scene == "game":
         ui.show_panel = ui.win_w >= 720
         ui._portrait_in_panel = False
@@ -21,7 +28,7 @@ def layout_board(ui):
         sq = max(20, min(inner_w, available) // 8)
         ui.SQ = sq
         ui.board_px = sq * 8
-        ui.frame = max(5, sq // 5)
+        ui.frame = max(12, sq // 5)
         ui.board_x = P + (inner_w - ui.board_px) // 2
         ui.board_y = P + thought_h + max(0, (available - ui.board_px) // 2)
         ui.status_x = P
@@ -29,32 +36,39 @@ def layout_board(ui):
         ui.status_w = inner_w
         ui._board_thought_rect = pygame.Rect(P, P, inner_w, thought_h - 8)
         return
-    if ui.scene == "game" and ui.win_w < 720:
-        ui.show_panel = False
-        ui._portrait_in_panel = False
-        ui.panel_w = 0
-        ui.panel_x = ui.win_w - P
-        ui.panel_y = P
-        ui.panel_h = ui.win_h - 2 * P
-        inner_w = ui.win_w - 2 * P
+    if ui.scene == "game":
+        header_h = max(48, ui.status_font.get_height() + ui.small_font.get_height() + 10)
+        ui._game_header_rect = pygame.Rect(P, P, ui.win_w - 2 * P, header_h)
+        content_y = ui._game_header_rect.bottom + 12
+        ui.show_panel = ui.win_w >= 720 and ui.win_h >= 440
+        ui._portrait_in_panel = ui.show_panel and ui.win_h >= 620
+        ui.panel_w = 250 if ui.show_panel else 0
+        ui.panel_x = ui.win_w - P - ui.panel_w
+        ui.panel_y = content_y
+        ui.panel_h = ui.win_h - P - content_y
+        inner_w = ui.win_w - 2 * P - (ui.panel_w + GAP if ui.show_panel else 0)
         compact = ui.win_h < 360
-        thought_h = 92 if ui.win_h >= 560 else 0
+        thought_h = 80 if not ui.show_panel and ui.win_h >= 600 else 0
         ui.status_h = 36 if compact else SH
         status_gap = 8 if compact else SGAP
-        controls_h = 64 if compact else 82
-        available = (ui.win_h - 2 * P - thought_h - ui.status_h
-                     - status_gap - controls_h - (0 if compact else 18))
-        sq = max(20, min(inner_w, available) // 8)
+        controls_h = 0 if ui.show_panel else (72 if compact else 88)
+        available = (ui.win_h - P - content_y - thought_h - ui.status_h
+                     - status_gap - controls_h)
+        # Reserve the coordinate frame on all four sides, including at the
+        # minimum window size. Controls must never fall below the window.
+        sq = max(12, min(inner_w - 12, available - 12) // 8)
+        frame = max(12, sq // 5)
+        sq = max(12, min(inner_w - 2 * frame, available - 2 * frame) // 8)
         ui.SQ = sq
         ui.board_px = sq * 8
-        ui.frame = max(5, sq // 5)
+        ui.frame = max(12, sq // 5)
         ui.board_x = P + (inner_w - ui.board_px) // 2
-        ui.board_y = P + thought_h + max(0, (available - ui.board_px) // 2)
+        ui.board_y = content_y + thought_h + max(ui.frame, (available - ui.board_px) // 2)
         ui.status_x = P
         ui.status_y = ui.board_y + ui.board_px + ui.frame + status_gap
         ui.status_w = inner_w
         if thought_h:
-            ui._board_thought_rect = pygame.Rect(P, P, inner_w,
+            ui._board_thought_rect = pygame.Rect(P, content_y, inner_w,
                                                   thought_h - 8)
         return
     medium_side = (ui.scene in ("lesson", "replay")
@@ -69,22 +83,25 @@ def layout_board(ui):
     if lesson_narrow:
         panel_w = ui.win_w - 2 * P
         ui.panel_w = panel_w
-        text_room = int(max(0, ui.text_scale - 1.0) * 140)
+        text_room = int(max(0, ui.text_scale - 1.0) * 200)
         ui.panel_h = max(220, min(300 + text_room,
                                   ui.win_h * 55 // 100))
         ui.panel_x = P
         ui.panel_y = ui.win_h - P - ui.panel_h
         inner_w = ui.win_w - 2 * P
-        thought_space = 98 - min(6, text_room // 9)
-        ui._board_thought_rect = pygame.Rect(
-            P, P, inner_w, thought_space - 24)
+        # At compact heights the portrait costs almost a hundred pixels of
+        # board space. Keep the question and a selectable board first.
+        thought_space = 98 if ui.win_h >= 820 else 0
+        if thought_space:
+            ui._board_thought_rect = pygame.Rect(
+                P, P, inner_w, thought_space - 24)
         inner_h = max(96, ui.panel_y - P - SH - SGAP - GAP
                       - thought_space)
         board = max(96, min(inner_w, inner_h))
         sq = max(12, board // 8)
         ui.SQ = sq
         ui.board_px = sq * 8
-        ui.frame = max(5, sq // 5)
+        ui.frame = max(12, sq // 5)
         ui.board_x = P + max(0, (inner_w - ui.board_px) // 2)
         ui.board_y = (P + thought_space
                         + max(0, (inner_h - ui.board_px) // 2))
@@ -105,12 +122,12 @@ def layout_board(ui):
 
     board = max(224, min(inner_w, inner_h))
     sq = max(28, board // 8)
-    frame = max(7, sq // 5)
+    frame = max(12, sq // 5)
     board = max(224, min(inner_w - 2 * frame, inner_h - 2 * frame))
     sq = max(28, board // 8)
     ui.SQ = sq
     ui.board_px = sq * 8
-    ui.frame = max(7, sq // 5)
+    ui.frame = max(12, sq // 5)
 
     ui.board_x = P + ui.frame + max(
         0, (inner_w - ui.board_px - 2 * ui.frame) // 2)

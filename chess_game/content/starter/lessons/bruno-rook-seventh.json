@@ -1,0 +1,105 @@
+{
+  "schema_version": 3,
+  "lesson_id": "bruno-rook-seventh",
+  "content_revision": 1,
+  "title": "A rook on the seventh rank",
+  "level": "intermediate",
+  "estimated_minutes": 4,
+  "objective": "Bring a rook into the opponent's position and capture a pawn on the seventh rank.",
+  "prerequisites": [
+    "rook movement",
+    "open files"
+  ],
+  "concepts": [
+    "rook activity",
+    "seventh rank",
+    "captures"
+  ],
+  "game_id": "bruno-rook-seventh-position",
+  "coach_player_id": "bruno-bear",
+  "content_kind": "synthetic",
+  "initial_help": true,
+  "commentary_source": {
+    "name": "Uroschess original practice lesson",
+    "license": "MIT",
+    "attribution": "Original practice position and teaching text; not a historical game"
+  },
+  "steps": [
+    {
+      "step_id": "enter-the-seventh",
+      "practice_mode": "guided",
+      "explanation": "The a-file is clear. Your rook can enter Black's position on a7, where it attacks the pawn on b7. The black rook on e8 guards the eighth rank.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Move your rook onto the seventh rank to attack b7.",
+        "hints": [
+          "Follow the open a-file.",
+          "Move a1 to a7."
+        ],
+        "tree": [
+          {
+            "uci": "a1a7",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Ra7 reaches the seventh rank and attacks the b7 pawn."
+          },
+          {
+            "uci": "a1a8",
+            "role": "learner",
+            "outcome": "wrong",
+            "feedback": "Ra8 puts your rook on the guarded eighth rank, where Black can capture it with Rxa8. Try the seventh rank instead."
+          },
+          {
+            "uci": "a1a6",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Ra6 uses the open file, but does not attack the b7 pawn. Go one rank farther."
+          }
+        ],
+        "other_legal_move_text": "That move is legal but is not reviewed for this task. Read the question again or try a hint."
+      },
+      "node_path": [],
+      "expected_fen": "4r2k/1p3ppp/8/8/8/8/5PPP/R5K1 w - - 0 1"
+    },
+    {
+      "step_id": "take-the-seventh-rank-pawn",
+      "practice_mode": "independent",
+      "explanation": "Black moved the king to g8. The b7 pawn is still attacked by your rook, and neither Black's king nor its rook protects b7.",
+      "detail": "",
+      "question": {
+        "kind": "move",
+        "timing": "before_move",
+        "evaluator": "reviewed_tree",
+        "prompt": "Capture the b7 pawn with your rook.",
+        "hints": [
+          "The pawn is one square to the right of the rook.",
+          "Move a7 to b7."
+        ],
+        "tree": [
+          {
+            "uci": "a7b7",
+            "role": "learner",
+            "outcome": "preferred",
+            "feedback": "Rxb7 wins the pawn and keeps your rook active on the seventh rank."
+          },
+          {
+            "uci": "a7a6",
+            "role": "learner",
+            "outcome": "off_goal",
+            "feedback": "Ra6 retreats from the pawn you can capture. Keep your rook active and take b7."
+          }
+        ],
+        "other_legal_move_text": "That move is legal but is not reviewed for this task. Read the question again or try a hint."
+      },
+      "node_path": [
+        "a1a7",
+        "h8g8"
+      ],
+      "expected_fen": "4r1k1/Rp3ppp/8/8/8/8/5PPP/6K1 w - - 2 2"
+    }
+  ],
+  "takeaway": "A rook on the opponent's pawn rank can attack several targets. Look for safe entry squares and check the defenders before taking a pawn."
+}

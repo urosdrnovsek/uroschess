@@ -428,13 +428,13 @@ def test_collection_and_master_acknowledgement_ui(tmp_path):
             exit_button = next(button for button in ui._menu_buttons
                                if button.label == "Exit")
             assert collection.rect.top >= exit_button.rect.bottom
-            assert collection.rect.bottom <= height
+            assert collection.rect.bottom <= ui.win_h
             ui._draw_menu()
             ui._open_collection()
             ui._build_menu_buttons()
             assert ui.menu_view == "collection"
             assert len(ui._collection_cards) == 7
-            assert all(button.rect.bottom <= height for button in
+            assert all(button.rect.bottom <= ui.win_h for button in
                        ui._menu_buttons + ui._collection_cards)
             assert all(button.rect.right <= width for button in
                        ui._menu_buttons + ui._collection_cards)

@@ -1,0 +1,10 @@
+[Event "Uroschess Save a threatened piece"]
+[Site "Synthetic lesson"]
+[White "Learner"]
+[Black "Practice position"]
+[Result "*"]
+[SetUp "1"]
+[FEN "7k/8/7b/8/8/8/3N1PPP/R5K1 w - - 0 1"]
+[Annotator "Uroschess"]
+
+1. Nf3 Bg7 2. Ra2 *
